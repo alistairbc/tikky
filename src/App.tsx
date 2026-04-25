@@ -1197,7 +1197,7 @@ export default function App() {
                       setEntries(prev => [...prev, ...newEntries]);
                       setModal(null);
                       setImportText("");
-                      setUndoMsg(\`Imported \${newEntries.length} entr\${newEntries.length === 1 ? "y" : "ies"}\`);
+                      setUndoMsg(`Imported ${newEntries.length} entr${newEntries.length === 1 ? "y" : "ies"}`);
                       startUndoTimer();
                     } catch {
                       alert("Invalid JSON — please paste a valid Tikky export.");
@@ -2437,5 +2437,6 @@ export default function App() {
     </div>
   );
 }
+
 
 
