@@ -1553,7 +1553,6 @@ export default function App() {
             </div>
           </div>
         )}
-        </div>{/* /outer-tramline */}
       </>
         ) : primaryTab === "lists" ? (
           <div style={{ flex:1, display:"flex", overflow:"hidden", background: C.bg }}>
@@ -2027,6 +2026,7 @@ export default function App() {
             </div>
           </div>
         )}
+      </div>{/* /outer-tramline */}
       </div>
 
       {isMobile && (
