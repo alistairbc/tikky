@@ -4,6 +4,7 @@ import { TM, PM } from "../constants";
 import { fmt, tagColor, renderMd } from "../utils/format";
 import { relDueLabel, isOverdue } from "../utils/nlp";
 import { Tick } from "./Tick";
+import { TypeBadge } from "./TypeBadge";
 import { Entry } from "../types";
 
 /* ── date-picker helpers ────────────────────────────────────────── */
@@ -55,7 +56,7 @@ export function StreamCard({
   selectMode, isSelected, onToggleSelect, onDuplicate,
   onExpand, onCycleType, onDelete, onToggleDone, onPin, onPriority,
   onEditStart, onEditChange, onEditSave, onEditCancel,
-  onDueDateEdit, onDueDateChange, onDueDateSave, onDueDateCancel,
+  onDueDateEdit, onDueDateChange, onDueDateSave, onDueDateCancel, onDueDateQuickSet,
   onCommentInput, onCommentAdd,
   onCommentEditStart, onCommentEditChange, onCommentEditSave, onCommentEditCancel,
   onCommentDelete,
@@ -270,6 +271,10 @@ export function StreamCard({
                   {(PM as any)[entry.priority].label.toUpperCase()}
                 </span>
 
+                {onCycleType && (
+                  <TypeBadge type={entry.type} onClick={onCycleType} />
+                )}
+
                 {entry.dueDate && editingDueDate !== entry.id && (
                   <span onClick={e => { e.stopPropagation(); onDueDateEdit(); }}
                     title="Click to change date"
@@ -296,7 +301,7 @@ export function StreamCard({
                            border:`1px solid ${C.accent}44`, borderRadius:10 }}>
                   <div style={{ display:"flex", flexWrap:"wrap", gap:5, marginBottom:8 }}>
                     {getDueDateShortcuts().map(s => (
-                      <button key={s.label} onClick={() => { onDueDateChange(s.value); onDueDateSave(); }}
+                      <button key={s.label} onClick={() => { onDueDateQuickSet ? onDueDateQuickSet(s.value) : (onDueDateChange(s.value), onDueDateSave()); }}
                         style={{ fontSize:11, padding:"3px 9px", borderRadius:6,
                                  background:`${C.accent}18`, border:`1px solid ${C.accent}44`,
                                  color: C.accent, cursor:"pointer", fontFamily:"inherit" }}>
@@ -305,7 +310,7 @@ export function StreamCard({
                     ))}
                   </div>
                   <input type="date"
-                    onChange={e => { if (e.target.value) { onDueDateChange(e.target.value); onDueDateSave(); } }}
+                    onChange={e => { if (e.target.value) { onDueDateQuickSet ? onDueDateQuickSet(e.target.value) : (onDueDateChange(e.target.value), onDueDateSave()); } }}
                     style={{ width:"100%", background: C.input, border:`1px solid ${C.border}`,
                              borderRadius:6, padding:"5px 8px", fontSize:11, color: C.text,
                              fontFamily:"inherit", outline:"none", boxSizing:"border-box" as const,
@@ -313,7 +318,7 @@ export function StreamCard({
                   />
                   <div style={{ display:"flex", gap:6 }}>
                     {entry.dueDate && (
-                      <button onClick={() => { onDueDateChange(null); onDueDateSave(); }}
+                      <button onClick={() => { onDueDateQuickSet ? onDueDateQuickSet('') : (onDueDateChange(null), onDueDateSave()); }}
                         style={{ flex:1, fontSize:11, padding:"4px", background:"none",
                                  border:`1px solid ${C.border}`, color:"#ef4444",
                                  borderRadius:5, cursor:"pointer", fontFamily:"inherit" }}>
@@ -687,13 +692,13 @@ export function StreamCard({
                                color: C.dim, cursor:"pointer", padding:"5px 14px",
                                borderRadius:7, fontFamily:"inherit", display:"flex",
                                alignItems:"center", gap:5 }}>
-                      \u21B2 Duplicate
+                      {"\u21B2"} Duplicate
                     </button>
                     <button onClick={onExpand}
                       style={{ fontSize:11, background:"none", border:`1px solid ${C.border}`,
                                color: C.dim, cursor:"pointer", padding:"5px 20px",
                                borderRadius:7, fontFamily:"inherit" }}>
-                      \u2191 Close panel
+                      {"\u2191"} Close panel
                     </button>
                   </div>
                 </div>
@@ -705,3 +710,4 @@ export function StreamCard({
     </div>
   );
 }
+
