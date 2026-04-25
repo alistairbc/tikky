@@ -61,6 +61,9 @@ export default function App() {
   const [filterTag,  setFilterTag]  = useState<string | null>(null);
   const [editingId,  setEditingId]  = useState<number | null>(null);
   const [editText,   setEditText]   = useState("");
+  const [editingBodyId, setEditingBodyId] = useState<number | null>(null);
+  const [bodyInput,    setBodyInput]    = useState("");
+  const [aiTitlingId,  setAiTitlingId]  = useState<number | null>(null);
   const [expanded,     setExpanded]     = useState<number | null>(null);
   const [dashExpanded, setDashExpanded] = useState<number | null>(null);
   const [stInputs,   setStInputs]   = useState<Record<number, string>>({});
@@ -627,6 +630,29 @@ export default function App() {
       emoji: e?.emoji || a.emoji
     });
     setEditingId(null);
+  };
+
+  const saveBody = (id: number) => {
+    up(id, { body: bodyInput });
+    setEditingBodyId(null);
+  };
+
+  const handleAiTitle = async (id: number) => {
+    const entry = entries.find(e => e.id === id);
+    if (!entry) return;
+    setAiTitlingId(id);
+    try {
+      const result = await queryAssistant(
+        `Split this entry into a very short title (max 8 words) and a longer body with the details. Return ONLY valid JSON with no markdown: {"title":"...","body":"..."}. Entry text: "${entry.text}"`,
+        []
+      );
+      if (result) {
+        const clean = result.replace(/```json?|```/g, "").trim();
+        const parsed = JSON.parse(clean);
+        if (parsed.title) up(id, { text: parsed.title.trim(), rawText: parsed.title.trim(), body: parsed.body || "" });
+      }
+    } catch {}
+    setAiTitlingId(null);
   };
 
   const saveDueDate = (id: number) => {
@@ -1421,6 +1447,14 @@ export default function App() {
                     }}
                     onEditStart={() => { setEditingId(entry.id); setEditText(entry.rawText); }}
                     isEditing={editingId === entry.id}
+                    editingBodyId={editingBodyId}
+                    bodyInput={bodyInput}
+                    onBodyEdit={() => { setEditingBodyId(entry.id); setBodyInput(entry.body || ""); }}
+                    onBodyChange={setBodyInput}
+                    onBodySave={() => saveBody(entry.id)}
+                    onBodyCancel={() => setEditingBodyId(null)}
+                    onAiTitle={() => handleAiTitle(entry.id)}
+                    aiTitling={aiTitlingId === entry.id}
                     editText={editText}
                     onEditChange={setEditText}
                     onEditSave={() => saveEdit(entry.id)}
