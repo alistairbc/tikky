@@ -1628,7 +1628,7 @@ export default function App() {
                   </button>
                   <div style={{ marginTop:15 }}>
                     <div style={{ fontSize:10, fontWeight:700, color: C.dim, textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:8 }}>Suggestions</div>
-                    <div className="no-scrollbar" style={{ display:"flex", overflowX:"auto", gap:6, paddingBottom:5, scrollbarWidth:"none" }}>
+                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:5, paddingBottom:5 }}>
                       {[
                         { name: "Groceries",        icon: "🛒", color: "#10b981" },
                         { name: "Travel",           icon: "✈️", color: "#06b6d4" },
