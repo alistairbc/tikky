@@ -25,17 +25,15 @@ export const SEED_LISTS: List[] = [
   {
     id: 101, name: "Movies to Watch", icon: "🎬", color: "#6366f1", pinned: false, createdAt: new Date(),
     items: [
-      { id: 1011, text: "The Brutalist", done: false, note: "", addedAt: new Date() },
-      { id: 1012, text: "Dune: Prophecy",  done: false, note: "", addedAt: new Date() },
-      { id: 1013, text: "Conclave",        done: true,  note: "Watched — great ending", addedAt: new Date(Date.now()-86400000) },
+      { id: 1011, text: "The Brutalist",    done: false, note: "", addedAt: new Date() },
+      { id: 1012, text: "Dune: Prophecy",   done: false, note: "", addedAt: new Date() },
+      { id: 1013, text: "Conclave",         done: true,  note: "Watched — great ending", addedAt: new Date(Date.now()-86400000) },
     ],
   },
   {
-    id: 102, name: "Books to Read", icon: "📚", color: "#10b981", pinned: false, createdAt: new Date(),
+    id: 102, name: "TV to Watch", icon: "📺", color: "#8b5cf6", pinned: false, createdAt: new Date(),
     items: [
-      { id: 1021, text: "Clear Thinking — Shane Parrish",    done: false, note: "", addedAt: new Date() },
-      { id: 1022, text: "The Creative Act — Rick Rubin",     done: false, note: "", addedAt: new Date() },
-      { id: 1023, text: "Build — Tony Fadell",               done: true,  note: "Finished Mar 2026", addedAt: new Date(Date.now()-604800000) },
-    ],
-  },
-];
+      { id: 1021, text: "Severance S2",         done: false, note: "", addedAt: new Date() },
+      { id: 1022, text: "The Bear S3",          done: false, note: "", addedAt: new Date() },
+      { id: 1023, text: "Slow Horses S4",       done: false, note: "", addedAt: new Date() },
+      { id: 1024, text: "White Lotus S3",       done: true,  note: "Finished — loved it", ad
