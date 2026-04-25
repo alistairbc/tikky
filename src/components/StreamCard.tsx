@@ -67,6 +67,7 @@ export function StreamCard({
   onBodyEdit, onBodyChange, onBodySave, onBodyCancel,
   onAiTitle, aiTitling,
   searchQuery,
+  showRestore,
 }: any) {
   const meta = (TM as any)[entry.type];
   const overdueEntry = isOverdue(entry);
@@ -114,6 +115,12 @@ export function StreamCard({
           </div>
         )}
 
+        {showRestore && entry.done && (
+          <div onClick={e => e.stopPropagation()} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:4, padding:"6px 10px", background:"#64748b18", borderRadius:8, border:"1px solid #64748b33" }}>
+            <span style={{ fontSize:11, color:"#64748b", fontWeight:600 }}>✓ Completed</span>
+            <button onClick={onToggleDone} style={{ fontSize:11, background:"#6366f1", color:"#fff", border:"none", borderRadius:6, padding:"3px 10px", cursor:"pointer", fontWeight:600 }}>Restore</button>
+          </div>
+        )}
         <motion.div
           initial={entry.isNew ? { opacity: 0, y: 16, scale: 0.97 } : false}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -239,6 +246,14 @@ export function StreamCard({
                     </button>
                   </div>
                 ) : (
+                  <button onClick={e => { e.stopPropagation(); onExpand(); }}
+                    title={isExpanded ? "Collapse" : "Expand"}
+                    style={{ fontSize:13, background:"none", border:"none", color: C.dim, cursor:"pointer",
+                             padding:"2px 5px", borderRadius:4, lineHeight:1,
+                             transform: isExpanded ? "rotate(180deg)" : "none",
+                             transition:"transform .15s" }}>
+                    ▾
+                  </button>
                   <button onClick={e => { e.stopPropagation(); onDelete(); }}
                     style={{ background:"none", border:"none", color: C.dim,
                              fontSize:14, cursor:"pointer", opacity:0.4 }}>
@@ -710,4 +725,5 @@ export function StreamCard({
     </div>
   );
 }
+
 
