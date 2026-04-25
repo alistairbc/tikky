@@ -314,6 +314,7 @@ export default function App() {
       if (e.key === "/") { e.preventDefault(); searchRef.current?.focus(); }
       if (e.key === "Escape") {
         if (modal)              { setModal(null); return; }
+        if (view !== "main")    { setView("main"); return; }
         if (focusMode)          { setFocusMode(false); setFocusSetup(true); return; }
         if (expanded !== null)  { setExpanded(null); return; }
         if (editingDueDate)     { setEditingDueDate(null); return; }
@@ -326,7 +327,14 @@ export default function App() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [dueFilter, typeFilter, filterTag, search, spaceFilter]);
+  }, [dueFilter, typeFilter, filterTag, search, spaceFilter, modal, focusMode, expanded, editingDueDate, view]);
+
+  // Clear drag-over indicator if drag ends outside a drop zone
+  useEffect(() => {
+    const clear = () => { setDragEntryId(null); setDragOverEntryId(null); };
+    window.addEventListener("dragend", clear);
+    return () => window.removeEventListener("dragend", clear);
+  }, []);
 
   // Duplicate resize listener removed — handled by the effect near isMobile initialisation.
 
@@ -835,7 +843,7 @@ export default function App() {
       <div style={{ minHeight:"100vh", background: C.bg, color: C.text, fontFamily: (FONTS as any)[fontFamily], zoom: String(fontScale), display:"flex", flexDirection:"column" }}>
         <div style={{ padding:"15px 20px", borderBottom:`1px solid ${C.border}`, display:"flex", alignItems:"center", justifyContent:"space-between", background:C.surface }}>
           <div style={{ fontWeight:700 }}>Tikky Guide</div>
-          <button onClick={() => setView("main")} style={{ background:"none", border:"none", color: C.accent, cursor:"pointer", fontWeight:600 }}>Done</button>
+          <button onClick={() => setView("main")} style={{ background: C.surface, border:`1px solid ${C.border}`, color: C.text, cursor:"pointer", fontWeight:600, padding:"6px 16px", borderRadius:8, fontSize:13 }}>✕ Close</button>
         </div>
         <div style={{ flex:1, padding:30, maxWidth:700, margin:"0 auto", display:"flex", flexDirection:"column", gap:25 }}>
           <section>
@@ -879,7 +887,7 @@ export default function App() {
       <div style={{ height:"100%", background: C.bg, color: C.text, fontFamily: (FONTS as any)[fontFamily], zoom: String(fontScale), display:"flex", flexDirection:"column", overflow:"hidden" }}>
         <div style={{ padding:"15px 20px", borderBottom:`1px solid ${C.border}`, display:"flex", alignItems:"center", justifyContent:"space-between", background:C.surface, flexShrink:0 }}>
           <div style={{ fontWeight:700 }}>Productivity Summary</div>
-          <button onClick={() => setView("main")} style={{ background:"none", border:"none", color: C.accent, cursor:"pointer", fontWeight:600 }}>Close</button>
+          <button onClick={() => setView("main")} style={{ background: C.surface, border:`1px solid ${C.border}`, color: C.text, cursor:"pointer", fontWeight:600, padding:"6px 16px", borderRadius:8, fontSize:13 }}>✕ Close</button>
         </div>
         <div style={{ flex:1, padding:30, maxWidth:800, margin:"0 auto", width:"100%", overflowY:"auto" }}>
           <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap:20, marginBottom:40 }}>
@@ -1535,8 +1543,8 @@ export default function App() {
                 <div
                   key={entry.id}
                   onClick={(e) => e.stopPropagation()}
-                  draggable={streamSort === "manual"}
-                  onDragStart={() => setDragEntryId(entry.id)}
+                  draggable={true}
+                  onDragStart={() => { setDragEntryId(entry.id); if (streamSort !== "manual") setStreamSort("manual"); }}
                   onDragOver={(e) => { e.preventDefault(); setDragOverEntryId(entry.id); }}
                   onDragLeave={() => setDragOverEntryId(null)}
                   onDrop={() => onDropEntry(entry.id)}
@@ -1560,6 +1568,7 @@ export default function App() {
                     onExpand={() => setExpanded(expanded === entry.id ? null : entry.id)}
                     onDelete={() => rm(entry.id)}
                     onToggleDone={() => toggleDone(entry.id)}
+                    showRestore={dashTab === "done"}
                     onPin={() => up(entry.id, { pinned: !entry.pinned })}
                     onPriority={(p: Priority) => up(entry.id, { priority: p })}
                     onAddPhoto={() => onAddPhoto(entry.id)}
@@ -1681,10 +1690,11 @@ export default function App() {
           <div style={{ width: 300, display:"flex", flexDirection:"column", background:C.bg }}>
             <div style={{ display:"flex", padding:"8px 10px", borderBottom:`1px solid ${C.border}`, gap:3, flexShrink:0 }}>
               {[
-                { k:"all",    l:"All",    c: C.accent,  n: entries.length },
-                { k:"tasks",  l:"Tasks",  c:"#10b981", n: entries.filter(e=>e.type==="task").length },
-                { k:"events", l:"Events", c:"#f59e0b", n: entries.filter(e=>e.type==="event").length },
-                { k:"notes",  l:"Notes",  c:"#818cf8", n: entries.filter(e=>e.type==="note"||e.type==="thought").length },
+                { k:"all",    l:"All",    c: C.accent,  n: entries.filter(e=>!e.done).length },
+                { k:"tasks",  l:"Tasks",  c:"#10b981", n: entries.filter(e=>e.type==="task"&&!e.done).length },
+                { k:"events", l:"Events", c:"#f59e0b", n: entries.filter(e=>e.type==="event"&&!e.done).length },
+                { k:"notes",  l:"Notes",  c:"#818cf8", n: entries.filter(e=>(e.type==="note"||e.type==="thought")&&!e.done).length },
+                { k:"done",   l:"✓ Done", c:"#64748b", n: entries.filter(e=>e.done).length },
               ].map(({ k, l, c, n }) => (
                 <button key={k} onClick={() => setDashTab(k)} style={{ flex:1, padding:"5px 4px", borderRadius:6, border:"none", cursor:"pointer", fontSize:11, fontWeight:600, fontFamily:"inherit", background: dashTab===k ? `${c}22` : "transparent", color: dashTab===k ? c : C.dim, display:"flex", alignItems:"center", justifyContent:"center", gap:4 }}>
                   {l}
@@ -1696,15 +1706,15 @@ export default function App() {
               {entries
                 .filter(e => 
                   (spaceFilter === "all" || e.contexts.includes(spaceFilter)) &&
-                  (dashTab === "all" || (dashTab === "tasks" ? e.type === "task" : dashTab === "events" ? e.type === "event" : e.type === "note" || e.type === "thought")))
-                .filter(e => !e.done)
+                  (dashTab === "all" || dashTab === "done" || (dashTab === "tasks" ? e.type === "task" : dashTab === "events" ? e.type === "event" : e.type === "note" || e.type === "thought")))
+                .filter(e => dashTab === "done" ? e.done : !e.done)
                 .map(entry => (
                   <div key={entry.id}
-                    draggable={streamSort === "manual"}
+                    draggable={dashTab !== "done" && streamSort === "manual"}
                     onDragStart={() => setDragEntryId(entry.id)}
                     onDragOver={(e) => { e.preventDefault(); setDragOverEntryId(entry.id); }}
                     onDragLeave={() => setDragOverEntryId(null)}
-                    onDrop={() => reorderEntry(entry.id)}
+                    onDrop={() => onDropEntry(entry.id)}
                     onDragEnd={() => { setDragEntryId(null); setDragOverEntryId(null); }}
                     style={{ outline: dragOverEntryId === entry.id && dragEntryId !== entry.id ? `2px solid ${C.accent}` : "none", borderRadius:14, transition:"outline 0.1s" }}
                   >
@@ -1721,6 +1731,7 @@ export default function App() {
                     stInputs={stInputs}
                     onExpand={() => setDashExpanded(dashExpanded === entry.id ? null : entry.id)}
                     onToggleDone={() => toggleDone(entry.id)}
+                    showRestore={dashTab === "done"}
                     onDelete={() => rm(entry.id)}
                     onPriority={(p: any) => up(entry.id, { priority: p })}
                     onDueDateEdit={() => { setEditingDueDate(entry.id); setDueDateInput(entry.dueDate || ""); }}
@@ -1761,7 +1772,7 @@ export default function App() {
                     return (
                       <button 
                         key={list.id} 
-                        onClick={() => setSelectedListId(list.id)}
+                        onClick={() => { setSelectedListId(list.id); setListSearch(''); }}
                         style={{ width:"100%", display:"flex", alignItems:"center", gap:10, padding:"10px 12px", borderRadius:10, background: active ? `${list.color}15` : "none", border:"none", cursor:"pointer", textAlign:"left", marginBottom:4, transition:"all .15s" }}
                       >
                         <span style={{ fontSize:16 }}>{list.icon || "📋"}</span>
@@ -1830,7 +1841,7 @@ export default function App() {
                   {lists.map(list => (
                     <button 
                       key={list.id} 
-                      onClick={() => setSelectedListId(list.id)}
+                      onClick={() => { setSelectedListId(list.id); setListSearch(''); }}
                       style={{ padding:"6px 12px", borderRadius:20, background: selectedListId === list.id ? `${list.color}22` : "none", border: selectedListId === list.id ? `1px solid ${list.color}55` : `1px solid ${C.border}`, color: selectedListId === list.id ? list.color : C.dim, fontSize:12, fontWeight:600, whiteSpace:"nowrap", cursor:"pointer" }}
                     >
                       {list.icon} {list.name}
@@ -1918,11 +1929,13 @@ export default function App() {
                         <div style={{ marginBottom:20, position:"relative" }}>
                           <input 
                             placeholder={`Search ${list.name}...`}
+                            value={listSearch}
+                            onChange={e => setListSearch(e.target.value)}
                             style={{ width:"100%", background:C.surface, border:`1px solid ${C.border}`, borderRadius:10, padding:"12px 15px", fontSize:14, color:C.text, outline:"none" }}
                           />
                         </div>
                         <div style={{ background: C.surface, borderRadius:16, border:`1px solid ${C.border}`, overflow:"hidden" }}>
-                          {list.items.map(item => (
+                          {list.items.filter(item => !listSearch || item.text.toLowerCase().includes(listSearch.toLowerCase())).map(item => (
                             <ListItem 
                               key={item.id} 
                               item={item} 
@@ -1932,7 +1945,8 @@ export default function App() {
                               editText={editListItemText}
                               onEditChange={setEditListItemText}
                               onEditSave={() => {
-                                setLists(lists.map(l => l.id === list.id ? { ...l, items: l.items.map(i => i.id === item.id ? { ...i, text: editListItemText } : i) } : l));
+                                const guessedEmoji = guessEmoji(editListItemText);
+                                setLists(lists.map(l => l.id === list.id ? { ...l, items: l.items.map(i => i.id === item.id ? { ...i, text: editListItemText, emoji: i.emoji || guessedEmoji || null } : i) } : l));
                                 setEditingListItemId(null);
                               }}
                               onEmojiChange={(emo: string) => {
@@ -2437,6 +2451,7 @@ export default function App() {
     </div>
   );
 }
+
 
 
 
