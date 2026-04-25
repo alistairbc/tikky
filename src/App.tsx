@@ -313,11 +313,15 @@ export default function App() {
       if (e.key === "n") { e.preventDefault(); inputRef.current?.focus(); }
       if (e.key === "/") { e.preventDefault(); searchRef.current?.focus(); }
       if (e.key === "Escape") {
-        if (dueFilter) setDueFilter(null);
-        else if (typeFilter) setTypeFilter(null);
-        else if (filterTag) setFilterTag(null);
-        else if (search) setSearch("");
-        else if (spaceFilter !== "all") setSpaceFilter("all");
+        if (modal)              { setModal(null); return; }
+        if (focusMode)          { setFocusMode(false); setFocusSetup(true); return; }
+        if (expanded !== null)  { setExpanded(null); return; }
+        if (editingDueDate)     { setEditingDueDate(null); return; }
+        if (dueFilter)          { setDueFilter(null); return; }
+        if (typeFilter)         { setTypeFilter(null); return; }
+        if (filterTag)          { setFilterTag(null); return; }
+        if (search)             { setSearch(""); return; }
+        if (spaceFilter !== "all") { setSpaceFilter("all"); return; }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -488,6 +492,25 @@ export default function App() {
       if (cmd === "/help")    { setView("help");    setInput(""); return; }
       if (cmd === "/summary") { setView("summary"); setSumPeriod(parts[1] || "all"); setInput(""); return; }
       if (cmd === "/export")  { setModal("export"); setInput(""); return; }
+      // Type-forcing shortcuts: /task hello, /event lunch, /note idea
+      if (["/task","/event","/note","/thought"].includes(cmd) && parts.slice(1).join(" ").trim()) {
+        const forced = cmd.slice(1) as "task"|"event"|"note"|"thought";
+        const body   = parts.slice(1).join(" ").trim();
+        setIsSubmitting(true);
+        setInput("");
+        const id = Date.now();
+        const now = new Date();
+        const newEntry: Entry = {
+          id, rawText: body, text: body, type: forced,
+          priority: "medium", done: false, pinned: false,
+          tags: [], contexts: [], subtasks: [], comments: [], images: [],
+          timestamp: now, isNew: true,
+        };
+        setEntries(p => [newEntry, ...p]);
+        setTimeout(() => up(id, { isNew: false }), 2000);
+        setIsSubmitting(false);
+        return;
+      }
       if (cmd === "/import")  { setModal("import"); setInput(""); return; }
     }
 
@@ -1452,7 +1475,7 @@ export default function App() {
                     {/* Row 2: View & Sort */}
                     <div style={{ display:"flex", gap:10, alignItems:"center", flexWrap:"wrap", borderTop:`1px solid ${C.border}44`, paddingTop:10 }}>
                       <div style={{ display:"flex", gap:3, background: C.bg, padding:3, borderRadius:10, border:`1px solid ${C.border}` }}>
-                        {[["newest","New"],["oldest","Old"],["priority","Priority"],["manual","⠿ Manual"]].map(([s, label]) => (
+                        {[["newest","🕜 New"],["oldest","📅 Old"],["priority","⚡ Priority"],["manual","⠿ Manual"]].map(([s, label]) => (
                           <button key={s} onClick={() => setStreamSort(s)} style={{ fontSize:11, padding:"5px 12px", borderRadius:7, border: "none", background: streamSort===s ? C.accent : "none", color: streamSort===s ? "#fff" : C.dim, cursor:"pointer", fontFamily:"inherit", fontWeight: streamSort===s ? 700 : 500, transition:"all .2s", whiteSpace:"nowrap" }}>{label}</button>
                         ))}
                       </div>
@@ -1562,6 +1585,7 @@ export default function App() {
                       up(entry.id, { dueDate: dueDateInput });
                       setEditingDueDate(null);
                     }}
+                    onDueDateQuickSet={(v: string) => { up(entry.id, { dueDate: v || null }); setEditingDueDate(null); }}
                     onDueDateCancel={() => setEditingDueDate(null)}
                     onDuplicate={() => duplicateEntry(entry.id)}
                     onCycleType={() => {
@@ -1675,8 +1699,17 @@ export default function App() {
                   (dashTab === "all" || (dashTab === "tasks" ? e.type === "task" : dashTab === "events" ? e.type === "event" : e.type === "note" || e.type === "thought")))
                 .filter(e => !e.done)
                 .map(entry => (
+                  <div key={entry.id}
+                    draggable={streamSort === "manual"}
+                    onDragStart={() => setDragEntryId(entry.id)}
+                    onDragOver={(e) => { e.preventDefault(); setDragOverEntryId(entry.id); }}
+                    onDragLeave={() => setDragOverEntryId(null)}
+                    onDrop={() => reorderEntry(entry.id)}
+                    onDragEnd={() => { setDragEntryId(null); setDragOverEntryId(null); }}
+                    style={{ outline: dragOverEntryId === entry.id && dragEntryId !== entry.id ? `2px solid ${C.accent}` : "none", borderRadius:14, transition:"outline 0.1s" }}
+                  >
                   <DashboardCard 
-                    key={entry.id} 
+                    key={`dc-${entry.id}`}
                     entry={entry} 
                     C={C}
                     isDashExp={dashExpanded === entry.id}
@@ -1687,12 +1720,13 @@ export default function App() {
                     editCommentText={editingComment?.text || ""}
                     stInputs={stInputs}
                     onExpand={() => setDashExpanded(dashExpanded === entry.id ? null : entry.id)}
-                    onToggleDone={() => up(entry.id, { done: !entry.done })}
+                    onToggleDone={() => toggleDone(entry.id)}
                     onDelete={() => rm(entry.id)}
                     onPriority={(p: any) => up(entry.id, { priority: p })}
                     onDueDateEdit={() => { setEditingDueDate(entry.id); setDueDateInput(entry.dueDate || ""); }}
                     onDueDateChange={setDueDateInput}
                     onDueDateSave={() => saveDueDate(entry.id)}
+                    onDueDateQuickSet={(v: string) => { up(entry.id, { dueDate: v || null }); setEditingDueDate(null); }}
                     onDueDateCancel={() => setEditingDueDate(null)}
                     onCommentInput={(val: string) => setCommentInputs(p => ({ ...p, [entry.id]: val }))}
                     onCommentAdd={() => addComment(entry.id)}
@@ -1707,6 +1741,7 @@ export default function App() {
                     onSubtaskDelete={(stId: number) => deleteSubtask(entry.id, stId)}
                     searchQuery={search}
                   />
+                  </div>
                 ))}
             </div>
           </div>
@@ -2402,4 +2437,5 @@ export default function App() {
     </div>
   );
 }
+
 
