@@ -28,6 +28,7 @@ export interface Entry {
   contexts: string[];
   subtasks: Subtask[];
   images?: string[];
+  body?: string;
   timestamp: Date;
   isNew?: boolean;
   updated?: boolean;
