@@ -1163,7 +1163,7 @@ export default function App() {
       <div style={{ flex:1, display:"flex", overflow:"hidden", minHeight:0, zIndex:1 }}>
         {primaryTab === "stream" ? (
           <>
-            <div style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden", borderRight: `1px solid ${C.border}` }}>
+            <div style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden", borderRight: `1px solid ${C.border}`, maxWidth: isMobile ? "100%" : 1080, margin:"0 auto", width:"100%" }}>
               {!isMobile && (
                 <div style={{ borderBottom:`1px solid ${C.border}`, padding: "15px", background:C.bg, flexShrink:0 }}>
                   <div style={{ display:"flex", flexDirection:"column", gap: 8 }}>
@@ -1585,10 +1585,18 @@ export default function App() {
                     <div style={{ fontSize:10, fontWeight:700, color: C.dim, textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:8 }}>Suggestions</div>
                     <div className="no-scrollbar" style={{ display:"flex", overflowX:"auto", gap:6, paddingBottom:5, scrollbarWidth:"none" }}>
                       {[
-                        { name: "Grocery List", icon: "🛒", color: "#10b981" },
-                        { name: "Travel Packing", icon: "✈️", color: "#06b6d4" },
-                        { name: "Reading List", icon: "📚", color: "#f59e0b" },
-                        { name: "Project Tasks", icon: "🚀", color: "#8b5cf6" },
+                        { name: "Grocery List",     icon: "🛒", color: "#10b981" },
+                        { name: "Travel Packing",   icon: "✈️", color: "#06b6d4" },
+                        { name: "Movies to Watch",  icon: "🎬", color: "#6366f1" },
+                        { name: "TV Shows",         icon: "📺", color: "#8b5cf6" },
+                        { name: "Books to Read",    icon: "📚", color: "#f59e0b" },
+                        { name: "Restaurants",      icon: "🍽️", color: "#f97316" },
+                        { name: "Music Playlist",   icon: "🎵", color: "#ec4899" },
+                        { name: "Project Tasks",    icon: "🚀", color: "#8b5cf6" },
+                        { name: "Home Repairs",     icon: "🔧", color: "#64748b" },
+                        { name: "Gift Ideas",       icon: "🎁", color: "#e11d48" },
+                        { name: "Fitness Goals",    icon: "🏋️", color: "#16a34a" },
+                        { name: "Travel Wishlist",  icon: "🌍", color: "#0284c7" },
                       ].map(s => (
                         <button 
                           key={s.name}
@@ -1632,10 +1640,17 @@ export default function App() {
                   </button>
                   <div style={{ width:1, height:20, background: C.border, flexShrink:0, alignSelf:"center" }} />
                   {[
-                    { name: "Grocery List", icon: "🛒", color: "#10b981" },
-                    { name: "Travel Packing", icon: "✈️", color: "#06b6d4" },
-                    { name: "Reading List", icon: "📚", color: "#f59e0b" },
-                    { name: "Project Tasks", icon: "🚀", color: "#8b5cf6" },
+                    { name: "Grocery List",    icon: "🛒", color: "#10b981" },
+                    { name: "Travel Packing",  icon: "✈️", color: "#06b6d4" },
+                    { name: "Movies",          icon: "🎬", color: "#6366f1" },
+                    { name: "TV Shows",        icon: "📺", color: "#8b5cf6" },
+                    { name: "Books",           icon: "📚", color: "#f59e0b" },
+                    { name: "Restaurants",     icon: "🍽️", color: "#f97316" },
+                    { name: "Music",           icon: "🎵", color: "#ec4899" },
+                    { name: "Project Tasks",   icon: "🚀", color: "#8b5cf6" },
+                    { name: "Gift Ideas",      icon: "🎁", color: "#e11d48" },
+                    { name: "Fitness Goals",   icon: "🏋️", color: "#16a34a" },
+                    { name: "Travel Wishlist", icon: "🌍", color: "#0284c7" },
                   ].map(s => (
                     <button 
                       key={s.name}
