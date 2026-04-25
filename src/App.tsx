@@ -2130,4 +2130,45 @@ export default function App() {
             />
           </div>
           <div style={{ padding:"15px 20px", borderTop:`1px solid ${C.border}`, display:"flex", gap:15, background: C.surface }}>
-            <button onClick={() => onAddPhoto()} style={{ background:
+            <button onClick={() => onAddPhoto()} style={{ background: C.bg, border:`1px solid ${C.border}`, color: C.text, padding:"10px", borderRadius:12, flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:8, fontSize:14, fontWeight:600 }}>
+              📷 Photo
+            </button>
+            <button onClick={() => { /* mic logic if any */ }} style={{ background: C.bg, border:`1px solid ${C.border}`, color: C.text, padding:"10px", borderRadius:12, flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:8, fontSize:14, fontWeight:600 }}>
+              🎙️ Voice
+            </button>
+          </div>
+          {composeImages.length > 0 && (
+            <div className="no-scrollbar" style={{ padding:"10px 20px", background: C.bg, display:"flex", gap:10, overflowX:"auto", borderTop:`1px solid ${C.border}` }}>
+              {composeImages.map((src, i) => (
+                <div key={i} style={{ position:"relative", flexShrink:0 }}>
+                  <img src={src} alt="" style={{ width:60, height:60, objectFit:"cover", borderRadius:8, border:`1px solid ${C.border}` }} />
+                  <button onClick={() => setComposeImages(p => p.filter((_, idx) => idx !== i))} style={{ position:"absolute", top:-5, right:-5, width:20, height:20, borderRadius:"50%", background:"#ef4444", color:"#fff", border:"none", fontSize:12, display:"flex", alignItems:"center", justifyContent:"center" }}>✕</button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+      <input 
+        type="file" 
+        ref={photoInputRef} 
+        onChange={handlePhotoUpload} 
+        style={{ display: "none" }} 
+        accept="image/*" 
+      />
+      <input 
+        type="file" 
+        ref={bgFileRef} 
+        onChange={e => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (ev) => setBgImage(ev.target?.result as string);
+          reader.readAsDataURL(file);
+        }} 
+        style={{ display: "none" }} 
+        accept="image/*" 
+      />
+    </div>
+  );
+}
