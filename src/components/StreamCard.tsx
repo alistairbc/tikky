@@ -404,31 +404,23 @@ export function StreamCard({
                 onClick={e => e.stopPropagation()}
               >
                 <div style={{ marginTop:16, paddingTop:16, borderTop:`1px solid ${C.border}` }}>
-                  <div style={{ display:"flex", justifyContent:"space-between", marginBottom:12, alignItems:"center" }}>
-                    <div style={{ display:"flex", gap:6 }}>
-                      <button onClick={onAiTitle} disabled={aiTitling}
-                        title="Let AI split into title + body"
-                        style={{ fontSize:11, background:`${C.accent}18`, border:`1px solid ${C.accent}44`,
-                                 color: C.accent, cursor: aiTitling ? "wait" : "pointer",
-                                 padding:"3px 10px", borderRadius:6, fontFamily:"inherit",
-                                 display:"flex", alignItems:"center", gap:5 }}>
-                        <span>✨</span> {aiTitling ? "Thinking…" : "AI Title"}
-                      </button>
-                      {!entry.body && editingBodyId !== entry.id && (
-                        <button onClick={onBodyEdit}
-                          style={{ fontSize:11, background:"none", border:`1px solid ${C.border}`,
-                                   color: C.dim, cursor:"pointer", padding:"3px 10px",
-                                   borderRadius:6, fontFamily:"inherit" }}>
-                          + Add body
-                        </button>
-                      )}
-                    </div>
-                    <button onClick={onExpand}
-                      style={{ fontSize:11, background:"none", border:`1px solid ${C.border}`,
-                               color: C.dim, cursor:"pointer", padding:"3px 11px",
-                               borderRadius:6, fontFamily:"inherit" }}>
-                      ↑ Close
+                  <div style={{ display:"flex", gap:6, marginBottom:12 }}>
+                    <button onClick={onAiTitle} disabled={aiTitling}
+                      title="Let AI split into title + body"
+                      style={{ fontSize:11, background:`${C.accent}18`, border:`1px solid ${C.accent}44`,
+                               color: C.accent, cursor: aiTitling ? "wait" : "pointer",
+                               padding:"3px 10px", borderRadius:6, fontFamily:"inherit",
+                               display:"flex", alignItems:"center", gap:5 }}>
+                      ✨ {aiTitling ? "Thinking…" : "AI Title"}
                     </button>
+                    {!entry.body && editingBodyId !== entry.id && (
+                      <button onClick={onBodyEdit}
+                        style={{ fontSize:11, background:"none", border:`1px solid ${C.border}`,
+                                 color: C.dim, cursor:"pointer", padding:"3px 10px",
+                                 borderRadius:6, fontFamily:"inherit" }}>
+                        + Add body
+                      </button>
+                    )}
                   </div>
 
                   {/* Body edit area */}
@@ -686,6 +678,23 @@ export function StreamCard({
                         );
                       })}
                     </div>
+                  </div>
+                  {/* Expanded footer */}
+                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center",
+                                marginTop:16, paddingTop:12, borderTop:`1px solid ${C.border}` }}>
+                    <button onClick={e => { e.stopPropagation(); onDuplicate && onDuplicate(); }}
+                      style={{ fontSize:11, background:"none", border:`1px solid ${C.border}`,
+                               color: C.dim, cursor:"pointer", padding:"5px 14px",
+                               borderRadius:7, fontFamily:"inherit", display:"flex",
+                               alignItems:"center", gap:5 }}>
+                      \u21B2 Duplicate
+                    </button>
+                    <button onClick={onExpand}
+                      style={{ fontSize:11, background:"none", border:`1px solid ${C.border}`,
+                               color: C.dim, cursor:"pointer", padding:"5px 20px",
+                               borderRadius:7, fontFamily:"inherit" }}>
+                      \u2191 Close panel
+                    </button>
                   </div>
                 </div>
               </motion.div>
