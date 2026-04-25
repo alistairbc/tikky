@@ -1056,15 +1056,139 @@ export default function App() {
     <div style={{ background: C.bg, height: "100%", color: C.text, fontFamily: (FONTS as any)[fontFamily], display:"flex", flexDirection:"column", overflow:"hidden", position:"relative", zoom: String(fontScale) }}>
       {bgOverlayStyle && <div style={{ position:"absolute", inset:0, zIndex:0, pointerEvents:"none", ...bgOverlayStyle }} />}
       
+      {/* ── Confetti burst ── */}
       <AnimatePresence>
         {celebration && (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.5 }}
-            style={{ position:"fixed", inset:0, display:"flex", alignItems:"center", justifyContent:"center", zIndex:1000, pointerEvents:"none" }}
+          <div style={{ position:"fixed", inset:0, zIndex:1000, pointerEvents:"none", overflow:"hidden" }}>
+            {Array.from({ length: 48 }).map((_, i) => {
+              const hues = [0, 30, 60, 120, 200, 270, 320];
+              const hue = hues[i % hues.length];
+              const x = (Math.sin(i * 2.4) * 0.5 + 0.5) * 100; // 0-100%
+              const delay = (i % 8) * 0.05;
+              const dur = 0.9 + (i % 5) * 0.15;
+              const size = 8 + (i % 4) * 4;
+              const rotate = (i * 137) % 360;
+              const shapes = ["●", "■", "▲", "◆"];
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ y: -20, x: `${x}vw`, opacity: 1, rotate: 0, scale: 1 }}
+                  animate={{ y: "110vh", opacity: [1, 1, 0], rotate: rotate + 360, scale: [1, 1.2, 0.8] }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: dur, delay, ease: "easeIn" }}
+                  style={{ position:"absolute", top:0, left:0, fontSize: size, color: `hsl(${hue},90%,60%)`, lineHeight:1 }}
+                >
+                  {shapes[i % shapes.length]}
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+      </AnimatePresence>
+
+
+      {/* ── Import / Export modal ── */}
+      <AnimatePresence>
+        {modal === "export" && (
+          <motion.div
+            key="export-modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{ position:"fixed", inset:0, zIndex:900, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(0,0,0,0.6)", backdropFilter:"blur(4px)" }}
+            onClick={() => setModal(null)}
           >
-            <div style={{ fontSize:120 }}>🎉</div>
+            <motion.div
+              initial={{ scale: 0.85, y: 30 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.85, y: 30 }}
+              onClick={e => e.stopPropagation()}
+              style={{ background: C.surface, border:`1px solid ${C.border}`, borderRadius:18, padding:"28px 28px 24px", width: 520, maxWidth:"92vw", maxHeight:"80vh", display:"flex", flexDirection:"column", gap:16, boxShadow:"0 20px 60px rgba(0,0,0,0.5)" }}
+            >
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                <div style={{ fontSize:17, fontWeight:700, color: C.text }}>📤 Export stream</div>
+                <button onClick={() => setModal(null)} style={{ background:"none", border:"none", color: C.dim, cursor:"pointer", fontSize:20, lineHeight:1 }}>✕</button>
+              </div>
+              <div style={{ fontSize:13, color: C.dim }}>Copy this JSON to back up or migrate your stream.</div>
+              <textarea
+                readOnly
+                value={JSON.stringify(entries, null, 2)}
+                style={{ flex:1, minHeight:220, resize:"none", background: C.bg, color: C.text, border:`1px solid ${C.border}`, borderRadius:10, padding:"12px 14px", fontFamily:"monospace", fontSize:12, lineHeight:1.5 }}
+              />
+              <div style={{ display:"flex", gap:10, justifyContent:"flex-end" }}>
+                <button
+                  onClick={() => { navigator.clipboard.writeText(JSON.stringify(entries, null, 2)); }}
+                  style={{ background: C.accent, color:"#fff", border:"none", borderRadius:10, padding:"9px 20px", cursor:"pointer", fontWeight:600, fontSize:13 }}
+                >
+                  Copy to clipboard
+                </button>
+                <button onClick={() => setModal(null)} style={{ background: C.surface, color: C.dim, border:`1px solid ${C.border}`, borderRadius:10, padding:"9px 20px", cursor:"pointer", fontSize:13 }}>
+                  Close
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {modal === "import" && (
+          <motion.div
+            key="import-modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{ position:"fixed", inset:0, zIndex:900, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(0,0,0,0.6)", backdropFilter:"blur(4px)" }}
+            onClick={() => setModal(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.85, y: 30 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.85, y: 30 }}
+              onClick={e => e.stopPropagation()}
+              style={{ background: C.surface, border:`1px solid ${C.border}`, borderRadius:18, padding:"28px 28px 24px", width: 520, maxWidth:"92vw", maxHeight:"80vh", display:"flex", flexDirection:"column", gap:16, boxShadow:"0 20px 60px rgba(0,0,0,0.5)" }}
+            >
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                <div style={{ fontSize:17, fontWeight:700, color: C.text }}>📥 Import stream</div>
+                <button onClick={() => setModal(null)} style={{ background:"none", border:"none", color: C.dim, cursor:"pointer", fontSize:20, lineHeight:1 }}>✕</button>
+              </div>
+              <div style={{ fontSize:13, color: C.dim }}>Paste previously exported JSON below. This will <strong>merge</strong> with your current stream (no data is deleted).</div>
+              <textarea
+                value={importText}
+                onChange={e => setImportText(e.target.value)}
+                placeholder='Paste exported JSON here…'
+                style={{ flex:1, minHeight:220, resize:"none", background: C.bg, color: C.text, border:`1px solid ${C.border}`, borderRadius:10, padding:"12px 14px", fontFamily:"monospace", fontSize:12, lineHeight:1.5 }}
+              />
+              <div style={{ display:"flex", gap:10, justifyContent:"flex-end" }}>
+                <button
+                  onClick={() => {
+                    try {
+                      const imported: Entry[] = JSON.parse(importText);
+                      if (!Array.isArray(imported)) throw new Error("Not an array");
+                      const existingIds = new Set(entries.map(e => e.id));
+                      const newEntries = imported.filter(e => !existingIds.has(e.id)).map(e => ({
+                        ...e,
+                        timestamp: new Date(e.timestamp),
+                        dueDate: e.dueDate ? new Date(e.dueDate) : undefined,
+                      }));
+                      setEntries(prev => [...prev, ...newEntries]);
+                      setModal(null);
+                      setImportText("");
+                      setUndoMsg(\`Imported \${newEntries.length} entr\${newEntries.length === 1 ? "y" : "ies"}\`);
+                      startUndoTimer();
+                    } catch {
+                      alert("Invalid JSON — please paste a valid Tikky export.");
+                    }
+                  }}
+                  style={{ background: C.accent, color:"#fff", border:"none", borderRadius:10, padding:"9px 20px", cursor:"pointer", fontWeight:600, fontSize:13 }}
+                >
+                  Import
+                </button>
+                <button onClick={() => { setModal(null); setImportText(""); }} style={{ background: C.surface, color: C.dim, border:`1px solid ${C.border}`, borderRadius:10, padding:"9px 20px", cursor:"pointer", fontSize:13 }}>
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -2278,3 +2402,4 @@ export default function App() {
     </div>
   );
 }
+
