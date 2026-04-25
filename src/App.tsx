@@ -1161,7 +1161,7 @@ export default function App() {
         </div>
       )}
       <div style={{ flex:1, display:"flex", overflow:"hidden", minHeight:0, zIndex:1 }}>
-        <div style={{ flex:1, display:"flex", overflow:"hidden", maxWidth: isMobile ? "100%" : 1400, margin:"0 auto", width:"100%" }}>
+        <div style={{ flex:1, display:"flex", overflow:"hidden", width:"100%" }}>
         {primaryTab === "stream" ? (
           <>
             <div style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden", borderRight: `1px solid ${C.border}` }}>
@@ -1269,7 +1269,7 @@ export default function App() {
                           value={search}
                           onChange={e => setSearch(e.target.value)}
                           placeholder="Search stream…"
-                          style={{ width:"100%", background:"transparent", border:`1px solid ${search ? C.accent+"44" : "transparent"}`, borderRadius:10, padding:"8px 12px", paddingRight: search ? 30 : 12, fontSize:13, color: C.text, fontFamily:"inherit", outline:"none", boxSizing:"border-box", transition:"all .2s" }}
+                          style={{ width:"100%", background:"transparent", border:`1px solid ${search ? C.accent+"66" : C.border+"88"}`, borderRadius:10, padding:"8px 12px", paddingRight: search ? 30 : 12, fontSize:13, color: C.text, fontFamily:"inherit", outline:"none", boxSizing:"border-box", transition:"all .2s" }}
                         />
                         {search && (
                           <button onClick={() => setSearch("")} style={{ position:"absolute", right:10, background:"none", border:"none", color: C.dimmer, cursor:"pointer", fontSize:14, padding:0, lineHeight:1, display:"flex", alignItems:"center" }}>✕</button>
@@ -1596,18 +1596,22 @@ export default function App() {
                     <div style={{ fontSize:10, fontWeight:700, color: C.dim, textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:8 }}>Suggestions</div>
                     <div className="no-scrollbar" style={{ display:"flex", overflowX:"auto", gap:6, paddingBottom:5, scrollbarWidth:"none" }}>
                       {[
-                        { name: "Grocery List",     icon: "🛒", color: "#10b981" },
-                        { name: "Travel Packing",   icon: "✈️", color: "#06b6d4" },
-                        { name: "Movies to Watch",  icon: "🎬", color: "#6366f1" },
+                        { name: "Groceries",        icon: "🛒", color: "#10b981" },
+                        { name: "Travel",           icon: "✈️", color: "#06b6d4" },
+                        { name: "Movies",           icon: "🎬", color: "#6366f1" },
                         { name: "TV Shows",         icon: "📺", color: "#8b5cf6" },
-                        { name: "Books to Read",    icon: "📚", color: "#f59e0b" },
+                        { name: "Books",            icon: "📚", color: "#f59e0b" },
                         { name: "Restaurants",      icon: "🍽️", color: "#f97316" },
-                        { name: "Music Playlist",   icon: "🎵", color: "#ec4899" },
+                        { name: "Music",            icon: "🎵", color: "#ec4899" },
                         { name: "Project Tasks",    icon: "🚀", color: "#8b5cf6" },
-                        { name: "Home Repairs",     icon: "🔧", color: "#64748b" },
+                        { name: "Home",             icon: "🏠", color: "#64748b" },
                         { name: "Gift Ideas",       icon: "🎁", color: "#e11d48" },
-                        { name: "Fitness Goals",    icon: "🏋️", color: "#16a34a" },
-                        { name: "Travel Wishlist",  icon: "🌍", color: "#0284c7" },
+                        { name: "Fitness",          icon: "🏋️", color: "#16a34a" },
+                        { name: "Wishlist",         icon: "⭐", color: "#0284c7" },
+                        { name: "Work",             icon: "💼", color: "#7c3aed" },
+                        { name: "Ideas",            icon: "💡", color: "#d97706" },
+                        { name: "Recipes",          icon: "🍳", color: "#dc2626" },
+                        { name: "Shopping",         icon: "🛍️", color: "#059669" },
                       ].map(s => (
                         <button 
                           key={s.name}
@@ -1651,8 +1655,14 @@ export default function App() {
                   </button>
                   <div style={{ width:1, height:20, background: C.border, flexShrink:0, alignSelf:"center" }} />
                   {[
-                    { name: "Grocery List",    icon: "🛒", color: "#10b981" },
-                    { name: "Travel Packing",  icon: "✈️", color: "#06b6d4" },
+                    { name: "Groceries",       icon: "🛒", color: "#10b981" },
+                    { name: "Travel",          icon: "✈️", color: "#06b6d4" },
+                    { name: "Movies",          icon: "🎬", color: "#6366f1" },
+                    { name: "Books",           icon: "📚", color: "#f59e0b" },
+                    { name: "Restaurants",     icon: "🍽️", color: "#f97316" },
+                    { name: "Fitness",         icon: "🏋️", color: "#16a34a" },
+                    { name: "Ideas",           icon: "💡", color: "#d97706" },
+                    { name: "Shopping",        icon: "🛍️", color: "#059669" },
                     { name: "Movies",          icon: "🎬", color: "#6366f1" },
                     { name: "TV Shows",        icon: "📺", color: "#8b5cf6" },
                     { name: "Books",           icon: "📚", color: "#f59e0b" },
