@@ -1161,9 +1161,10 @@ export default function App() {
         </div>
       )}
       <div style={{ flex:1, display:"flex", overflow:"hidden", minHeight:0, zIndex:1 }}>
+        <div style={{ flex:1, display:"flex", overflow:"hidden", maxWidth: isMobile ? "100%" : 1400, margin:"0 auto", width:"100%" }}>
         {primaryTab === "stream" ? (
           <>
-            <div style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden", borderRight: `1px solid ${C.border}`, maxWidth: isMobile ? "100%" : 1080, margin:"0 auto", width:"100%" }}>
+            <div style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden", borderRight: `1px solid ${C.border}` }}>
               {!isMobile && (
                 <div style={{ borderBottom:`1px solid ${C.border}`, padding: "15px", background:C.bg, flexShrink:0 }}>
                   <div style={{ display:"flex", flexDirection:"column", gap: 8 }}>
@@ -1188,7 +1189,7 @@ export default function App() {
                         }}
                         placeholder="What's on your mind? Try 'Update...', 'What's next?', #tags, @spaces, !priority or /summary..." 
                         rows={2}
-                        style={{ flex:1, background:C.surface, border:`1px solid ${C.border}`, borderRadius:10, padding: "12px", fontSize:14, color:C.text, outline:"none", resize:"none", minHeight: 60, maxHeight:120, transition:"border-color .2s" }} 
+                        style={{ flex:1, background:C.input, border:`1.5px solid ${C.accent}33`, borderRadius:10, padding: "12px", fontSize:14, color:C.text, outline:"none", resize:"none", minHeight: 60, maxHeight:120, transition:"border-color .2s", boxShadow:`0 0 0 3px ${C.accent}08` }} 
                       />
                       {acType && (
                         <div style={{ position:"absolute", top: acPos.top, left: acPos.left, background: C.surface, border:`1px solid ${C.accent}55`, borderRadius:8, zIndex:1000, boxShadow:"0 10px 25px rgba(0,0,0,.3)", minWidth:120, overflow:"hidden" }}>
@@ -1211,6 +1212,16 @@ export default function App() {
                       <button onClick={() => photoInputRef.current?.click()} title="Attach photo" style={{ background: C.surface, border:`1px solid ${C.border}`, color: C.dim, borderRadius:10, padding:"0 14px", cursor:"pointer", fontSize:16, flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center" }}>📷</button>
                       <button onClick={addEntry} disabled={isSubmitting} style={{ background: isSubmitting ? C.dimmer : C.accent, color:"#fff", border:"none", borderRadius:10, padding: "0 20px", cursor: isSubmitting ? "wait" : "pointer", fontWeight:600, fontSize:14, transition:"all .1s", minWidth:56, opacity: isSubmitting ? 0.7 : 1 }} onMouseDown={e=>{ if (!isSubmitting) e.currentTarget.style.transform="scale(0.96)"; }} onMouseUp={e=>e.currentTarget.style.transform="scale(1)"}>{isSubmitting ? "…" : "Add"}</button>
                     </div>
+                    {composeImages.length > 0 && (
+                      <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginTop:4 }}>
+                        {composeImages.map((img, i) => (
+                          <div key={i} style={{ position:"relative" }}>
+                            <img src={img} alt="" style={{ width:52, height:52, objectFit:"cover", borderRadius:8, border:`1px solid ${C.border}`, display:"block" }} />
+                            <button onClick={() => setComposeImages(p => p.filter((_,idx) => idx !== i))} style={{ position:"absolute", top:-5, right:-5, width:16, height:16, borderRadius:"50%", background:"#ef4444", border:"none", color:"#fff", fontSize:10, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0 }}>✕</button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     <div style={{ display:"flex", gap:10, fontSize:10, color: C.dim, paddingLeft:2 }}>
                       <span>💡 Tip: Type <b>/task</b> or <b>/event</b> to change type</span>
                       <span>·</span>
@@ -1258,7 +1269,7 @@ export default function App() {
                           value={search}
                           onChange={e => setSearch(e.target.value)}
                           placeholder="Search stream…"
-                          style={{ width:"100%", background:C.input, border:`1px solid ${search ? C.accent+"55" : C.border}`, borderRadius:10, padding:"8px 12px", paddingRight: search ? 30 : 12, fontSize:13, color: C.text, fontFamily:"inherit", outline:"none", boxSizing:"border-box", transition:"all .2s" }}
+                          style={{ width:"100%", background:"transparent", border:`1px solid ${search ? C.accent+"44" : "transparent"}`, borderRadius:10, padding:"8px 12px", paddingRight: search ? 30 : 12, fontSize:13, color: C.text, fontFamily:"inherit", outline:"none", boxSizing:"border-box", transition:"all .2s" }}
                         />
                         {search && (
                           <button onClick={() => setSearch("")} style={{ position:"absolute", right:10, background:"none", border:"none", color: C.dimmer, cursor:"pointer", fontSize:14, padding:0, lineHeight:1, display:"flex", alignItems:"center" }}>✕</button>
@@ -1542,6 +1553,7 @@ export default function App() {
             </div>
           </div>
         )}
+        </div>{/* /outer-tramline */}
       </>
         ) : primaryTab === "lists" ? (
           <div style={{ flex:1, display:"flex", overflow:"hidden", background: C.bg }}>
@@ -1844,19 +1856,19 @@ export default function App() {
             </div>
           </div>
         ) : (
-          <div className="no-scrollbar" style={{ flex:1, overflowY:"auto", background: C.bg, padding: isMobile ? "20px 20px 80px" : 40 }}>
+          <div className="no-scrollbar" style={{ flex:1, overflowY:"auto", background: "transparent", padding: isMobile ? "20px 20px 80px" : 40 }}>
             <div style={{ maxWidth: 640, margin:"0 auto" }}>
               <div style={{ marginBottom:36 }}>
                 <div style={{ fontSize:10, fontWeight:700, color: C.accent, textTransform:"uppercase", letterSpacing:"0.12em", marginBottom:14 }}>Theme & Accent</div>
                 <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:10, marginBottom:15 }}>
                   {THEMES.map(t => (
-                    <button key={t.id} onClick={() => setTheme(t.id)} style={{ background: C.surface, border:`2px solid ${theme === t.id ? C.accent : C.border}`, borderRadius:12, padding:"14px 12px", cursor:"pointer", textAlign:"left", fontFamily:"inherit" }}>
+                    <button key={t.id} onClick={() => setTheme(t.id)} style={{ background: `${C.surface}cc`, backdropFilter:"blur(12px)", border:`2px solid ${theme === t.id ? C.accent : C.border}`, borderRadius:12, padding:"14px 12px", cursor:"pointer", textAlign:"left", fontFamily:"inherit" }}>
                       <div style={{ fontSize:12, fontWeight:700, color: C.text }}>{t.name}</div>
                       <div style={{ fontSize:10, color: C.dim }}>{t.desc}</div>
                     </button>
                   ))}
                 </div>
-                <div style={{ display:"flex", alignItems:"center", gap:15, background: C.surface, padding:"12px 15px", borderRadius:12, border:`1px solid ${C.border}`, marginBottom:10 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:15, background: `${C.surface}cc`, backdropFilter:"blur(12px)", padding:"12px 15px", borderRadius:12, border:`1px solid ${C.border}`, marginBottom:10 }}>
                   <span style={{ fontSize:12, fontWeight:600, color: C.dim }}>Accent Color</span>
                   <input 
                     type="color" 
@@ -1889,12 +1901,12 @@ export default function App() {
                 <div style={{ display:"flex", flexDirection:"column", gap:15 }}>
                   <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:10 }}>
                     {Object.keys(FONTS).map(f => (
-                      <button key={f} onClick={() => setFontFamily(f)} style={{ background: C.surface, border:`2px solid ${fontFamily === f ? C.accent : C.border}`, borderRadius:10, padding:"10px", cursor:"pointer", fontSize:12, fontWeight:600, fontFamily: (FONTS as any)[f] }}>
+                      <button key={f} onClick={() => setFontFamily(f)} style={{ background: `${C.surface}cc`, backdropFilter:"blur(12px)", border:`2px solid ${fontFamily === f ? C.accent : C.border}`, borderRadius:10, padding:"10px", cursor:"pointer", fontSize:12, fontWeight:600, fontFamily: (FONTS as any)[f] }}>
                         {f.charAt(0).toUpperCase() + f.slice(1)}
                       </button>
                     ))}
                   </div>
-                  <div style={{ display:"flex", alignItems:"center", gap:15, background: C.surface, padding:"12px 15px", borderRadius:12, border:`1px solid ${C.border}` }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:15, background: `${C.surface}cc`, backdropFilter:"blur(12px)", padding:"12px 15px", borderRadius:12, border:`1px solid ${C.border}` }}>
                     <span style={{ fontSize:12, fontWeight:600, color: C.dim }}>Text Size</span>
                     <input type="range" min="0.8" max="1.2" step="0.05" value={fontScale} onChange={e => setFontScale(parseFloat(e.target.value))} style={{ flex:1, accentColor: C.accent }} />
                     <span style={{ fontSize:12, fontWeight:700, minWidth:35 }}>{Math.round(fontScale * 100)}%</span>
@@ -1912,7 +1924,7 @@ export default function App() {
                     { id: "grid",  label: "Blueprint Grid", preview: { backgroundImage: `linear-gradient(${C.accent}44 1px, transparent 1px), linear-gradient(90deg, ${C.accent}44 1px, transparent 1px)`, backgroundSize:"14px 14px" } },
                     { id: "image", label: "Custom Image",   preview: bgImage ? { backgroundImage:`url(${bgImage})`, backgroundSize:"cover", backgroundPosition:"center" } : null },
                   ].map(p => (
-                    <button key={p.id} onClick={() => setBgPreset(p.id)} style={{ background: C.surface, border:`2px solid ${bgPreset === p.id ? C.accent : C.border}`, borderRadius:12, padding:"10px 12px", cursor:"pointer", display:"flex", flexDirection:"column", gap:8, textAlign:"left", transition:"border-color .15s" }}>
+                    <button key={p.id} onClick={() => setBgPreset(p.id)} style={{ background: `${C.surface}cc`, backdropFilter:"blur(12px)", border:`2px solid ${bgPreset === p.id ? C.accent : C.border}`, borderRadius:12, padding:"10px 12px", cursor:"pointer", display:"flex", flexDirection:"column", gap:8, textAlign:"left", transition:"border-color .15s" }}>
                       <div style={{ width:"100%", height:44, borderRadius:7, background: C.bg, border:`1px solid ${C.border}`, overflow:"hidden", position:"relative", flexShrink:0 }}>
                         {p.preview ? (
                           <div style={{ position:"absolute", inset:0, ...p.preview }} />
@@ -1925,7 +1937,7 @@ export default function App() {
                   ))}
                 </div>
                 <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
-                  <div style={{ display:"flex", flexDirection:"column", gap:10, background: C.surface, padding:"12px 15px", borderRadius:12, border:`1px solid ${C.border}` }}>
+                  <div style={{ display:"flex", flexDirection:"column", gap:10, background: `${C.surface}cc`, backdropFilter:"blur(12px)", padding:"12px 15px", borderRadius:12, border:`1px solid ${C.border}` }}>
                     <div style={{ display:"flex", alignItems:"center", gap:15 }}>
                       <span style={{ fontSize:12, fontWeight:600, color: C.dim }}>Upload Image</span>
                       <input 
@@ -1954,7 +1966,7 @@ export default function App() {
                       <div style={{ width:"100%", height:80, borderRadius:8, background:`url(${bgImage})`, backgroundSize:"cover", backgroundPosition:"center", border:`1px solid ${C.border}` }} />
                     )}
                   </div>
-                  <div style={{ display:"flex", alignItems:"center", gap:15, background: C.surface, padding:"12px 15px", borderRadius:12, border:`1px solid ${C.border}` }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:15, background: `${C.surface}cc`, backdropFilter:"blur(12px)", padding:"12px 15px", borderRadius:12, border:`1px solid ${C.border}` }}>
                     <span style={{ fontSize:12, fontWeight:600, color: C.dim }}>Overlay Opacity</span>
                     <input type="range" min="0" max="1" step="0.05" value={bgOpacity} onChange={e => setBgOpacity(parseFloat(e.target.value))} style={{ flex:1, accentColor: C.accent }} />
                     <span style={{ fontSize:12, fontWeight:700, minWidth:35 }}>{Math.round(bgOpacity * 100)}%</span>
@@ -1970,7 +1982,7 @@ export default function App() {
                     { v: "v1.1.0", name: "Foundation Layer", status: "SHIPPED", color: "#10b981", notes: ["Core task management engine", "Focus / Pomodoro timer", "Bulk operations & select mode"] },
                     { v: "v1.3.0", name: "Neural Workflows", status: "UPCOMING", color: C.dim, notes: ["Calendar view for events", "Smart templates & recurring tasks", "Native push notifications"] },
                   ].map(pulse => (
-                    <div key={pulse.v} style={{ background: C.surface, borderRadius:16, border:`1px solid ${C.border}`, padding:20, position:"relative", overflow:"hidden" }}>
+                    <div key={pulse.v} style={{ background: `${C.surface}cc`, backdropFilter:"blur(12px)", borderRadius:16, border:`1px solid ${C.border}`, padding:20, position:"relative", overflow:"hidden" }}>
                       <div style={{ position:"absolute", left:0, top:0, bottom:0, width:4, background: pulse.color }} />
                       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
                         <div>
@@ -1989,7 +2001,7 @@ export default function App() {
                 <div style={{ fontSize:10, fontWeight:700, color: C.accent, textTransform:"uppercase", letterSpacing:"0.12em", marginBottom:12 }}>Coming Up</div>
                 <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:20 }}>
                   {roadmap.map(item => (
-                    <div key={item.label} style={{ background: C.surface, borderRadius:12, border:`1px solid ${C.border}`, padding:"12px 14px", display:"flex", gap:10, alignItems:"flex-start" }}>
+                    <div key={item.label} style={{ background: `${C.surface}cc`, backdropFilter:"blur(12px)", borderRadius:12, border:`1px solid ${C.border}`, padding:"12px 14px", display:"flex", gap:10, alignItems:"flex-start" }}>
                       <span style={{ fontSize:18, flexShrink:0, lineHeight:1.2 }}>{item.icon}</span>
                       <div>
                         <div style={{ fontSize:12, fontWeight:700, marginBottom:2 }}>{item.label}</div>
@@ -2002,7 +2014,7 @@ export default function App() {
                 <div style={{ fontSize:10, fontWeight:700, color: "#10b981", textTransform:"uppercase", letterSpacing:"0.12em", marginBottom:12 }}>✓ Shipped</div>
                 <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
                   {shipped.map(item => (
-                    <div key={item.label} style={{ display:"flex", gap:10, alignItems:"flex-start", padding:"8px 12px", background: C.surface, borderRadius:10, border:`1px solid ${C.border}` }}>
+                    <div key={item.label} style={{ display:"flex", gap:10, alignItems:"flex-start", padding:"8px 12px", background: `${C.surface}cc`, backdropFilter:"blur(12px)", borderRadius:10, border:`1px solid ${C.border}` }}>
                       <span style={{ color:"#10b981", fontWeight:700, fontSize:12, flexShrink:0 }}>✓</span>
                       <div>
                         <span style={{ fontSize:12, fontWeight:600 }}>{item.label}</span>
