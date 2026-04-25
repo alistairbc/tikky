@@ -4,6 +4,21 @@ import { fmt, renderMd } from "../utils/format";
 import { relDueLabel } from "../utils/nlp";
 import { Tick } from "./Tick";
 
+
+function toISO(d: Date) { return d.toISOString().split('T')[0]; }
+function addDays(d: Date, n: number) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
+function getDueDateShortcuts() {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dToFri = (5 - today.getDay() + 7) % 7 || 7;
+  return [
+    { label: "Today",     value: toISO(today) },
+    { label: "Tomorrow",  value: toISO(addDays(today, 1)) },
+    { label: "Friday",    value: toISO(addDays(today, dToFri)) },
+    { label: "Next week", value: toISO(addDays(today, 7)) },
+  ];
+}
+
 export function DashboardCard({
   entry, C,
   isDashExp, editingDueDate, dueDateInput,
@@ -46,10 +61,33 @@ export function DashboardCard({
                 </div>
               )}
               {editingDueDate === entry.id && !entry.done ? (
-                <div onClick={e => e.stopPropagation()} style={{ display:"flex", alignItems:"center", gap:3 }}>
-                  <input autoFocus value={dueDateInput} onChange={e => onDueDateChange(e.target.value)} onKeyDown={e => { if (e.key === "Enter") { e.stopPropagation(); onDueDateSave(); } if (e.key === "Escape") { e.stopPropagation(); onDueDateCancel(); } }} onClick={e => e.stopPropagation()} placeholder="e.g. Friday 3pm" style={{ fontSize:10, background:C.input, border:`1px solid ${C.accent}88`, borderRadius:4, padding:"2px 6px", color:"#f59e0b", fontFamily:"inherit", outline:"none", width:100 }} />
-                  <button onClick={e => { e.stopPropagation(); onDueDateSave(); }}   style={{ fontSize:10, background:`${C.accent}22`, border:`1px solid ${C.accent}55`, color:C.accent, cursor:"pointer", padding:"2px 5px", borderRadius:4, fontFamily:"inherit", lineHeight:1 }}>✓</button>
-                  <button onClick={e => { e.stopPropagation(); onDueDateCancel(); }} style={{ fontSize:10, background:"none", border:`1px solid ${C.border}`, color:C.dim, cursor:"pointer", padding:"2px 5px", borderRadius:4, fontFamily:"inherit", lineHeight:1 }}>✕</button>
+                <div onClick={e => e.stopPropagation()} style={{ position:"relative" }}>
+                  <div style={{ position:"absolute", top:"100%", left:0, zIndex:300,
+                                background: C.surface, border:`1px solid ${C.accent}55`,
+                                borderRadius:8, padding:"8px 10px", marginTop:3,
+                                boxShadow:"0 8px 20px rgba(0,0,0,.35)", minWidth:180 }}>
+                    <div style={{ display:"flex", flexWrap:"wrap", gap:4, marginBottom:6 }}>
+                      {getDueDateShortcuts().map(s => (
+                        <button key={s.label} onClick={() => { onDueDateChange(s.value); onDueDateSave(); }}
+                          style={{ fontSize:10, padding:"2px 7px", borderRadius:5,
+                                   background:`${C.accent}18`, border:`1px solid ${C.accent}44`,
+                                   color:C.accent, cursor:"pointer", fontFamily:"inherit" }}>
+                          {s.label}
+                        </button>
+                      ))}
+                    </div>
+                    <input type="date"
+                      onChange={e => { if (e.target.value) { onDueDateChange(e.target.value); onDueDateSave(); }}}
+                      style={{ width:"100%", background: C.input, border:`1px solid ${C.border}`,
+                               borderRadius:5, padding:"3px 6px", fontSize:10, color:C.text,
+                               fontFamily:"inherit", outline:"none", boxSizing:"border-box" }}
+                    />
+                    <button onClick={onDueDateCancel}
+                      style={{ marginTop:4, width:"100%", fontSize:9, padding:"2px", background:"none",
+                               border:"none", color:C.dim, cursor:"pointer", fontFamily:"inherit" }}>
+                      Cancel
+                    </button>
+                  </div>
                 </div>
               ) : entry.dueDate && !entry.done ? (
                 <span onClick={e => { e.stopPropagation(); onDueDateEdit(); }} title={`Due: ${entry.dueDate} — click to edit`} style={{ fontSize:10, color:"#f59e0b", background:"#f59e0b18", padding:"1px 6px", borderRadius:3, fontWeight:600, cursor:"pointer" }}>⏱ {relDueLabel(entry.dueDate, entry.timestamp)}</span>
@@ -68,6 +106,23 @@ export function DashboardCard({
                 {[...entry.tags, ...entry.contexts].map(t => (
                   <span key={t} style={{ fontSize:9, color: (TM as any).thought.color, background:`${(TM as any).thought.color}28`, padding:"1px 5px", borderRadius:3, fontWeight:600 }}>{t}</span>
                 ))}
+              </div>
+            )}
+            {(entry.images||[]).length > 0 && (
+              <div style={{ display:"flex", gap:4, marginTop:4, flexWrap:"wrap" }}>
+                {(entry.images as string[]).slice(0,3).map((src, i) => (
+                  <img key={i} src={src} alt=""
+                    style={{ width:32, height:32, objectFit:"cover", borderRadius:4,
+                             border:`1px solid ${C.border}`, display:"block" }} />
+                ))}
+                {(entry.images||[]).length > 3 && (
+                  <div style={{ width:32, height:32, borderRadius:4, background:C.bg,
+                                border:`1px solid ${C.border}`, display:"flex",
+                                alignItems:"center", justifyContent:"center",
+                                fontSize:9, color:C.dim }}>
+                    +{(entry.images||[]).length - 3}
+                  </div>
+                )}
               </div>
             )}
             <div style={{ display:"flex", alignItems:"center", gap:4 }}>
