@@ -1208,6 +1208,7 @@ export default function App() {
                           )}
                         </div>
                       )}
+                      <button onClick={() => photoInputRef.current?.click()} title="Attach photo" style={{ background: C.surface, border:`1px solid ${C.border}`, color: C.dim, borderRadius:10, padding:"0 14px", cursor:"pointer", fontSize:16, flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center" }}>📷</button>
                       <button onClick={addEntry} disabled={isSubmitting} style={{ background: isSubmitting ? C.dimmer : C.accent, color:"#fff", border:"none", borderRadius:10, padding: "0 20px", cursor: isSubmitting ? "wait" : "pointer", fontWeight:600, fontSize:14, transition:"all .1s", minWidth:56, opacity: isSubmitting ? 0.7 : 1 }} onMouseDown={e=>{ if (!isSubmitting) e.currentTarget.style.transform="scale(0.96)"; }} onMouseUp={e=>e.currentTarget.style.transform="scale(1)"}>{isSubmitting ? "…" : "Add"}</button>
                     </div>
                     <div style={{ display:"flex", gap:10, fontSize:10, color: C.dim, paddingLeft:2 }}>
@@ -1342,6 +1343,7 @@ export default function App() {
             className="no-scrollbar"
             style={{ flex:1, overflowY:"auto", padding: isMobile ? "15px 15px 80px" : "15px", position:"relative" }}
           >
+            <div style={{ maxWidth: isMobile ? "100%" : 860, margin:"0 auto" }}>
             {(() => {
               const PO: Record<string, number> = { high:0, medium:1, low:2 };
               
@@ -1477,6 +1479,7 @@ export default function App() {
 
               return filteredEntries.map((entry, i) => renderCard(entry, i, filteredEntries.length));
             })()}
+            </div>{/* /tramline */}
             <div ref={streamEndRef} />
           </div>
         </div>
@@ -1888,15 +1891,21 @@ export default function App() {
                 <div style={{ fontSize:10, fontWeight:700, color: C.accent, textTransform:"uppercase", letterSpacing:"0.12em", marginBottom:14 }}>Background</div>
                 <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:10, marginBottom:12 }}>
                   {[
-                    { id: "none", label: "None", icon: "∅" },
-                    { id: "mesh", label: "Mesh Gradient", icon: "◈" },
-                    { id: "noise", label: "Film Grain", icon: "░" },
-                    { id: "grid", label: "Blueprint Grid", icon: "⊞" },
-                    { id: "image", label: "Custom Image", icon: "🖼" },
+                    { id: "none",  label: "None",           preview: null },
+                    { id: "mesh",  label: "Mesh Gradient",  preview: { background: `radial-gradient(ellipse at 20% 40%, ${C.accent}99 0%, transparent 60%), radial-gradient(ellipse at 80% 70%, #ec489999 0%, transparent 50%), radial-gradient(ellipse at 60% 10%, #06b6d499 0%, transparent 50%)` } },
+                    { id: "noise", label: "Film Grain",     preview: { backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='60' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`, opacity: 0.6 } },
+                    { id: "grid",  label: "Blueprint Grid", preview: { backgroundImage: `linear-gradient(${C.accent}44 1px, transparent 1px), linear-gradient(90deg, ${C.accent}44 1px, transparent 1px)`, backgroundSize:"14px 14px" } },
+                    { id: "image", label: "Custom Image",   preview: bgImage ? { backgroundImage:`url(${bgImage})`, backgroundSize:"cover", backgroundPosition:"center" } : null },
                   ].map(p => (
-                    <button key={p.id} onClick={() => setBgPreset(p.id)} style={{ background: C.surface, border:`2px solid ${bgPreset === p.id ? C.accent : C.border}`, borderRadius:12, padding:"12px", cursor:"pointer", display:"flex", alignItems:"center", gap:10 }}>
-                      <span style={{ fontSize:16 }}>{p.icon}</span>
-                      <span style={{ fontSize:12, fontWeight:600 }}>{p.label}</span>
+                    <button key={p.id} onClick={() => setBgPreset(p.id)} style={{ background: C.surface, border:`2px solid ${bgPreset === p.id ? C.accent : C.border}`, borderRadius:12, padding:"10px 12px", cursor:"pointer", display:"flex", flexDirection:"column", gap:8, textAlign:"left", transition:"border-color .15s" }}>
+                      <div style={{ width:"100%", height:44, borderRadius:7, background: C.bg, border:`1px solid ${C.border}`, overflow:"hidden", position:"relative", flexShrink:0 }}>
+                        {p.preview ? (
+                          <div style={{ position:"absolute", inset:0, ...p.preview }} />
+                        ) : (
+                          <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, color: C.dimmer }}>∅</div>
+                        )}
+                      </div>
+                      <span style={{ fontSize:12, fontWeight:600, color: bgPreset === p.id ? C.accent : C.text }}>{p.label}</span>
                     </button>
                   ))}
                 </div>
@@ -1940,11 +1949,11 @@ export default function App() {
 
               <div style={{ marginBottom:36 }}>
                 <div style={{ fontSize:10, fontWeight:700, color: C.accent, textTransform:"uppercase", letterSpacing:"0.12em", marginBottom:14 }}>Product Pulse</div>
-                <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+                <div style={{ display:"flex", flexDirection:"column", gap:12, marginBottom:20 }}>
                   {[
-                    { v: "v1.2.0", name: "The Precision Update", status: "ACTIVE", color: C.accent, notes: ["Advanced grid customization tools", "High-density data visualization charts", "Global preference synchronization"] },
-                    { v: "v1.1.0", name: "Foundation Layer", status: "SHIPPED", color: "#10b981", notes: ["Core task management engine", "Cross-platform sync", "Basic theme engine"] },
-                    { v: "v1.3.0", name: "Neural Workflows", status: "UPCOMING", color: C.dim, notes: ["AI-powered task prioritization", "Natural language automation", "Smart context awareness"] },
+                    { v: "v1.2.0", name: "The Precision Update", status: "ACTIVE", color: C.accent, notes: ["Claude AI integration for smart entry classification", "Railway deployment — accessible anywhere", "Async compose with live feedback"] },
+                    { v: "v1.1.0", name: "Foundation Layer", status: "SHIPPED", color: "#10b981", notes: ["Core task management engine", "Focus / Pomodoro timer", "Bulk operations & select mode"] },
+                    { v: "v1.3.0", name: "Neural Workflows", status: "UPCOMING", color: C.dim, notes: ["Calendar view for events", "Smart templates & recurring tasks", "Native push notifications"] },
                   ].map(pulse => (
                     <div key={pulse.v} style={{ background: C.surface, borderRadius:16, border:`1px solid ${C.border}`, padding:20, position:"relative", overflow:"hidden" }}>
                       <div style={{ position:"absolute", left:0, top:0, bottom:0, width:4, background: pulse.color }} />
@@ -1958,6 +1967,32 @@ export default function App() {
                       <ul style={{ margin:0, padding:"0 0 0 18px", fontSize:12, color: C.dim, lineHeight:1.6 }}>
                         {pulse.notes.map((note, i) => <li key={i}>{note}</li>)}
                       </ul>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ fontSize:10, fontWeight:700, color: C.accent, textTransform:"uppercase", letterSpacing:"0.12em", marginBottom:12 }}>Coming Up</div>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:20 }}>
+                  {roadmap.map(item => (
+                    <div key={item.label} style={{ background: C.surface, borderRadius:12, border:`1px solid ${C.border}`, padding:"12px 14px", display:"flex", gap:10, alignItems:"flex-start" }}>
+                      <span style={{ fontSize:18, flexShrink:0, lineHeight:1.2 }}>{item.icon}</span>
+                      <div>
+                        <div style={{ fontSize:12, fontWeight:700, marginBottom:2 }}>{item.label}</div>
+                        <div style={{ fontSize:11, color: C.dim, lineHeight:1.4 }}>{item.desc}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ fontSize:10, fontWeight:700, color: "#10b981", textTransform:"uppercase", letterSpacing:"0.12em", marginBottom:12 }}>✓ Shipped</div>
+                <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+                  {shipped.map(item => (
+                    <div key={item.label} style={{ display:"flex", gap:10, alignItems:"flex-start", padding:"8px 12px", background: C.surface, borderRadius:10, border:`1px solid ${C.border}` }}>
+                      <span style={{ color:"#10b981", fontWeight:700, fontSize:12, flexShrink:0 }}>✓</span>
+                      <div>
+                        <span style={{ fontSize:12, fontWeight:600 }}>{item.label}</span>
+                        <span style={{ fontSize:11, color: C.dim, marginLeft:6 }}>{item.desc}</span>
+                      </div>
                     </div>
                   ))}
                 </div>
