@@ -31,10 +31,11 @@ export function StreamCard({
   const meta = (TM as any)[entry.type];
   const overdueEntry = isOverdue(entry);
   return (
-    <motion.div 
-      layout
+    <motion.div
+      layout="position"
       initial={entry.isNew ? { opacity: 0, y: 20, scale: 0.95 } : false}
       animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ layout: { duration: 0.15 } }}
       style={{ display:"flex", gap: isMobile ? 0 : 10, marginBottom: isMobile ? 8 : compact ? 5 : 10 }}
     >
 
@@ -65,7 +66,8 @@ export function StreamCard({
         )}
 
         <motion.div
-          layout
+          layout="position"
+          transition={{ layout: { duration: 0.15 } }}
           onClick={e => {
             if ((e.currentTarget as any)._wasSwiped) { (e.currentTarget as any)._wasSwiped = false; return; }
             if (selectMode) { onToggleSelect && onToggleSelect(); return; }
@@ -350,14 +352,4 @@ export function StreamCard({
 
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginTop:14, paddingTop:10, borderTop:`1px solid ${C.border}` }}>
                 <button onClick={e => { e.stopPropagation(); onDuplicate && onDuplicate(); }} style={{ fontSize:11, background:"none", border:`1px solid ${C.border}`, color: C.dim, cursor:"pointer", padding:"5px 14px", borderRadius:7, fontFamily:"inherit", display:"flex", alignItems:"center", gap:5 }}>⎘ Duplicate</button>
-                <button onClick={onExpand} style={{ fontSize:11, background:"none", border:`1px solid ${C.border}`, color: C.dim, cursor:"pointer", padding:"5px 20px", borderRadius:7, fontFamily:"inherit" }}>↑ Close panel</button>
-              </div>
-
-            </div>
-          )}
-
-        </motion.div>
-      </div>
-    </motion.div>
-  );
-}
+                <button onClick={onExpand} style={{ fontSize:11, background:"none", border:`1px solid ${C.border}`, color: C.dim, cursor:"pointer", padding:"5px 20px", borderRadius:7, fontFamily:"inherit" }}>↑ Close panel
