@@ -3,8 +3,8 @@ export const CLR = {
   success: "#10b981",
   warn:    "#f59e0b",
   info:    "#6366f1",
-  note:    "#818cf8",
-  thought: "#64748b",
+  note:    "#fde047",
+  thought: "#8b5cf6",
   violet:  "#8b5cf6",
   cyan:    "#06b6d4",
   pink:    "#ec4899",
@@ -13,7 +13,7 @@ export const CLR = {
 
 export const TM = {
   task:    { label: "Task",    color: CLR.success, icon: "✓" },
-  event:   { label: "Event",   color: CLR.warn,    icon: "◈" },
+  event:   { label: "Event",   color: "#6366f1",   icon: "◈" },
   note:    { label: "Note",    color: CLR.note,    icon: "◉" },
   thought: { label: "Thought", color: CLR.thought, icon: "◎" },
 };
@@ -38,14 +38,14 @@ export const FONTS = {
 };
 
 export const LIST_COLORS = ["#6366f1","#10b981","#f59e0b","#ef4444","#8b5cf6","#06b6d4","#f97316","#ec4899"];
-export const LIST_ICONS  = ["📋","🎬","📚","🛒","💡","✈","🎯","🏋","🎵","🍿","🌿","💼","🧠","🔖","🗂","⭐"];
+export const LIST_ICONS  = ["📋","🎬","📚","🛒","💡","✈","🎯","🏻","🎵","🍿","🌿","💼","🧠","🔖","🗂","⭐"];
 
 export const LIST_TEMPLATES = [
   { name:"Movies to Watch",  icon:"🎬", color:"#6366f1" },
   { name:"TV to Watch",      icon:"📺", color:"#f97316" },
   { name:"Books to Read",    icon:"📚", color:"#10b981" },
   { name:"Shopping",         icon:"🛒", color:"#f59e0b" },
-  { name:"Travel Wishlist",  icon:"✈", color:"#06b6d4" },
+  { name:"Travel Wishlist",  icon:"✈",        color:"#06b6d4" },
   { name:"Ideas",            icon:"💡", color:"#8b5cf6" },
   { name:"Goals",            icon:"🎯", color:"#ef4444" },
 ];
