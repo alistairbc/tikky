@@ -74,7 +74,6 @@ export function ListItem({ item, listColor, isEditing, editText, onEditChange, o
                   style={{ flex:1, background:C.input, border:`1px solid #6366f155`, borderRadius:6, padding:"4px 8px", fontSize:13, color: C.text, fontFamily:"inherit", outline:"none", boxSizing:"border-box" }}
                 />
                 <input
-                  maxLength={4}
                   value={item.emoji || ""}
                   onChange={e => onEmojiChange(e.target.value.trim())}
                   placeholder="Emoji"
@@ -82,7 +81,11 @@ export function ListItem({ item, listColor, isEditing, editText, onEditChange, o
                 />
               </div>
               <div style={{ display:"flex", flexWrap:"wrap", gap:4, marginBottom:8 }}>
-                {["✅", "📝", "🚀", "💡", "📅", "🔥", "⭐", "📌", "🛒", "✈️", "🍔", "🏋️", "🎨", "🎵", "💬", "❤️"].map(emo => (
+                {[
+                "✅","🚀","💡","📅","🔥","⭐","📌","📝","🛒","✈️","🎬","🎵","🎮","☕","🐾","🚗",
+                "💰","💪","🎁","🏠","🎨","🎯","❤️","💬","👍","🎉","💯","🙏","🤝","👏","⚠️","🔖",
+                "🇦🇺","🇺🇸","🇬🇧","🇯🇵","🇰🇷","🇨🇳","🇫🇷","🇩🇪","🇮🇹","🇪🇸","🇧🇷","🇨🇦","🇮🇳","🇲🇽","🇿🇦","🇳🇿"
+              ].map(emo => (
                   <button
                     key={emo}
                     onClick={() => onEmojiChange(emo)}
@@ -98,7 +101,7 @@ export function ListItem({ item, listColor, isEditing, editText, onEditChange, o
               </div>
             </div>
           ) : (
-            <p onDoubleClick={onStartEdit} title="Double-click to edit" style={{ margin:0, fontSize:13, color: item.done ? C.dim : C.text, textDecoration: item.done ? "line-through" : "none", lineHeight:1.5, cursor:"text", wordBreak:"break-word" }}>
+            <p onClick={onStartEdit} title="Click to edit" style={{ margin:0, fontSize:13, color: item.done ? C.dim : C.text, textDecoration: item.done ? "line-through" : "none", lineHeight:1.5, cursor:"text", wordBreak:"break-word" }}>
               {item.emoji && <span style={{ marginRight:5 }}>{item.emoji}</span>}
               {item.text}
             </p>
@@ -127,3 +130,4 @@ export function ListItem({ item, listColor, isEditing, editText, onEditChange, o
     </div>
   );
 }
+
