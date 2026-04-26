@@ -123,6 +123,7 @@ export default function App() {
   const [focusSetup,     setFocusSetup]     = useState(true);
   const [focusTaskIds,   setFocusTaskIds]   = useState<Set<number>>(new Set());
   const [celebration,    setCelebration]    = useState(false);
+  const [lightboxImg,    setLightboxImg]    = useState<string | null>(null);
 
   const roadmap = [
     { icon: "📅", label: "Calendar View", desc: "Full-screen interactive calendar to manage events and deadlines visually." },
@@ -1087,6 +1088,34 @@ export default function App() {
     <div style={{ background: C.bg, height: "100%", color: C.text, fontFamily: (FONTS as any)[fontFamily], display:"flex", flexDirection:"column", overflow:"hidden", position:"relative", zoom: String(fontScale) }}>
       {bgOverlayStyle && <div style={{ position:"absolute", inset:0, zIndex:0, pointerEvents:"none", ...bgOverlayStyle }} />}
       
+      {/* ── Image lightbox ── */}
+      {lightboxImg && (
+        <div
+          onClick={() => setLightboxImg(null)}
+          style={{ position:"fixed", inset:0, zIndex:1200, background:"rgba(0,0,0,0.92)",
+                   display:"flex", alignItems:"center", justifyContent:"center",
+                   cursor:"zoom-out", backdropFilter:"blur(6px)" }}
+        >
+          <img
+            src={lightboxImg}
+            alt=""
+            onClick={e => e.stopPropagation()}
+            style={{ maxWidth:"92vw", maxHeight:"88vh", objectFit:"contain",
+                     borderRadius:12, boxShadow:"0 20px 80px rgba(0,0,0,0.8)",
+                     cursor:"default" }}
+          />
+          <button
+            onClick={() => setLightboxImg(null)}
+            style={{ position:"fixed", top:20, right:24, background:"rgba(255,255,255,0.12)",
+                     border:"none", color:"#fff", fontSize:22, width:40, height:40,
+                     borderRadius:"50%", cursor:"pointer", display:"flex",
+                     alignItems:"center", justifyContent:"center", lineHeight:1 }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* ── Confetti burst ── */}
       <AnimatePresence>
         {celebration && (
@@ -1619,6 +1648,7 @@ export default function App() {
                     onTagClick={(t: string) => setFilterTag(filterTag === t ? null : t)}
                     filterTag={filterTag}
                     onImgDelete={(idx: number) => up(entry.id, { images: (entry.images||[]).filter((_, i) => i !== idx) })}
+                    onImgClick={(url: string) => setLightboxImg(url)}
                     selectMode={selectMode}
                     isSelected={selectedEntries.has(entry.id)}
                     onToggleSelect={() => {
@@ -2451,6 +2481,7 @@ export default function App() {
     </div>
   );
 }
+
 
 
 
