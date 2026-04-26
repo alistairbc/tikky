@@ -24,7 +24,7 @@ import { SumItem, SumSection } from "./components/Summary";
 
 const loadPrefs = (): Prefs => { try { return JSON.parse(localStorage.getItem("tikky_prefs") || "{}"); } catch(_) { return {}; } };
 
-const C_BASE = { bg:"#111111", surface:"#1c1c1c", border:"#2c2c2c", text:"#f0f0f0", muted:"#a0a0a0", dim:"#707070", dimmer:"#4a4a4a", accent:"#6366f1", input:"#0a0a0a" };
+const C_BASE = { bg:"#111111", surface:"#1c1c1c", border:"#2c2c2c", text:"#f0f0f0", muted:"#b0b0b0", dim:"#888888", dimmer:"#666666", accent:"#6366f1", input:"#0a0a0a" };
 
 const changelog = CHANGELOG;
 
@@ -892,15 +892,15 @@ export default function App() {
         </div>
         <div style={{ flex:1, padding:30, maxWidth:800, margin:"0 auto", width:"100%", overflowY:"auto" }}>
           <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap:20, marginBottom:40 }}>
-            <div style={{ background: C.surface, padding:20, borderRadius:16, border:`1px solid ${C.border}`, textAlign:"center" }}>
+            <div style={{ background: C.surface, padding:20, borderRadius:12, border:`1px solid ${C.border}`, textAlign:"center" }}>
               <div style={{ fontSize:32, fontWeight:800, color: C.accent }}>{done.length}</div>
               <div style={{ fontSize:12, color: C.dim }}>Completed Items</div>
             </div>
-            <div style={{ background: C.surface, padding:20, borderRadius:16, border:`1px solid ${C.border}`, textAlign:"center" }}>
+            <div style={{ background: C.surface, padding:20, borderRadius:12, border:`1px solid ${C.border}`, textAlign:"center" }}>
               <div style={{ fontSize:32, fontWeight:800, color: "#10b981" }}>{rate}%</div>
               <div style={{ fontSize:12, color: C.dim }}>Task Completion Rate</div>
             </div>
-            <div style={{ background: C.surface, padding:20, borderRadius:16, border:`1px solid ${C.border}`, textAlign:"center" }}>
+            <div style={{ background: C.surface, padding:20, borderRadius:12, border:`1px solid ${C.border}`, textAlign:"center" }}>
               <div style={{ fontSize:32, fontWeight:800, color: "#f59e0b" }}>{insights.streak}</div>
               <div style={{ fontSize:12, color: C.dim }}>Day Streak</div>
             </div>
@@ -1493,7 +1493,7 @@ export default function App() {
                           return (
                             <button key={String(t)} onClick={() => setTypeFilter(typeFilter === t ? null : t)}
                               title={t ? (TM as any)[t].label : "All types"}
-                              style={{ fontSize:12, width:30, height:30, borderRadius:6, border: "none", background: active ? `${col}33` : "none", color: active ? col : C.dim, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", transition:"all .2s" }}>
+                              style={{ fontSize:12, width:30, height:30, borderRadius:6, border: active ? `1px solid ${col}55` : "1px solid transparent", background: active ? `${col}22` : "none", color: active ? col : C.dim, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", transition:"all .15s" }}>
                               {label}
                             </button>
                           );
@@ -1502,7 +1502,7 @@ export default function App() {
                       <div style={{ display:"flex", gap:4 }}>
                         {[["overdue","⚠ Overdue","#ef4444"],["today","⏱ Today","#f59e0b"],["week","📅 Week",C.accent]].map(([k,label,col]) => (
                           <button key={k} onClick={() => setDueFilter(dueFilter === k ? null : k)}
-                            style={{ fontSize:11, padding:"5px 12px", borderRadius:8, border: dueFilter===k ? `1px solid ${col}55` : `1px solid ${C.border}`, background: dueFilter===k ? `${col}22` : C.input, color: dueFilter===k ? col : C.dim, cursor:"pointer", fontFamily:"inherit", fontWeight: dueFilter===k ? 700 : 500, transition:"all .2s", whiteSpace:"nowrap" }}>
+                            style={{ fontSize:11, padding:"4px 10px", borderRadius:8, border: dueFilter===k ? `1px solid ${col}55` : `1px solid ${C.border}88`, background: dueFilter===k ? `${col}22` : "transparent", color: dueFilter===k ? col : C.dim, cursor:"pointer", fontFamily:"inherit", fontWeight: dueFilter===k ? 700 : 500, transition:"all .15s", whiteSpace:"nowrap" }}>
                             {label}
                           </button>
                         ))}
@@ -1722,8 +1722,8 @@ export default function App() {
               {[
                 { k:"all",    l:"All",    c: C.accent,  n: entries.filter(e=>!e.done).length },
                 { k:"tasks",  l:"Tasks",  c:"#10b981", n: entries.filter(e=>e.type==="task"&&!e.done).length },
-                { k:"events", l:"Events", c:"#f59e0b", n: entries.filter(e=>e.type==="event"&&!e.done).length },
-                { k:"notes",  l:"Notes",  c:"#818cf8", n: entries.filter(e=>(e.type==="note"||e.type==="thought")&&!e.done).length },
+                { k:"events", l:"Events", c:"#6366f1", n: entries.filter(e=>e.type==="event"&&!e.done).length },
+                { k:"notes",  l:"Notes",  c:"#fde047", n: entries.filter(e=>(e.type==="note"||e.type==="thought")&&!e.done).length },
                 { k:"done",   l:"✓ Done", c:"#64748b", n: entries.filter(e=>e.done).length },
               ].map(({ k, l, c, n }) => (
                 <button key={k} onClick={() => setDashTab(k)} style={{ flex:1, padding:"5px 4px", borderRadius:6, border:"none", cursor:"pointer", fontSize:11, fontWeight:600, fontFamily:"inherit", background: dashTab===k ? `${c}22` : "transparent", color: dashTab===k ? c : C.dim, display:"flex", alignItems:"center", justifyContent:"center", gap:4 }}>
@@ -2052,7 +2052,7 @@ export default function App() {
                 </div>
               </div>
 
-              <div style={{ background: C.surface, padding:25, borderRadius:20, border:`1px solid ${C.border}`, marginBottom:30 }}>
+              <div style={{ background: C.surface, padding:20, borderRadius:12, border:`1px solid ${C.border}`, marginBottom:30 }}>
                 <h3 style={{ margin:"0 0 20px 0", fontSize:15, fontWeight:700 }}>Activity (Last 7 Days)</h3>
                 <div style={{ display:"flex", alignItems:"flex-end", gap:8, height:120 }}>
                   {insights.activity.map((v, i) => {
@@ -2068,7 +2068,7 @@ export default function App() {
               </div>
 
               <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap:20 }}>
-                <div style={{ background: C.surface, padding:25, borderRadius:20, border:`1px solid ${C.border}` }}>
+                <div style={{ background: C.surface, padding:20, borderRadius:12, border:`1px solid ${C.border}` }}>
                   <h3 style={{ margin:"0 0 15px 0", fontSize:15, fontWeight:700 }}>Type Breakdown</h3>
                   {["task","event","note","thought"].map(t => {
                     const count = entries.filter(e => e.type === t).length;
@@ -2086,7 +2086,7 @@ export default function App() {
                     );
                   })}
                 </div>
-                <div style={{ background: C.surface, padding:25, borderRadius:20, border:`1px solid ${C.border}` }}>
+                <div style={{ background: C.surface, padding:20, borderRadius:12, border:`1px solid ${C.border}` }}>
                   <h3 style={{ margin:"0 0 15px 0", fontSize:15, fontWeight:700 }}>Top Tags</h3>
                   {(() => {
                     const tagCounts = allTags.map(tag => ({ tag, count: entries.filter(e => e.tags.includes(tag) || e.contexts.includes(tag)).length }));
