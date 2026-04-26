@@ -8,7 +8,7 @@ import { TypeBadge } from "./TypeBadge";
 import { Entry } from "../types";
 
 /* ── date-picker helpers ────────────────────────────────────────── */
-function toISO(d: Date) { return d.toISOString().split('T')[0]; }
+function toISO(d: Date) { const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
 function addDays(d: Date, n: number) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
 function getDueDateShortcuts() {
   const now   = new Date();
@@ -61,7 +61,7 @@ export function StreamCard({
   onCommentEditStart, onCommentEditChange, onCommentEditSave, onCommentEditCancel,
   onCommentDelete,
   onSubtaskInput, onSubtaskAdd, onSubtaskToggle, onSubtaskDelete,
-  onAddPhoto, onTagClick, onImgDelete, onEmojiChange,
+  onAddPhoto, onTagClick, onImgDelete, onEmojiChange, onImgClick,
   onHandleDragStart, onHandleDragEnd,
   editingBodyId, bodyInput,
   onBodyEdit, onBodyChange, onBodySave, onBodyCancel,
@@ -212,6 +212,7 @@ export function StreamCard({
                         if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onEditSave(); }
                         if (e.key === "Escape") onEditCancel();
                       }}
+                      onBlur={() => { if (editText.trim() === (entry.rawText||"").trim()) onEditCancel(); else onEditSave(); }}
                       onClick={e => e.stopPropagation()}
                       style={{ flex:1, resize:"none", background: C.input,
                                border:`1px solid ${C.accent}66`, borderRadius:6,
@@ -355,8 +356,10 @@ export function StreamCard({
                 <div style={{ display:"flex", gap:4, marginTop:8, flexWrap:"wrap" }}>
                   {(entry.images as string[]).slice(0,4).map((src, i) => (
                     <img key={i} src={src} alt=""
+                      onClick={e => { e.stopPropagation(); onImgClick && onImgClick(src); }}
                       style={{ width:40, height:40, objectFit:"cover", borderRadius:6,
-                               border:`1px solid ${C.border}`, display:"block" }} />
+                               border:`1px solid ${C.border}`, display:"block",
+                               cursor:"zoom-in" }} />
                   ))}
                   {(entry.images||[]).length > 4 && (
                     <div style={{ width:40, height:40, borderRadius:6, background: C.bg,
@@ -623,7 +626,7 @@ export function StreamCard({
                                      textTransform:"uppercase", letterSpacing:"0.08em", flexShrink:0 }}>
                         Emoji
                       </span>
-                      <input maxLength={4} value={entry.emoji || ""}
+                      <input value={entry.emoji || ""}
                         onChange={e => onEmojiChange(e.target.value.trim())}
                         placeholder="Emoji…"
                         style={{ width:60, background: C.input, border:`1px solid ${C.border}`,
@@ -641,7 +644,11 @@ export function StreamCard({
                       )}
                     </div>
                     <div style={{ display:"flex", flexWrap:"wrap", gap:5 }}>
-                      {["✅","📝","🚀","💡","📅","🔥","⭐","📌","🛒","✈️","🍔","🏋","🎨","🎵","💬","❤️"].map(emo => (
+                      {[
+                        "✅","🚀","💡","📅","🔥","⭐","📌","📝","🛒","✈️","🎬","🎵","🎮","☕","🐾","🚗",
+                        "💰","💪","🎁","🏠","🎨","🎯","⚠️","🔖","❤️","💬","👍","🎉","💯","🙏","🤝","👏",
+                        "🇦🇺","🇺🇸","🇬🇧","🇯🇵","🇰🇷","🇨🇳","🇫🇷","🇩🇪","🇮🇹","🇪🇸","🇧🇷","🇨🇦","🇮🇳","🇲🇽","🇿🇦","🇳🇿"
+                      ].map(emo => (
                         <button key={emo} onClick={e => { e.stopPropagation(); onEmojiChange(emo); }}
                           style={{ fontSize:16, background: entry.emoji === emo ? `${C.accent}22` : "none",
                                    border: entry.emoji === emo ? `1px solid ${C.accent}55` : `1px solid ${C.border}`,
@@ -684,7 +691,8 @@ export function StreamCard({
                         return (
                           <div key={idx} style={{ position:"relative" }}>
                             <img src={src} alt=""
-                              style={{ width:imgW, height:imgW, objectFit:"cover",
+                              onClick={e => { e.stopPropagation(); onImgClick && onImgClick(src); }}
+                              style={{ width:imgW, height:imgW, objectFit:"cover", cursor:"zoom-in",
                                        borderRadius:9, border:`1px solid ${C.border}`, display:"block" }} />
                             <button onClick={e => { e.stopPropagation(); onImgDelete(idx); }}
                               style={{ position:"absolute", top:-6, right:-6, width:19, height:19,
@@ -725,5 +733,6 @@ export function StreamCard({
     </div>
   );
 }
+
 
 
