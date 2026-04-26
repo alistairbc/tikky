@@ -1,6 +1,14 @@
 import { CLR } from "./constants";
 
 export const CHANGELOG = [
+  { version:"1.3.0", date:"2026-04-27", label:"Calendar View", items:[
+    "New Calendar tab (📅) — full month-grid view of all entries that have a due date",
+    "Overdue banner at the top of the calendar when you have past-due items, with a live summary",
+    "Day detail panel — click any date to see all entries due that day, color-coded by type",
+    "Jump to any entry from the calendar — clicking a day entry switches to Stream and expands that card",
+    "Month type breakdown — shows a count of tasks / events / notes / thoughts scheduled this month",
+    "Today is highlighted with an accent ring; past days with no entries are visually muted",
+  ]},
   { version:"1.2.0", date:"2026-04-05", label:"Insights · Markdown · Alerts · Saved filters", items:[
     "Insights tab (✦) — streak counter, entries-per-day bar chart, tag frequency, type breakdown, and completion rate, all computed live from your stream",
     "Markdown rendering in entry text — use **bold**, *italic*, `code`, and [text](url) anywhere in your entries",

@@ -20,6 +20,7 @@ import { Highlight } from "./components/Highlight";
 import { StreamCard } from "./components/StreamCard";
 import { DashboardCard } from "./components/DashboardCard";
 import { ListItem } from "./components/ListItem";
+import { CalendarView } from "./components/CalendarView";
 import { SumItem, SumSection } from "./components/Summary";
 
 const loadPrefs = (): Prefs => { try { return JSON.parse(localStorage.getItem("tikky_prefs") || "{}"); } catch(_) { return {}; } };
@@ -52,7 +53,7 @@ export default function App() {
   const [input,      setInput]      = useState("");
   const [dashTab,    setDashTab]    = useState("all");
   const [view,       setView]       = useState("main");
-  const [primaryTab, setPrimaryTab] = useState<"stream" | "lists" | "insights" | "settings">("stream");
+  const [primaryTab, setPrimaryTab] = useState<"stream" | "lists" | "insights" | "calendar" | "settings">("stream");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [showMobileCompose, setShowMobileCompose] = useState(false);
   const [sumPeriod,  setSumPeriod]  = useState("all");
@@ -1356,6 +1357,7 @@ export default function App() {
             { key:"stream",   label:"Stream",   icon:"◎" },
             { key:"lists",    label:"Lists",    icon:"☰" },
             { key:"insights", label:"Insights", icon:"✦" },
+            { key:"calendar", label:"Calendar", icon:"📅" },
             { key:"settings", label:"Settings", icon:"⚙" },
           ].map(({ key, label, icon }) => (
             <button key={key} onClick={() => setPrimaryTab(key)} style={{ padding:"9px 16px", background:"none", border:"none", borderBottom: primaryTab===key ? `2px solid ${C.accent}` : "2px solid transparent", color: primaryTab===key ? C.accent : C.dim, cursor:"pointer", fontSize:13, fontWeight: primaryTab===key ? 600 : 400, fontFamily:"inherit", display:"flex", alignItems:"center", gap:6, transition:"all .15s", marginBottom:"-1px" }}>
@@ -2101,6 +2103,13 @@ export default function App() {
               </div>
             </div>
           </div>
+        ) : primaryTab === "calendar" ? (
+          <CalendarView
+            entries={entries}
+            C={C}
+            isMobile={isMobile}
+            onEntryClick={(id) => { setExpanded(id); setPrimaryTab("stream"); }}
+          />
         ) : (
           <div className="no-scrollbar" style={{ flex:1, overflowY:"auto", background: "transparent", padding: isMobile ? "20px 20px 80px" : 40 }}>
             <div style={{ maxWidth: 640, margin:"0 auto" }}>
