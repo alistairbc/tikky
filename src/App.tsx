@@ -11,6 +11,7 @@ import {
 } from "./utils/nlp";
 import { fmt, inPeriod, tagColor, renderMd } from "./utils/format";
 import { classifyEntry, queryAssistant } from "./api";
+import { supabase } from "./lib/supabase";
 
 // Components
 import { Tick } from "./components/Tick";
@@ -28,6 +29,14 @@ const loadPrefs = (): Prefs => { try { return JSON.parse(localStorage.getItem("t
 const C_BASE = { bg:"#111111", surface:"#1c1c1c", border:"#2c2c2c", text:"#f0f0f0", muted:"#b0b0b0", dim:"#888888", dimmer:"#666666", accent:"#6366f1", input:"#0a0a0a" };
 
 const changelog = CHANGELOG;
+
+// Inject spin keyframe for sync indicator
+if (typeof document !== "undefined" && !document.getElementById("tikky-spin")) {
+  const s = document.createElement("style");
+  s.id = "tikky-spin";
+  s.textContent = "@keyframes spin { to { transform: rotate(360deg); } }";
+  document.head.appendChild(s);
+}
 
 export default function App() {
   const [entries, setEntries] = useState<Entry[]>(() => {
@@ -289,6 +298,14 @@ export default function App() {
   const [isDragOver,    setIsDragOver]    = useState(false);
   const [voiceError,    setVoiceError]    = useState<string | null>(null);
 
+  // ── Cloud auth & sync ─────────────────────────────────────────────────
+  const [session,         setSession]         = useState<any>(null);
+  const [authLoading,     setAuthLoading]     = useState(true);
+  const [syncStatus,      setSyncStatus]      = useState<"idle"|"syncing"|"error">("idle");
+  const [cloudLoaded,     setCloudLoaded]     = useState(false);
+  const [showImportPrompt,setShowImportPrompt]= useState(false);
+  const cloudSaveTimer = useRef<any>(null);
+
   const searchRef = useRef<HTMLInputElement>(null);
   const streamEndRef  = useRef<HTMLDivElement>(null);
   const inputRef      = useRef<HTMLTextAreaElement>(null);
@@ -396,6 +413,79 @@ export default function App() {
   useEffect(() => {
     try { localStorage.setItem("tikky_saved_filters", JSON.stringify(savedFilters)); } catch(_) {}
   }, [savedFilters]);
+
+  // ── Auth: listen for session changes ─────────────────────────────────
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session: s } }: any) => {
+      setSession(s); setAuthLoading(false);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, s: any) => {
+      setSession(s);
+      if (!s) setCloudLoaded(false);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // ── Load from cloud when user logs in ────────────────────────────────
+  useEffect(() => {
+    if (!session || cloudLoaded) return;
+    (async () => {
+      setSyncStatus("syncing");
+      const { data, error } = await supabase
+        .from("user_data")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+      if (error) { setSyncStatus("error"); setCloudLoaded(true); return; }
+      if (!data) {
+        // First login — offer to import local data
+        const hasLocal = localStorage.getItem("tikky_entries");
+        if (hasLocal && hasLocal !== "[]") setShowImportPrompt(true);
+      } else {
+        // Load cloud data into state (overrides localStorage)
+        const ce = (data.entries || []).map((e: any) => ({
+          ...e,
+          timestamp: new Date(e.timestamp),
+          subtasks: e.subtasks || [], comments: (e.comments || []).map((c: any) => ({ ...c, createdAt: new Date(c.createdAt) })),
+          tags: e.tags || [], contexts: e.contexts || [], images: e.images || [],
+          pinned: e.pinned || false, completedAt: e.completedAt || null,
+        }));
+        const cl = (data.lists || []).map((l: any) => ({
+          ...l, createdAt: new Date(l.createdAt),
+          items: (l.items || []).map((i: any) => ({ ...i, addedAt: new Date(i.addedAt) })),
+        }));
+        setEntries(ce); setLists(cl);
+        if (data.stream_order?.length) setStreamOrder(data.stream_order);
+        const p = data.preferences || {};
+        if (p.theme) setTheme(p.theme);
+        if (p.accent) setAccentOverride(p.accent);
+        if (p.font) setFontFamily(p.font);
+        if (p.scale) setFontScale(p.scale);
+        if (p.bgPreset) setBgPreset(p.bgPreset);
+        if (p.bgOpacity) setBgOpacity(p.bgOpacity);
+        if (p.streamSort) setStreamSort(p.streamSort);
+      }
+      setCloudLoaded(true); setSyncStatus("idle");
+    })();
+  }, [session?.user?.id]);
+
+  // ── Save to cloud (debounced 2s) when data changes ───────────────────
+  useEffect(() => {
+    if (!session || !cloudLoaded) return;
+    if (cloudSaveTimer.current) clearTimeout(cloudSaveTimer.current);
+    cloudSaveTimer.current = setTimeout(async () => {
+      setSyncStatus("syncing");
+      const se = entries.map(e => ({ ...e, timestamp: e.timestamp.toISOString(), comments: (e.comments || []).map(c => ({ ...c, createdAt: c.createdAt.toISOString() })) }));
+      const sl = lists.map(l => ({ ...l, createdAt: l.createdAt.toISOString(), items: (l.items || []).map(i => ({ ...i, addedAt: i.addedAt.toISOString() })) }));
+      const prefs = { theme, accent: accentOverride, font: fontFamily, scale: fontScale, bgPreset, bgOpacity, streamSort };
+      const { error } = await supabase.from("user_data").upsert(
+        { user_id: session.user.id, entries: se, lists: sl, stream_order: streamOrder, preferences: prefs, updated_at: new Date().toISOString() },
+        { onConflict: "user_id" }
+      );
+      setSyncStatus(error ? "error" : "idle");
+    }, 2000);
+    return () => clearTimeout(cloudSaveTimer.current);
+  }, [entries, lists, streamOrder, theme, accentOverride, fontFamily, fontScale, bgPreset, bgOpacity, streamSort, session, cloudLoaded]);
 
   useEffect(() => {
     const now = new Date();
@@ -1133,6 +1223,35 @@ export default function App() {
     );
   }
 
+  // ── Login screen ─────────────────────────────────────────────────────
+  if (!authLoading && !session) {
+    return (
+      <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"#111", fontFamily:"Inter, sans-serif" }}>
+        <div style={{ textAlign:"center", padding:40, borderRadius:24, background:"#1c1c1c", border:"1px solid #2c2c2c", maxWidth:340, width:"100%", margin:20 }}>
+          <div style={{ fontSize:42, marginBottom:12 }}>◆</div>
+          <div style={{ fontSize:28, fontWeight:800, color:"#f0f0f0", marginBottom:8, letterSpacing:"-0.5px" }}>Tikky</div>
+          <div style={{ fontSize:14, color:"#888", marginBottom:32, lineHeight:1.5 }}>Sign in to sync your stream across all your devices</div>
+          <button
+            onClick={() => supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin } })}
+            style={{ width:"100%", padding:"12px 20px", background:"#fff", border:"none", borderRadius:12, fontSize:14, fontWeight:600, color:"#111", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:10, marginBottom:12 }}>
+            <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+            Continue with Google
+          </button>
+          <div style={{ fontSize:11, color:"#555", marginTop:16 }}>Apple and more providers coming soon</div>
+          <div style={{ fontSize:11, color:"#444", marginTop:8 }}>v{TIKKY_VERSION}</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (authLoading) {
+    return (
+      <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"#111" }}>
+        <div style={{ color:"#555", fontSize:13 }}>Loading…</div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ background: C.bg, height: "100%", color: C.text, fontFamily: (FONTS as any)[fontFamily], display:"flex", flexDirection:"column", overflow:"hidden", position:"relative", zoom: String(fontScale) }}>
       {bgOverlayStyle && <div style={{ position:"absolute", inset:0, zIndex:0, pointerEvents:"none", ...bgOverlayStyle }} />}
@@ -1458,6 +1577,26 @@ export default function App() {
             );
           })}
           <div className="no-scrollbar" style={{ marginLeft:"auto", display:"flex", gap:2, padding:"4px 0", alignItems:"center", overflowX:"auto" }}>
+            {/* Sync status indicator */}
+            <div title={syncStatus === "syncing" ? "Syncing…" : syncStatus === "error" ? "Sync failed" : `Signed in as ${session?.user?.email}`}
+              style={{ display:"flex", alignItems:"center", gap:5, padding:"4px 8px", borderRadius:8, background: syncStatus === "error" ? "#ef444420" : "none", marginRight:4, cursor:"default" }}>
+              {syncStatus === "syncing" ? (
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={C.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation:"spin 1s linear infinite" }}>
+                  <path d="M21 12a9 9 0 11-6.219-8.56"/>
+                </svg>
+              ) : syncStatus === "error" ? (
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+              ) : (
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={C.dim} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              )}
+              <span style={{ fontSize:10, color: syncStatus === "error" ? "#ef4444" : C.dimmer, maxWidth:120, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                {syncStatus === "syncing" ? "Syncing" : syncStatus === "error" ? "Sync error" : session?.user?.email?.split("@")[0]}
+              </span>
+            </div>
             <button onClick={() => setSpaceFilter("all")} style={{ padding:"3px 10px", background: spaceFilter==="all" ? `${C.accent}22` : "none", border: spaceFilter==="all" ? `1px solid ${C.accent}55` : "1px solid transparent", borderRadius:6, color: spaceFilter==="all" ? C.accent : C.dim, cursor:"pointer", fontSize:11, fontWeight: spaceFilter==="all" ? 600 : 400, fontFamily:"inherit", transition:"all .15s" }}>All</button>
             {allContexts.map(ctx => (
               <button key={ctx} onClick={() => setSpaceFilter(spaceFilter===ctx ? "all" : ctx)} style={{ padding:"3px 10px", background: spaceFilter===ctx ? `${C.accent}22` : "none", border: spaceFilter===ctx ? `1px solid ${C.accent}55` : "1px solid transparent", borderRadius:6, color: spaceFilter===ctx ? C.accent : C.dim, cursor:"pointer", fontSize:11, fontWeight: spaceFilter===ctx ? 600 : 400, fontFamily:"inherit", transition:"all .15s", maxWidth:90, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{ctx}</button>
@@ -2519,6 +2658,55 @@ export default function App() {
                 </div>
               </div>
 
+              {/* Account section */}
+              <div style={{ marginBottom:36 }}>
+                <div style={{ fontSize:10, fontWeight:700, color: C.accent, textTransform:"uppercase", letterSpacing:"0.12em", marginBottom:14 }}>Account</div>
+                <div style={{ background: C.surface, borderRadius:16, border:`1px solid ${C.border}`, padding:20, display:"flex", alignItems:"center", justifyContent:"space-between", gap:12 }}>
+                  <div>
+                    <div style={{ fontSize:13, fontWeight:600, color: C.text }}>{session?.user?.user_metadata?.full_name || session?.user?.email?.split("@")[0]}</div>
+                    <div style={{ fontSize:11, color: C.dim, marginTop:2 }}>{session?.user?.email}</div>
+                    <div style={{ fontSize:10, color: C.dimmer, marginTop:4, display:"flex", alignItems:"center", gap:4 }}>
+                      <span style={{ width:6, height:6, borderRadius:"50%", background: syncStatus === "error" ? "#ef4444" : syncStatus === "syncing" ? C.accent : "#10b981", display:"inline-block" }} />
+                      {syncStatus === "syncing" ? "Syncing…" : syncStatus === "error" ? "Sync error — check connection" : "Synced"}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => supabase.auth.signOut()}
+                    style={{ padding:"8px 16px", background:"none", border:`1px solid ${C.border}`, borderRadius:8, color: C.dim, fontSize:12, cursor:"pointer", whiteSpace:"nowrap", fontFamily:"inherit" }}>
+                    Sign out
+                  </button>
+                </div>
+              </div>
+
+              {/* Import prompt modal */}
+              {showImportPrompt && (
+                <div style={{ position:"fixed", inset:0, background:"#000a", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  <div style={{ background: C.surface, border:`1px solid ${C.border}`, borderRadius:20, padding:32, maxWidth:380, width:"90%", textAlign:"center" }}>
+                    <div style={{ fontSize:32, marginBottom:12 }}>☁️</div>
+                    <div style={{ fontSize:18, fontWeight:700, color: C.text, marginBottom:10 }}>Import your local data?</div>
+                    <div style={{ fontSize:13, color: C.dim, lineHeight:1.6, marginBottom:24 }}>You have existing entries and lists on this device. Import them to your cloud account, or start with a fresh cloud account.</div>
+                    <div style={{ display:"flex", gap:10, justifyContent:"center" }}>
+                      <button
+                        onClick={async () => {
+                          setSyncStatus("syncing"); setShowImportPrompt(false);
+                          const se = entries.map(e => ({ ...e, timestamp: e.timestamp.toISOString(), comments: (e.comments || []).map(c => ({ ...c, createdAt: c.createdAt.toISOString() })) }));
+                          const sl = lists.map(l => ({ ...l, createdAt: l.createdAt.toISOString(), items: (l.items || []).map(i => ({ ...i, addedAt: i.addedAt.toISOString() })) }));
+                          await supabase.from("user_data").upsert({ user_id: session.user.id, entries: se, lists: sl, stream_order: streamOrder, preferences: {}, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+                          setCloudLoaded(true); setSyncStatus("idle");
+                        }}
+                        style={{ padding:"10px 22px", background: C.accent, border:"none", borderRadius:10, color:"#fff", fontSize:13, fontWeight:700, cursor:"pointer" }}>
+                        Import to cloud
+                      </button>
+                      <button
+                        onClick={() => { setEntries([]); setLists([]); setShowImportPrompt(false); setCloudLoaded(true); }}
+                        style={{ padding:"10px 22px", background:"none", border:`1px solid ${C.border}`, borderRadius:10, color: C.dim, fontSize:13, cursor:"pointer" }}>
+                        Start fresh
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div style={{ marginBottom:36 }}>
                 <div style={{ fontSize:10, fontWeight:700, color: C.accent, textTransform:"uppercase", letterSpacing:"0.12em", marginBottom:14 }}>Product Pulse</div>
                 <div style={{ display:"flex", flexDirection:"column", gap:12, marginBottom:20 }}>
@@ -2772,6 +2960,7 @@ export default function App() {
     </div>
   );
 }
+
 
 
 

@@ -1,6 +1,13 @@
 import { CLR } from "./constants";
 
 export const CHANGELOG = [
+  { version:"0.113", date:"2026-04-28", label:"Cloud Sync", items:[
+    "Sign in with Google — your data syncs across all your devices",
+    "First login prompts to import any existing local data",
+    "Sync status indicator in header shows when data is saving to the cloud",
+    "Account section in Settings shows your email and sign-out button",
+    "All entries, lists, and preferences stored securely per-user in the cloud",
+  ]},
   { version:"0.112", date:"2026-04-28", label:"Backlog Clear", items:[
     "Average days to complete tasks now works — completedAt timestamp stored on each task when marked done",
     "Card selection outline no longer gets stuck — exiting select mode now clears all selections",
