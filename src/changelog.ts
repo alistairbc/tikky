@@ -1,6 +1,15 @@
 import { CLR } from "./constants";
 
 export const CHANGELOG = [
+  { version:"0.112", date:"2026-04-28", label:"Backlog Clear", items:[
+    "Average days to complete tasks now works — completedAt timestamp stored on each task when marked done",
+    "Card selection outline no longer gets stuck — exiting select mode now clears all selections",
+    "Images on entries now persist across page reloads — compressed to max 900px before storing to avoid localStorage quota failures",
+    "Sort mode icons verified working for all 4 modes (New / Old / Priority / Manual)",
+    "Sidebar drag-to-reorder verified working (active in Manual sort mode)",
+    "Emoji picker confirmed working including country flags",
+    "List search filter confirmed working",
+  ]},
   { version:"0.111", date:"2026-04-27", label:"Mobile Polish + Versioning", items:[
     "Versioning scheme updated: pre-production releases now use v0.xxx format",
     "List item swipe-to-delete: redundant delete button hidden on mobile",

@@ -44,6 +44,7 @@ export default function App() {
           contexts:  e.contexts || [],
           images:    e.images   || [],
           pinned:    e.pinned   || false,
+          completedAt: e.completedAt || null,
         }));
       }
     } catch(_) {}
@@ -429,7 +430,7 @@ export default function App() {
     const e = entries.find(x => x.id === id);
     if (!e) return;
     const prev = e.done;
-    up(id, { done: !prev });
+    up(id, { done: !prev, completedAt: !prev ? new Date().toISOString() : null });
     if (!prev) {
       setCelebration(true);
       playSound('ding');
@@ -606,19 +607,38 @@ export default function App() {
     setTimeout(() => setEntries(prev => prev.map(e => e.id === newId ? { ...e, isNew: false } : e)), 3000);
   };
 
+  const compressImage = (src: string, cb: (compressed: string) => void) => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 900;
+      const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      const ctx = canvas.getContext("2d");
+      if (!ctx) { cb(src); return; }
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      cb(canvas.toDataURL("image/jpeg", 0.72));
+    };
+    img.onerror = () => cb(src);
+    img.src = src;
+  };
+
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
       const src = ev.target?.result as string;
-      if (addPhotoEntryIdRef.current) {
-        const entry = entries.find(x => x.id === addPhotoEntryIdRef.current);
-        if (entry) up(entry.id, { images: [...(entry.images || []), src] });
-        addPhotoEntryIdRef.current = null;
-      } else {
-        setComposeImages(p => [...p, src]);
-      }
+      compressImage(src, (compressed) => {
+        if (addPhotoEntryIdRef.current) {
+          const entry = entries.find(x => x.id === addPhotoEntryIdRef.current);
+          if (entry) up(entry.id, { images: [...(entry.images || []), compressed] });
+          addPhotoEntryIdRef.current = null;
+        } else {
+          setComposeImages(p => [...p, compressed]);
+        }
+      });
     };
     reader.readAsDataURL(file);
     e.target.value = "";
@@ -846,16 +866,16 @@ export default function App() {
     const dueThisWeek  = entries.filter(e => !e.done && e.dueDate && (() => { const d = new Date(e.dueDate + "T12:00:00"); return d >= today && d <= weekAhead; })()).length;
     const dueThisMonth = entries.filter(e => !e.done && e.dueDate && (() => { const d = new Date(e.dueDate + "T12:00:00"); return d >= today && d <= monthEnd; })()).length;
 
-    // Avg days to complete (tasks with done + timestamp)
-    const completedTasks = tasks.filter(e => e.done);
+    // Avg days to complete (tasks with completedAt timestamp)
+    const completedTasks = tasks.filter(e => e.done && e.completedAt);
     let avgCompletionDays: number | null = null;
     if (completedTasks.length > 0) {
       const totalDays = completedTasks.reduce((sum, e) => {
         const created = new Date(e.timestamp);
-        // Use current date as proxy for completion date (no completedAt stored)
-        return sum + 0;
+        const completed = new Date(e.completedAt!);
+        return sum + Math.max(0, (completed.getTime() - created.getTime()) / 86400000);
       }, 0);
-      avgCompletionDays = null; // requires completedAt field — show N/A for now
+      avgCompletionDays = Math.round((totalDays / completedTasks.length) * 10) / 10;
     }
 
     // Tasks added this week
@@ -865,7 +885,7 @@ export default function App() {
       return ed >= new Date(today.getTime() - 6 * 86400000) && ed <= today;
     }).length;
 
-    return { streak, completionRate, activity, dueThisWeek, dueThisMonth, addedThisWeek };
+    return { streak, completionRate, activity, dueThisWeek, dueThisMonth, addedThisWeek, avgCompletionDays };
   }, [entries]);
 
   if (view === "help") {
@@ -1307,7 +1327,8 @@ export default function App() {
           <div style={{ width:1, height:20, background: C.border }} />
           <div style={{ display:"flex", gap:8 }}>
             <button onClick={() => {
-              const next = entries.map(e => selectedEntries.has(e.id) ? { ...e, done: true } : e);
+              const completedNow = new Date().toISOString();
+              const next = entries.map(e => selectedEntries.has(e.id) ? { ...e, done: true, completedAt: e.completedAt || completedNow } : e);
               setEntries(next); setSelectedEntries(new Set()); setSelectMode(false);
             }} style={{ background:"none", border:`1px solid ${C.border}`, color: C.text, padding:"5px 12px", borderRadius:8, fontSize:12, cursor:"pointer", fontWeight:600 }}>✓ Done</button>
             <button onClick={() => {
@@ -1599,7 +1620,7 @@ export default function App() {
                           <option value="date">Due date</option>
                         </select>
                         <div style={{ display:"flex", gap:4 }}>
-                          <button onClick={() => setSelectMode(v => !v)} title="Select mode" style={{ fontSize:12, width:34, height:34, borderRadius:8, border: selectMode ? `1px solid ${C.accent}55` : `1px solid ${C.border}`, background: selectMode ? `${C.accent}18` : C.input, color: selectMode ? C.accent : C.dim, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", transition:"all .2s" }}>☑</button>
+                          <button onClick={() => { const next = !selectMode; setSelectMode(next); if (!next) setSelectedEntries(new Set()); }} title="Select mode" style={{ fontSize:12, width:34, height:34, borderRadius:8, border: selectMode ? `1px solid ${C.accent}55` : `1px solid ${C.border}`, background: selectMode ? `${C.accent}18` : C.input, color: selectMode ? C.accent : C.dim, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", transition:"all .2s" }}>☑</button>
                           <button onClick={() => setCompactView(v => !v)} title="Compact view" style={{ fontSize:12, width:34, height:34, borderRadius:8, border: compactView ? `1px solid ${C.accent}55` : `1px solid ${C.border}`, background: compactView ? `${C.accent}18` : C.input, color: compactView ? C.accent : C.dim, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", transition:"all .2s" }}>⊟</button>
                         </div>
                       </div>
@@ -2314,6 +2335,13 @@ export default function App() {
                   <div style={{ fontSize:11, color: C.dim, marginBottom:6 }}>Added This Week</div>
                   <div style={{ fontSize:28, fontWeight:800, color: C.text }}>{insights.addedThisWeek}<span style={{ fontSize:12, fontWeight:400, color: C.dim }}> entries</span></div>
                 </div>
+                <div style={{ background: C.surface, padding:18, borderRadius:16, border:`1px solid ${C.border}` }}>
+                  <div style={{ fontSize:11, color: C.dim, marginBottom:6 }}>Avg Days to Complete</div>
+                  <div style={{ fontSize:28, fontWeight:800, color: insights.avgCompletionDays !== null ? "#10b981" : C.dim }}>
+                    {insights.avgCompletionDays !== null ? insights.avgCompletionDays : "—"}
+                    <span style={{ fontSize:12, fontWeight:400, color: C.dim }}>{insights.avgCompletionDays !== null ? " days" : " no data yet"}</span>
+                  </div>
+                </div>
               </div>
 
               <div style={{ background: C.surface, padding:20, borderRadius:12, border:`1px solid ${C.border}`, marginBottom:30 }}>
@@ -2744,6 +2772,7 @@ export default function App() {
     </div>
   );
 }
+
 
 
 

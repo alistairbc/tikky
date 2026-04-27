@@ -30,6 +30,7 @@ export interface Entry {
   images?: string[];
   body?: string;
   timestamp: Date;
+  completedAt?: string | null;
   isNew?: boolean;
   updated?: boolean;
 }
@@ -62,3 +63,4 @@ export interface Prefs {
   bgOpacity?: number;
   streamSort?: string;
 }
+
