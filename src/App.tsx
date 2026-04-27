@@ -1318,17 +1318,21 @@ export default function App() {
 
       <div style={{ padding: isMobile ? "8px 15px" : "11px 18px", borderBottom:`1px solid ${C.border}`, display:"flex", alignItems:"center", justifyContent:"space-between", flexShrink:0, background: isMobile ? C.bg : "rgba(15,23,42,0.97)", backdropFilter: isMobile ? "none" : "blur(8px)", zIndex:10 }}>
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          <span style={{ color: C.accent, fontSize: isMobile ? 18 : 15, filter: isMobile ? "none" : "drop-shadow(0 0 5px #6366f1)" }}>{isMobile ? "✔️" : "◈"}</span>
+          <svg width={isMobile ? 20 : 16} height={isMobile ? 20 : 16} viewBox="0 0 24 24" fill={C.accent} style={{ filter:`drop-shadow(0 0 4px ${C.accent}88)`, flexShrink:0 }}><path d="M12 2L22 12L12 22L2 12Z"/></svg>
           <span style={{ fontWeight:700, fontSize: isMobile ? 18 : 15, letterSpacing:"-0.3px" }}>Ticky Notes</span>
         </div>
         <div style={{ display:"flex", gap: isMobile ? 12 : 6, alignItems:"center" }}>
           {isMobile ? (
             <>
-              <button onClick={() => setShowMobileFilters(true)} style={{ background:"none", border:"none", color: C.text, fontSize:18, cursor:"pointer" }}>🔍</button>
-              <button onClick={() => setShowMobileFilters(true)} style={{ background:"none", border:"none", color: C.text, fontSize:18, cursor:"pointer" }}>⊌</button>
-              <div style={{ width:28, height:28, borderRadius:"50%", overflow:"hidden", border:`1px solid ${C.border}` }}>
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Profile" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
-              </div>
+              <button onClick={() => setShowMobileFilters(true)} title="Search & filter" style={{ background:"none", border:"none", color: C.muted, cursor:"pointer", padding:4, display:"flex" }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              </button>
+              <button onClick={() => setShowMobileFilters(true)} title="Filters" style={{ background:"none", border:"none", color: C.muted, cursor:"pointer", padding:4, display:"flex" }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+              </button>
+              <button onClick={() => setPrimaryTab("settings")} title="Settings" style={{ background:"none", border:"none", color: C.muted, cursor:"pointer", padding:4, display:"flex" }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+              </button>
             </>
           ) : (
             <>
@@ -1439,8 +1443,10 @@ export default function App() {
                           )}
                         </div>
                       )}
-                      <button onClick={() => photoInputRef.current?.click()} title="Attach photo" style={{ background: C.surface, border:`1px solid ${C.border}`, color: C.dim, borderRadius:10, padding:"0 14px", cursor:"pointer", fontSize:16, flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center" }}>📷</button>
-                      <button onClick={addEntry} disabled={isSubmitting} style={{ background: isSubmitting ? C.dimmer : C.accent, color:"#fff", border:"none", borderRadius:10, padding: "0 20px", cursor: isSubmitting ? "wait" : "pointer", fontWeight:600, fontSize:14, transition:"all .1s", minWidth:56, opacity: isSubmitting ? 0.7 : 1 }} onMouseDown={e=>{ if (!isSubmitting) e.currentTarget.style.transform="scale(0.96)"; }} onMouseUp={e=>e.currentTarget.style.transform="scale(1)"}>{isSubmitting ? "…" : "Add"}</button>
+                      <button onClick={() => photoInputRef.current?.click()} title="Attach photo" style={{ height:28, width:28, background: C.surface, border:`1px solid ${C.border}`, color: C.dim, borderRadius:6, padding:0, cursor:"pointer", flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center", transition:"border-color .12s" }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                      </button>
+                      <button onClick={addEntry} disabled={isSubmitting} style={{ height:28, padding:"0 14px", background: isSubmitting ? C.dimmer : C.accent, color:"#fff", border:"none", borderRadius:6, cursor: isSubmitting ? "wait" : "pointer", fontWeight:600, fontSize:11, letterSpacing:"0.04em", flexShrink:0, transition:"all .1s", opacity: isSubmitting ? 0.7 : 1 }} onMouseDown={e=>{ if (!isSubmitting) e.currentTarget.style.transform="scale(0.96)"; }} onMouseUp={e=>e.currentTarget.style.transform="scale(1)"}>{isSubmitting ? "…" : "Add"}</button>
                     </div>
                     {composeImages.length > 0 && (
                       <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginTop:4 }}>
@@ -1467,22 +1473,19 @@ export default function App() {
                 const overdue = entries.filter(e => !e.done && e.dueDate && resolveDueDate(e.dueDate, e.timestamp)! < new Date(new Date().setHours(0,0,0,0)));
                 const today   = entries.filter(e => !e.done && e.dueDate && resolveDueDate(e.dueDate, e.timestamp)! >= new Date(new Date().setHours(0,0,0,0)) && resolveDueDate(e.dueDate, e.timestamp)! < new Date(new Date().setHours(24,0,0,0)));
                 if ((overdue.length > 0 || today.length > 0) && !dismissedAlert) {
-                  const isMidnight = theme === "midnight";
-                  const bg = isMidnight ? "#ef444415" : "#fef2f2";
-                  const border = isMidnight ? "#ef444433" : "#fee2e2";
-                  const textCol = isMidnight ? "#fca5a5" : "#991b1b";
-                  const btnBg = isMidnight ? "#ef444433" : "#fee2e2";
-
                   return (
-                    <div style={{ background: bg, borderBottom:`1px solid ${border}`, padding:"8px 15px", display:"flex", alignItems:"center", gap:10, flexShrink:0 }}>
-                      <span style={{ fontSize:14 }}>⚠️</span>
-                      <div style={{ flex:1, fontSize:12, color: textCol, fontWeight:500 }}>
-                        {overdue.length > 0 && <span>{overdue.length} overdue item{overdue.length>1?'s':''}</span>}
-                        {overdue.length > 0 && today.length > 0 && <span> and </span>}
+                    <div style={{ background:"#ef444412", borderBottom:"1px solid #ef444430", padding:"7px 15px", display:"flex", alignItems:"center", gap:10, flexShrink:0 }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}>
+                        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                      </svg>
+                      <div style={{ flex:1, fontSize:11, color:"#fca5a5", fontWeight:600 }}>
+                        {overdue.length > 0 && <span>{overdue.length} overdue</span>}
+                        {overdue.length > 0 && today.length > 0 && <span style={{ color:"#ef444466", margin:"0 4px" }}>·</span>}
                         {today.length > 0 && <span>{today.length} due today</span>}
                       </div>
-                      <button onClick={() => setDueFilter(overdue.length > 0 ? "overdue" : "today")} style={{ background: btnBg, border:"none", color: textCol, padding:"3px 8px", borderRadius:5, fontSize:11, fontWeight:600, cursor:"pointer" }}>View</button>
-                      <button onClick={() => setDismissedAlert(true)} style={{ background:"none", border:"none", color: textCol, cursor:"pointer", fontSize:14, padding:0 }}>✕</button>
+                      <button onClick={() => setDueFilter(overdue.length > 0 ? "overdue" : "today")} style={{ background:"#ef444420", border:"1px solid #ef444440", color:"#ef4444", padding:"2px 8px", borderRadius:4, fontSize:10, fontWeight:700, cursor:"pointer", fontFamily:"inherit", letterSpacing:"0.04em" }}>VIEW</button>
+                      <button onClick={() => setDismissedAlert(true)} style={{ background:"none", border:"none", color:"#ef444488", cursor:"pointer", fontSize:13, padding:0, lineHeight:1 }}>✕</button>
                     </div>
                   );
                 }
@@ -2211,7 +2214,7 @@ export default function App() {
                 </div>
                 <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
                   <div style={{ display:"flex", flexDirection:"column", gap:10, background: `${C.surface}cc`, backdropFilter:"blur(12px)", padding:"12px 15px", borderRadius:12, border:`1px solid ${C.border}` }}>
-                    <div style={{ display:"flex", alignItems:"center", gap:15 }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
                       <span style={{ fontSize:12, fontWeight:600, color: C.dim }}>Upload Image</span>
                       <input 
                         type="file" 
@@ -2229,7 +2232,7 @@ export default function App() {
                             reader.readAsDataURL(file);
                           }
                         }}
-                        style={{ fontSize:11, color: C.dim, flex:1 }}
+                        style={{ fontSize:11, color: C.dim, flex:1, minWidth:0 }}
                       />
                       {bgImage && (
                         <button onClick={() => { setBgImage(null); if(bgPreset === "image") setBgPreset("none"); localStorage.removeItem("tikky_bgimage"); }} style={{ background:"none", border:"none", color:"#ef4444", fontSize:11, cursor:"pointer" }}>Remove</button>

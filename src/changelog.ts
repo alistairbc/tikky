@@ -1,6 +1,15 @@
 import { CLR } from "./constants";
 
 export const CHANGELOG = [
+  { version:"1.6.0", date:"2026-04-27", label:"Polish + Themes", items:[
+    "Calendar entry cards now show entry title and formatted due date",
+    "Consistent diamond ◆ logo icon on desktop and mobile",
+    "Mobile header: SVG search/filter/settings icons replace emoji",
+    "Stream overdue banner: unified dark style matching calendar",
+    "Compose buttons: standardised to 28px · camera SVG · Add spec",
+    "Add/remove custom image: layout fixed on mobile",
+    "11 new themes: Paper, Sage, Daylight, Hi-Contrast Dark/Light, Color-blind Safe, Low Stim, Night Shift, Sunshine, Terminal",
+  ]},
   { version:"1.5.0", date:"2026-04-27", label:"UX Polish", items:[
     "Renamed to Ticky Notes",
     "Desktop nav: consistent SVG outline icons (no more colored calendar emoji)",
@@ -169,4 +178,17 @@ export const THEMES = [
   { id:"galaxy",       name:"Glass Galaxy",  desc:"Deep space, violet nebula",        dark:true,  colors:{ bg:"#06040d", surface:"#110d1e", border:"#2b1f50", text:"#ede8ff", muted:"#c0b0f0", dim:"#a090e0", dimmer:"#6a58a0", accent:"#9c6dff", input:"#060311" } },
   { id:"ember",        name:"Ember",         desc:"Warm dark, amber & orange",        dark:true,  colors:{ bg:"#120a05", surface:"#1c1108", border:"#3a1f0a", text:"#fde8d8", muted:"#e4b08a", dim:"#b07045", dimmer:"#7a4a28", accent:"#f97316", input:"#0a0502" } },
   { id:"kaleidoscope", name:"Kaleidoscope",  desc:"Bold, vibrant & alive",            dark:true,  colors:{ bg:"#0d0014", surface:"#1a0828", border:"#4a1060", text:"#fdf4ff", muted:"#e8c4fe", dim:"#c888f8", dimmer:"#7a38a0", accent:"#e879f9", input:"#090010" } },
+  // Light themes
+  { id:"paper",        name:"Paper",          desc:"Cream paper · low glare",           dark:false, colors:{ bg:"#faf7f0", surface:"#fffef9", border:"#d8cfc0", text:"#1a1410", muted:"#5a4a38", dim:"#7a6a56", dimmer:"#a09080", accent:"#8b6914", input:"#f5f0e8" } },
+  { id:"sage",         name:"Sage",           desc:"Soft green · low arousal",          dark:false, colors:{ bg:"#f0f5f0", surface:"#fafffe", border:"#c0d4c0", text:"#0f200f", muted:"#345a34", dim:"#527a52", dimmer:"#7aaa7a", accent:"#2d7a2d", input:"#e8f2e8" } },
+  { id:"daylight",     name:"Daylight",       desc:"Crisp · cool grey",                 dark:false, colors:{ bg:"#f2f5f8", surface:"#ffffff", border:"#cdd6e0", text:"#1a222c", muted:"#445566", dim:"#667788", dimmer:"#99aabb", accent:"#0284c7", input:"#edf2f7" } },
+  // Accessibility
+  { id:"hc-dark",      name:"Hi-Contrast Dark",  desc:"Pure B/W · low vision",         dark:true,  colors:{ bg:"#000000", surface:"#0a0a0a", border:"#404040", text:"#ffffff", muted:"#dddddd", dim:"#aaaaaa", dimmer:"#666666", accent:"#fde047", input:"#050505" } },
+  { id:"hc-light",     name:"Hi-Contrast Light", desc:"Pure W/B · low vision",         dark:false, colors:{ bg:"#ffffff", surface:"#f8f8f8", border:"#000000", text:"#000000", muted:"#111111", dim:"#333333", dimmer:"#555555", accent:"#0000cc", input:"#ffffff" } },
+  { id:"cvd",          name:"Color-blind Safe",  desc:"Blue/orange · no R/G",          dark:true,  colors:{ bg:"#0a0e1a", surface:"#141828", border:"#283048", text:"#e0e8ff", muted:"#a0b0d0", dim:"#7090b0", dimmer:"#405070", accent:"#f59e0b", input:"#080c18" } },
+  { id:"lowstim",      name:"Low Stim",           desc:"Muted · ADHD / sensory",        dark:true,  colors:{ bg:"#1c1a18", surface:"#252320", border:"#383634", text:"#e0dcd6", muted:"#9c9890", dim:"#78746e", dimmer:"#565450", accent:"#b8a878", input:"#141210" } },
+  // Specialised
+  { id:"nightshift",   name:"Night Shift",        desc:"Sleep-safe · warm red-light",   dark:true,  colors:{ bg:"#0d0804", surface:"#1c1008", border:"#3c2010", text:"#ffd090", muted:"#c07840", dim:"#905030", dimmer:"#602010", accent:"#e04010", input:"#080400" } },
+  { id:"sunshine",     name:"Sunshine",            desc:"Max-bright · outdoor use",      dark:false, colors:{ bg:"#fffef0", surface:"#fffffc", border:"#ddd890", text:"#181800", muted:"#3a3800", dim:"#5a5800", dimmer:"#787600", accent:"#6b5900", input:"#fffef8" } },
+  { id:"terminal",     name:"Terminal",            desc:"Phosphor · power user",         dark:true,  colors:{ bg:"#000d00", surface:"#001800", border:"#003800", text:"#00ee44", muted:"#00bb33", dim:"#008822", dimmer:"#005511", accent:"#00ff44", input:"#000900" } },
 ];

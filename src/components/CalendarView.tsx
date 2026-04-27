@@ -3,7 +3,7 @@ import { TM } from '../constants';
 
 interface Entry {
   id: number;
-  title: string;
+  text: string;
   type: string;
   dueDate?: string;
   done?: boolean;
@@ -142,7 +142,7 @@ export function CalendarView({ entries, C, onEntryClick, isMobile }: Props) {
               ⚠ {overdueEntries.length} overdue
             </span>
             <span style={{ fontSize: 11, color: C.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
-              {overdueFilter ? 'Click to clear filter' : overdueEntries.slice(0, 3).map((e: Entry) => e.title).join(' · ') + (overdueEntries.length > 3 ? ` +${overdueEntries.length - 3} more` : '')}
+              {overdueFilter ? 'Click to clear filter' : overdueEntries.slice(0, 3).map((e: Entry) => e.text).join(' · ') + (overdueEntries.length > 3 ? ` +${overdueEntries.length - 3} more` : '')}
             </span>
           </div>
         )}
@@ -302,9 +302,9 @@ export function CalendarView({ entries, C, onEntryClick, isMobile }: Props) {
             ? 'Upcoming'
             : selectedIsToday
             ? '⭑ Today'
-            : new Date(selectedDay + 'T12:00:00').toLocaleDateString('en-AU', {
+            : (() => { const d = new Date(selectedDay + 'T12:00:00'); return isNaN(d.getTime()) ? selectedDay : d.toLocaleDateString('en-AU', {
                 weekday: 'long', month: 'long', day: 'numeric',
-              })
+              }); })()
           }
         </div>
         <div style={{ fontSize: 11, color: C.dim, marginBottom: 14 }}>
@@ -356,11 +356,13 @@ export function CalendarView({ entries, C, onEntryClick, isMobile }: Props) {
                   )}
                 </div>
                 <div style={{ fontSize: 12, color: C.text, lineHeight: 1.4, fontWeight: 500 }}>
-                  {entry.title}
+                  {entry.text}
                 </div>
-                {!selectedDay && !overdueFilter && entry.dueDate && (
-                  <div style={{ fontSize: 10, color: C.dim, marginTop: 3 }}>
-                    {new Date(entry.dueDate + 'T12:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })}
+                {!selectedDay && !overdueFilter && (
+                  <div style={{ fontSize: 10, color: entry.dueDate ? C.dim : C.dimmer, marginTop: 3 }}>
+                    {entry.dueDate
+                      ? (() => { const d = new Date(entry.dueDate + 'T12:00:00'); return isNaN(d.getTime()) ? 'No date' : d.toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short' }); })()
+                      : 'No date'}
                   </div>
                 )}
               </div>
