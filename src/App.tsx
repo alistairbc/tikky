@@ -2132,7 +2132,7 @@ export default function App() {
                             <span style={{ fontSize:18 }}>+</span> Add item
                           </button>
                         </div>
-                        ) : (
+                        ) : listLayout === "sticky" ? (
                         /* Sticky-note grid layout */
                         <div>
                           <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(auto-fill, minmax(180px, 1fr))", gap:14 }}>
