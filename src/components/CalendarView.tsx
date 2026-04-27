@@ -297,7 +297,7 @@ export function CalendarView({ entries, C, onEntryClick, isMobile }: Props) {
           marginBottom: 2,
         }}>
           {overdueFilter
-            ? `⚠ ${overdueEntries.length} Overdue`
+            ? `⚠ ${overdueEntries.length} overdue`
             : !selectedDay
             ? 'Upcoming'
             : selectedIsToday
@@ -373,3 +373,4 @@ export function CalendarView({ entries, C, onEntryClick, isMobile }: Props) {
     </div>
   );
 }
+

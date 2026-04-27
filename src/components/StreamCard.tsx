@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from "motion/react";
 import { TM, PM } from "../constants";
 import { fmt, tagColor, renderMd } from "../utils/format";
@@ -27,14 +27,116 @@ function getDueDateShortcuts() {
   ];
 }
 
-/* Body renderer — handles - bullets and line breaks */
+/* Body editor with formatting toolbar — needs local ref for cursor ops */
+function BodyEditor({ bodyInput, onBodyChange, onBodyCancel, onBodySave, C }: { bodyInput: string; onBodyChange: (v: string) => void; onBodyCancel: () => void; onBodySave: () => void; C: any }) {
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
+  const insert = (prefix: string, suffix = "") => {
+    const ta = bodyRef.current;
+    if (!ta) { onBodyChange(bodyInput + prefix + suffix); return; }
+    const start = ta.selectionStart ?? bodyInput.length;
+    const end   = ta.selectionEnd   ?? bodyInput.length;
+    const selected = bodyInput.slice(start, end);
+    const newVal = bodyInput.slice(0, start) + prefix + selected + suffix + bodyInput.slice(end);
+    onBodyChange(newVal);
+    setTimeout(() => {
+      if (!bodyRef.current) return;
+      bodyRef.current.focus();
+      const pos = start + prefix.length + selected.length;
+      bodyRef.current.setSelectionRange(pos, pos);
+    }, 0);
+  };
+  const btn = (label: string, title: string, prefix: string, suffix = "") => (
+    <button key={label} type="button"
+      onMouseDown={e => { e.preventDefault(); insert(prefix, suffix); }}
+      title={title}
+      style={{ background:"none", border:`1px solid ${C.border}`, borderRadius:4, color: C.muted, cursor:"pointer", padding:"2px 8px", fontSize:11, fontWeight:700, fontFamily:"monospace", lineHeight:1.6, flexShrink:0 }}
+    >{label}</button>
+  );
+  return (
+    <div>
+      <div style={{ display:"flex", gap:5, marginBottom:6, flexWrap:"wrap" }}>
+        {btn("B","Bold","**","**")}
+        {btn("I","Italic","_","_")}
+        {btn("•","Bullet","\n- ")}
+        {btn("[ ]","Checkbox","\n- [ ] ")}
+        {btn("H2","Heading","## ")}
+      </div>
+      <textarea autoFocus ref={bodyRef} rows={5} value={bodyInput}
+        onChange={e => onBodyChange(e.target.value)}
+        onKeyDown={e => { if (e.key === "Escape") onBodyCancel(); }}
+        placeholder="Add detail, context, links… (- for bullets, - [ ] for checkboxes)"
+        style={{ width:"100%", resize:"vertical", background: C.input,
+                 border:`1px solid ${C.accent}55`, borderRadius:8,
+                 padding:"8px 10px", fontSize:12, fontFamily:"inherit",
+                 color: C.text, outline:"none", lineHeight:1.6,
+                 boxSizing:"border-box" as const }}
+      />
+      <div style={{ display:"flex", gap:6, marginTop:6 }}>
+        <button onClick={onBodySave}
+          style={{ fontSize:11, background: C.accent, border:"none", color:"#fff", cursor:"pointer", padding:"4px 12px", borderRadius:6, fontFamily:"inherit", fontWeight:600 }}>
+          Save
+        </button>
+        <button onClick={onBodyCancel}
+          style={{ fontSize:11, background:"none", border:`1px solid ${C.border}`, color: C.dim, cursor:"pointer", padding:"4px 12px", borderRadius:6, fontFamily:"inherit" }}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* Markdown formatting toolbar for body notes */
+function FormatToolbar({ bodyRef, value, onChange, C }: { bodyRef: React.RefObject<HTMLTextAreaElement|null>; value: string; onChange: (v: string) => void; C: any }) {
+  const insert = (prefix: string, suffix = "") => {
+    const ta = bodyRef.current;
+    if (!ta) { onChange(value + prefix + suffix); return; }
+    const start = ta.selectionStart ?? value.length;
+    const end   = ta.selectionEnd ?? value.length;
+    const selected = value.slice(start, end);
+    const newVal = value.slice(0, start) + prefix + selected + suffix + value.slice(end);
+    onChange(newVal);
+    setTimeout(() => {
+      if (!bodyRef.current) return;
+      bodyRef.current.focus();
+      const pos = start + prefix.length + selected.length;
+      bodyRef.current.setSelectionRange(pos, pos);
+    }, 0);
+  };
+  const btn = (label: string, title: string, prefix: string, suffix = "") => (
+    <button key={label} type="button"
+      onMouseDown={e => { e.preventDefault(); insert(prefix, suffix); }}
+      title={title}
+      style={{ background:"none", border:`1px solid ${C.border}`, borderRadius:4, color: C.muted, cursor:"pointer", padding:"2px 8px", fontSize:11, fontWeight:700, fontFamily:"monospace", lineHeight:1.6, flexShrink:0 }}
+    >{label}</button>
+  );
+  return (
+    <div style={{ display:"flex", gap:5, marginBottom:6, flexWrap:"wrap" }}>
+      {btn("B","Bold","**","**")}
+      {btn("I","Italic","_","_")}
+      {btn("•","Bullet","\n- ")}
+      {btn("[ ]","Checkbox","\n- [ ] ")}
+      {btn("H","Heading","## ")}
+    </div>
+  );
+}
+
+/* Body renderer — handles - bullets, checkboxes and line breaks */
 function BodyText({ text, C }: { text: string; C: any }) {
   const lines = text.split('\n');
   return (
     <>
       {lines.map((line, i) => {
-        const isBullet = /^[-*•]\s/.test(line);
-        return isBullet ? (
+        const isCheck   = /^- \[[ xX]\]\s/.test(line);
+        const isChecked = isCheck && line[3] !== " ";
+        const isBullet  = !isCheck && /^[-*•]\s/.test(line);
+        return isCheck ? (
+          <div key={i} style={{ display:"flex", gap:6, alignItems:"flex-start", marginTop: i > 0 ? 3 : 0 }}>
+            <span style={{ width:12, height:12, borderRadius:3, border:`1.5px solid ${isChecked ? C.accent : C.border}`, background: isChecked ? C.accent : "none", flexShrink:0, marginTop:3, display:"inline-flex", alignItems:"center", justifyContent:"center" }}>
+              {isChecked && <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><path d="M5 13l4 4L19 7"/></svg>}
+            </span>
+            <span style={{ textDecoration: isChecked ? "line-through" : "none", color: isChecked ? C.dim : C.text, fontSize:"inherit" }}>{line.slice(6)}</span>
+          </div>
+        ) : isBullet ? (
           <div key={i} style={{ display:"flex", gap:6, alignItems:"flex-start", marginTop: i > 0 ? 3 : 0 }}>
             <span style={{ color: C.accent, flexShrink:0, marginTop:1, fontSize:11 }}>•</span>
             <span>{renderMd(line.slice(2), "")}</span>
@@ -303,7 +405,17 @@ export function StreamCard({
                             background:`${meta.color}15`, border:`1px solid ${meta.color}33`,
                             display:"flex", alignItems:"center", justifyContent:"center",
                             fontSize:20, flexShrink:0 }}>
-                {entry.emoji || (entry.type === "task" ? "⚡" : entry.type === "event" ? "📅" : entry.type === "note" ? "📝" : "💡")}
+                {entry.emoji ? (
+                  <span style={{ fontSize:20, lineHeight:1 }}>{entry.emoji}</span>
+                ) : entry.type === "task" ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={meta.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                ) : entry.type === "event" ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={meta.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                ) : entry.type === "note" ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={meta.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={meta.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+                )}
               </div>
             )}
 
@@ -638,32 +750,7 @@ export function StreamCard({
                         Body
                       </div>
                       {editingBodyId === entry.id ? (
-                        <div>
-                          <textarea autoFocus rows={4} value={bodyInput}
-                            onChange={e => onBodyChange(e.target.value)}
-                            onKeyDown={e => { if (e.key === "Escape") onBodyCancel(); }}
-                            placeholder="Add detail, context, links… (- for bullets)"
-                            style={{ width:"100%", resize:"vertical", background: C.input,
-                                     border:`1px solid ${C.accent}55`, borderRadius:8,
-                                     padding:"8px 10px", fontSize:12, fontFamily:"inherit",
-                                     color: C.text, outline:"none", lineHeight:1.6,
-                                     boxSizing:"border-box" as const }}
-                          />
-                          <div style={{ display:"flex", gap:6, marginTop:6 }}>
-                            <button onClick={onBodySave}
-                              style={{ fontSize:11, background: C.accent, border:"none",
-                                       color:"#fff", cursor:"pointer", padding:"4px 12px",
-                                       borderRadius:6, fontFamily:"inherit", fontWeight:600 }}>
-                              Save
-                            </button>
-                            <button onClick={onBodyCancel}
-                              style={{ fontSize:11, background:"none", border:`1px solid ${C.border}`,
-                                       color: C.dim, cursor:"pointer", padding:"4px 12px",
-                                       borderRadius:6, fontFamily:"inherit" }}>
-                              Cancel
-                            </button>
-                          </div>
-                        </div>
+                        <BodyEditor bodyInput={bodyInput} onBodyChange={onBodyChange} onBodyCancel={onBodyCancel} onBodySave={onBodySave} C={C} />
                       ) : (
                         <div onClick={onBodyEdit} title="Click to edit"
                           style={{ fontSize:12, color: C.text, lineHeight:1.6, cursor:"text",
@@ -904,3 +991,4 @@ export function StreamCard({
     </div>
   );
 }
+

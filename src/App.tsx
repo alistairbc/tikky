@@ -219,6 +219,7 @@ export default function App() {
   const [listSearch,    setListSearch]    = useState("");
   const [editingListItemId, setEditingListItemId] = useState<number | null>(null);
   const [editListItemText,  setEditListItemText]  = useState("");
+  const [listLayout,        setListLayout]        = useState<"list"|"sticky">("list");
 
   const [acType,        setAcType]        = useState<"tag" | "context" | null>(null);
   const [acQuery,       setAcQuery]       = useState("");
@@ -837,7 +838,32 @@ export default function App() {
       return count;
     });
 
-    return { streak, completionRate, activity };
+    // Due this week / month
+    const weekAhead = new Date(today.getTime() + 7 * 86400000);
+    const monthEnd  = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    const dueThisWeek  = entries.filter(e => !e.done && e.dueDate && (() => { const d = new Date(e.dueDate + "T12:00:00"); return d >= today && d <= weekAhead; })()).length;
+    const dueThisMonth = entries.filter(e => !e.done && e.dueDate && (() => { const d = new Date(e.dueDate + "T12:00:00"); return d >= today && d <= monthEnd; })()).length;
+
+    // Avg days to complete (tasks with done + timestamp)
+    const completedTasks = tasks.filter(e => e.done);
+    let avgCompletionDays: number | null = null;
+    if (completedTasks.length > 0) {
+      const totalDays = completedTasks.reduce((sum, e) => {
+        const created = new Date(e.timestamp);
+        // Use current date as proxy for completion date (no completedAt stored)
+        return sum + 0;
+      }, 0);
+      avgCompletionDays = null; // requires completedAt field — show N/A for now
+    }
+
+    // Tasks added this week
+    const addedThisWeek = entries.filter(e => {
+      const d = new Date(e.timestamp);
+      const ed = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      return ed >= new Date(today.getTime() - 6 * 86400000) && ed <= today;
+    }).length;
+
+    return { streak, completionRate, activity, dueThisWeek, dueThisMonth, addedThisWeek };
   }, [entries]);
 
   if (view === "help") {
@@ -1317,8 +1343,8 @@ export default function App() {
       )}
 
       <div style={{ padding: isMobile ? "8px 15px" : "11px 18px", borderBottom:`1px solid ${C.border}`, display:"flex", alignItems:"center", justifyContent:"space-between", flexShrink:0, background: isMobile ? C.bg : "rgba(15,23,42,0.97)", backdropFilter: isMobile ? "none" : "blur(8px)", zIndex:10 }}>
-        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          <svg width={isMobile ? 20 : 16} height={isMobile ? 20 : 16} viewBox="0 0 24 24" fill={C.accent} style={{ filter:`drop-shadow(0 0 4px ${C.accent}88)`, flexShrink:0 }}><path d="M12 2L22 12L12 22L2 12Z"/></svg>
+        <div onClick={() => setPrimaryTab("stream")} style={{ display:"flex", alignItems:"center", gap:10, cursor:"pointer" }}>
+          <svg width={isMobile ? 22 : 18} height={isMobile ? 22 : 18} viewBox="0 0 24 24" fill={C.accent} style={{ filter:`drop-shadow(0 0 5px ${C.accent}99)`, flexShrink:0 }}><path d="M12 2L22 12L12 22L2 12Z"/></svg>
           <span style={{ fontWeight:700, fontSize: isMobile ? 18 : 15, letterSpacing:"-0.3px" }}>Ticky Notes</span>
         </div>
         <div style={{ display:"flex", gap: isMobile ? 12 : 6, alignItems:"center" }}>
@@ -1973,7 +1999,12 @@ export default function App() {
                           <div style={{ fontSize:12, color: C.dim }}>{list.items.filter(i => !i.done).length} remaining · {list.items.filter(i => i.done).length} done</div>
                         </div>
                       </div>
-                      <div style={{ display:"flex", gap:8 }}>
+                      <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+                        <button
+                          onClick={() => setListLayout(listLayout === "list" ? "sticky" : "list")}
+                          title={listLayout === "list" ? "Switch to sticky notes" : "Switch to list view"}
+                          style={{ background: listLayout === "sticky" ? `${C.accent}22` : "none", border:`1px solid ${listLayout === "sticky" ? C.accent : C.border}`, color: listLayout === "sticky" ? C.accent : C.dim, cursor:"pointer", padding:"6px 10px", borderRadius:8, fontSize:14 }}
+                        >{listLayout === "sticky" ? "🗒" : "☰"}</button>
                         <button onClick={() => setLists(lists.filter(l => l.id !== list.id))} style={{ background:"none", border:`1px solid ${C.border}`, color: C.dim, cursor:"pointer", padding:"6px 10px", borderRadius:8, fontSize:14 }}>🗑</button>
                       </div>
                     </div>
@@ -1987,6 +2018,7 @@ export default function App() {
                             style={{ width:"100%", background:C.surface, border:`1px solid ${C.border}`, borderRadius:10, padding:"12px 15px", fontSize:14, color:C.text, outline:"none" }}
                           />
                         </div>
+                        {listLayout === "list" ? (
                         <div style={{ background: C.surface, borderRadius:16, border:`1px solid ${C.border}`, overflow:"hidden" }}>
                           {list.items.filter(item => !listSearch || item.text.toLowerCase().includes(listSearch.toLowerCase())).map(item => (
                             <ListItem 
@@ -2042,6 +2074,80 @@ export default function App() {
                             <span style={{ fontSize:18 }}>+</span> Add item
                           </button>
                         </div>
+                        ) : (
+                        /* Sticky-note grid layout */
+                        <div>
+                          <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(auto-fill, minmax(180px, 1fr))", gap:14 }}>
+                            {list.items.filter(item => !listSearch || item.text.toLowerCase().includes(listSearch.toLowerCase())).map(item => (
+                              <div
+                                key={item.id}
+                                style={{
+                                  background: item.done ? "#1a1a1a" : `${list.color}18`,
+                                  border: `1px solid ${list.color}44`,
+                                  borderRadius:10,
+                                  padding:14,
+                                  position:"relative",
+                                  minHeight:110,
+                                  display:"flex",
+                                  flexDirection:"column",
+                                  gap:8,
+                                  boxShadow: item.done ? "none" : `0 2px 8px ${list.color}22`,
+                                  opacity: item.done ? 0.5 : 1,
+                                  transition:"all .15s",
+                                }}
+                              >
+                                {/* top strip */}
+                                <div style={{ height:4, background: list.color, borderRadius:"6px 6px 0 0", position:"absolute", top:0, left:0, right:0 }} />
+                                {item.emoji && <span style={{ fontSize:18 }}>{item.emoji}</span>}
+                                {editingListItemId === item.id ? (
+                                  <textarea
+                                    autoFocus
+                                    value={editListItemText}
+                                    onChange={e => setEditListItemText(e.target.value)}
+                                    onBlur={() => {
+                                      const guessedEmoji = guessEmoji(editListItemText);
+                                      setLists(lists.map(l => l.id === list.id ? { ...l, items: l.items.map(i => i.id === item.id ? { ...i, text: editListItemText, emoji: i.emoji || guessedEmoji || null } : i) } : l));
+                                      setEditingListItemId(null);
+                                    }}
+                                    onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); (e.target as HTMLTextAreaElement).blur(); } if (e.key === "Escape") setEditingListItemId(null); }}
+                                    style={{ flex:1, background:"none", border:"none", outline:"none", color: C.text, fontSize:13, resize:"none", fontFamily:"inherit", lineHeight:1.5, minHeight:50 }}
+                                  />
+                                ) : (
+                                  <div
+                                    onClick={() => { setEditingListItemId(item.id); setEditListItemText(item.text); }}
+                                    style={{ flex:1, fontSize:13, color: item.done ? C.dim : C.text, lineHeight:1.5, textDecoration: item.done ? "line-through" : "none", cursor:"text", minHeight:40, wordBreak:"break-word" }}
+                                  >
+                                    {item.text || <span style={{ color: C.dimmer, fontStyle:"italic" }}>Click to add…</span>}
+                                  </div>
+                                )}
+                                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginTop:"auto" }}>
+                                  <button
+                                    onClick={() => setLists(lists.map(l => l.id === list.id ? { ...l, items: l.items.map(i => i.id === item.id ? { ...i, done: !i.done } : i) } : l))}
+                                    style={{ width:20, height:20, borderRadius:4, border:`2px solid ${item.done ? list.color : C.border}`, background: item.done ? list.color : "none", display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", flexShrink:0 }}
+                                  >
+                                    {item.done && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><path d="M5 13l4 4L19 7"/></svg>}
+                                  </button>
+                                  <button
+                                    onClick={() => setLists(lists.map(l => l.id === list.id ? { ...l, items: l.items.filter(i => i.id !== item.id) } : l))}
+                                    style={{ background:"none", border:"none", color: C.dimmer, cursor:"pointer", fontSize:12, padding:2, lineHeight:1 }}
+                                  >✕</button>
+                                </div>
+                              </div>
+                            ))}
+                            {/* Add sticky */}
+                            <button
+                              onClick={() => {
+                                const newItemId = Date.now();
+                                const newItem = { id: newItemId, text: "", emoji: null, done: false, addedAt: new Date(), note: "" };
+                                setLists(lists.map(l => l.id === list.id ? { ...l, items: [...l.items, newItem] } : l));
+                                setEditingListItemId(newItemId);
+                                setEditListItemText("");
+                              }}
+                              style={{ minHeight:110, borderRadius:10, border:`2px dashed ${C.border}`, background:"none", color: C.dim, cursor:"pointer", fontSize:28, display:"flex", alignItems:"center", justifyContent:"center" }}
+                            >+</button>
+                          </div>
+                        </div>
+                        )}
                       </div>
                     </div>
                   </>
@@ -2060,18 +2166,30 @@ export default function App() {
                 </div>
               </div>
 
-              <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap:20, marginBottom:30 }}>
-                <div style={{ background: C.surface, padding:20, borderRadius:16, border:`1px solid ${C.border}` }}>
-                  <div style={{ fontSize:12, color: C.dim, marginBottom:8 }}>Current Streak</div>
-                  <div style={{ fontSize:32, fontWeight:800, color: C.accent }}>{insights.streak} <span style={{ fontSize:14, fontWeight:400, color: C.dim }}>days</span></div>
+              <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(3, 1fr)", gap:16, marginBottom:30 }}>
+                <div style={{ background: C.surface, padding:18, borderRadius:16, border:`1px solid ${C.border}` }}>
+                  <div style={{ fontSize:11, color: C.dim, marginBottom:6 }}>Streak</div>
+                  <div style={{ fontSize:28, fontWeight:800, color: C.accent }}>{insights.streak}<span style={{ fontSize:12, fontWeight:400, color: C.dim }}> days</span></div>
                 </div>
-                <div style={{ background: C.surface, padding:20, borderRadius:16, border:`1px solid ${C.border}` }}>
-                  <div style={{ fontSize:12, color: C.dim, marginBottom:8 }}>Completion Rate</div>
-                  <div style={{ fontSize:32, fontWeight:800, color: "#10b981" }}>{insights.completionRate}<span style={{ fontSize:14, fontWeight:400, color: C.dim }}>%</span></div>
+                <div style={{ background: C.surface, padding:18, borderRadius:16, border:`1px solid ${C.border}` }}>
+                  <div style={{ fontSize:11, color: C.dim, marginBottom:6 }}>Completion Rate</div>
+                  <div style={{ fontSize:28, fontWeight:800, color: "#10b981" }}>{insights.completionRate}<span style={{ fontSize:12, fontWeight:400, color: C.dim }}>%</span></div>
                 </div>
-                <div style={{ background: C.surface, padding:20, borderRadius:16, border:`1px solid ${C.border}` }}>
-                  <div style={{ fontSize:12, color: C.dim, marginBottom:8 }}>Total Entries</div>
-                  <div style={{ fontSize:32, fontWeight:800, color: C.text }}>{entries.length}</div>
+                <div style={{ background: C.surface, padding:18, borderRadius:16, border:`1px solid ${C.border}` }}>
+                  <div style={{ fontSize:11, color: C.dim, marginBottom:6 }}>Total Entries</div>
+                  <div style={{ fontSize:28, fontWeight:800, color: C.text }}>{entries.length}</div>
+                </div>
+                <div style={{ background: C.surface, padding:18, borderRadius:16, border:`1px solid ${C.border}` }}>
+                  <div style={{ fontSize:11, color: C.dim, marginBottom:6 }}>Due This Week</div>
+                  <div style={{ fontSize:28, fontWeight:800, color: insights.dueThisWeek > 0 ? "#f59e0b" : C.text }}>{insights.dueThisWeek}<span style={{ fontSize:12, fontWeight:400, color: C.dim }}> tasks</span></div>
+                </div>
+                <div style={{ background: C.surface, padding:18, borderRadius:16, border:`1px solid ${C.border}` }}>
+                  <div style={{ fontSize:11, color: C.dim, marginBottom:6 }}>Due This Month</div>
+                  <div style={{ fontSize:28, fontWeight:800, color: insights.dueThisMonth > 0 ? "#0ea5e9" : C.text }}>{insights.dueThisMonth}<span style={{ fontSize:12, fontWeight:400, color: C.dim }}> tasks</span></div>
+                </div>
+                <div style={{ background: C.surface, padding:18, borderRadius:16, border:`1px solid ${C.border}` }}>
+                  <div style={{ fontSize:11, color: C.dim, marginBottom:6 }}>Added This Week</div>
+                  <div style={{ fontSize:28, fontWeight:800, color: C.text }}>{insights.addedThisWeek}<span style={{ fontSize:12, fontWeight:400, color: C.dim }}> entries</span></div>
                 </div>
               </div>
 
@@ -2315,10 +2433,10 @@ export default function App() {
             <span style={{ fontSize:8, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.04em" }}>Stream</span>
           </button>
 
-          {/* Insights */}
-          <button onClick={() => setPrimaryTab("insights")} style={{ flex:1, height:"100%", background:"none", border:"none", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:2, color: primaryTab==="insights" ? "#fde047" : "#666", cursor:"pointer", fontFamily:"inherit" }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 17l5-5 4 4 7-9"/></svg>
-            <span style={{ fontSize:8, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.04em" }}>Insights</span>
+          {/* Lists */}
+          <button onClick={() => setPrimaryTab("lists")} style={{ flex:1, height:"100%", background:"none", border:"none", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:2, color: primaryTab==="lists" ? "#fde047" : "#666", cursor:"pointer", fontFamily:"inherit" }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="5" width="16" height="3" rx="1"/><rect x="4" y="11" width="16" height="3" rx="1"/><rect x="4" y="17" width="16" height="3" rx="1"/></svg>
+            <span style={{ fontSize:8, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.04em" }}>Lists</span>
           </button>
 
           {/* Add — raised yellow button */}
@@ -2330,10 +2448,10 @@ export default function App() {
             >+</button>
           </div>
 
-          {/* Lists */}
-          <button onClick={() => setPrimaryTab("lists")} style={{ flex:1, height:"100%", background:"none", border:"none", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:2, color: primaryTab==="lists" ? "#fde047" : "#666", cursor:"pointer", fontFamily:"inherit" }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="5" width="16" height="3" rx="1"/><rect x="4" y="11" width="16" height="3" rx="1"/><rect x="4" y="17" width="16" height="3" rx="1"/></svg>
-            <span style={{ fontSize:8, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.04em" }}>Lists</span>
+          {/* Insights */}
+          <button onClick={() => setPrimaryTab("insights")} style={{ flex:1, height:"100%", background:"none", border:"none", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:2, color: primaryTab==="insights" ? "#fde047" : "#666", cursor:"pointer", fontFamily:"inherit" }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 17l5-5 4 4 7-9"/></svg>
+            <span style={{ fontSize:8, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.04em" }}>Insights</span>
           </button>
 
           {/* Settings */}
@@ -2502,6 +2620,7 @@ export default function App() {
     </div>
   );
 }
+
 
 
 

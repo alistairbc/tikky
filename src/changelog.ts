@@ -191,4 +191,6 @@ export const THEMES = [
   { id:"nightshift",   name:"Night Shift",        desc:"Sleep-safe · warm red-light",   dark:true,  colors:{ bg:"#0d0804", surface:"#1c1008", border:"#3c2010", text:"#ffd090", muted:"#c07840", dim:"#905030", dimmer:"#602010", accent:"#e04010", input:"#080400" } },
   { id:"sunshine",     name:"Sunshine",            desc:"Max-bright · outdoor use",      dark:false, colors:{ bg:"#fffef0", surface:"#fffffc", border:"#ddd890", text:"#181800", muted:"#3a3800", dim:"#5a5800", dimmer:"#787600", accent:"#6b5900", input:"#fffef8" } },
   { id:"terminal",     name:"Terminal",            desc:"Phosphor · power user",         dark:true,  colors:{ bg:"#000d00", surface:"#001800", border:"#003800", text:"#00ee44", muted:"#00bb33", dim:"#008822", dimmer:"#005511", accent:"#00ff44", input:"#000900" } },
+  { id:"sticky",      name:"Yellow Pad",          desc:"Sticky-note warmth · sunlit",    dark:false, colors:{ bg:"#fffde7", surface:"#fff9c4", border:"#f9e04b", text:"#1a1600", muted:"#4a4000", dim:"#7a6f00", dimmer:"#b09a00", accent:"#e65100", input:"#fffde7" } },
 ];
+
