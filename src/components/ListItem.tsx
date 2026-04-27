@@ -168,15 +168,17 @@ export function ListItem({
               </div>
             </div>
           ) : (
-            <p
+            <div
               onClick={onStartEdit}
               title="Click to edit"
-              style={{ margin:0, fontSize:13, color: item.done ? C.dim : C.text,
+              style={{ margin:0, minHeight:20, cursor:"text" }}>
+              <p style={{ margin:0, fontSize:13, color: item.done ? C.dim : C.text,
                        textDecoration: item.done ? "line-through" : "none",
-                       lineHeight:1.5, cursor:"text", wordBreak:"break-word" }}>
-              {item.emoji && <span style={{ marginRight:5 }}>{item.emoji}</span>}
-              {item.text}
-            </p>
+                       lineHeight:1.5, wordBreak:"break-word", minHeight:18 }}>
+                {item.emoji && <span style={{ marginRight:5 }}>{item.emoji}</span>}
+                {item.text || <span style={{ color: C.dimmer, fontSize:12, fontStyle:"italic" }}>Click to add text…</span>}
+              </p>
+            </div>
           )}
 
           {/* Inline note */}

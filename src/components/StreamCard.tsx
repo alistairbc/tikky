@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from "motion/react";
 import { TM, PM } from "../constants";
 import { fmt, tagColor, renderMd } from "../utils/format";
@@ -46,6 +46,70 @@ function BodyText({ text, C }: { text: string; C: any }) {
         );
       })}
     </>
+  );
+}
+
+
+/* Collapsible emoji picker — collapsed by default */
+function EmojiPicker({ entry, C, onEmojiChange }: { entry: any, C: any, onEmojiChange: (v: string) => void }) {
+  const [open, setOpen] = useState(entry.emoji ? true : false);
+  const EMOJIS = [
+    "✅","🚀","💡","📅","🔥","⭐","📌","📝","🛒","✈️","🎬","🎵","🎮","☕","🐾","🚗",
+    "💰","💪","🎁","🏠","🎨","🎯","⚠️","🔖","❤️","💬","👍","🎉","💯","🙏","🤝","👏",
+    "🇦🇺","🇺🇸","🇬🇧","🇯🇵","🇰🇷","🇨🇳","🇫🇷","🇩🇪","🇮🇹","🇪🇸","🇧🇷","🇨🇦","🇮🇳","🇲🇽","🇿🇦","🇳🇿",
+  ];
+  return (
+    <div style={{ marginTop:12, marginBottom:10 }}>
+      {/* Header row — always visible */}
+      <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom: open ? 8 : 0 }}>
+        <button
+          onClick={e => { e.stopPropagation(); setOpen(o => !o); }}
+          style={{ fontSize:10, fontWeight:700, color: C.dim, textTransform:"uppercase" as const,
+                   letterSpacing:"0.08em", background:"none", border:"none", cursor:"pointer",
+                   fontFamily:"inherit", display:"flex", alignItems:"center", gap:4, padding:0 }}>
+          {entry.emoji ? <span style={{ fontSize:16 }}>{entry.emoji}</span> : "Emoji"}
+          <span style={{ fontSize:9, opacity:0.6 }}>{open ? "▴" : "▾"}</span>
+        </button>
+        {entry.emoji && (
+          <button onClick={e => { e.stopPropagation(); onEmojiChange(""); }}
+            style={{ fontSize:10, background:"none", border:`1px solid ${C.border}`,
+                     color: C.dim, cursor:"pointer", padding:"2px 7px",
+                     borderRadius:4, fontFamily:"inherit" }}>
+            ✕
+          </button>
+        )}
+      </div>
+      {/* Expandable grid */}
+      {open && (
+        <div>
+          <div style={{ display:"flex", gap:5, marginBottom:6 }}>
+            <input
+              value={entry.emoji || ""}
+              onChange={e => onEmojiChange(e.target.value.trim())}
+              placeholder="Type or paste…"
+              style={{ flex:1, background: C.input, border:`1px solid ${C.border}`,
+                       borderRadius:6, padding:"4px 8px", fontSize:12,
+                       color: C.text, fontFamily:"inherit", outline:"none" }}
+              onClick={e => e.stopPropagation()}
+            />
+          </div>
+          <div style={{ display:"flex", flexWrap:"wrap", gap:4 }}>
+            {EMOJIS.map(emo => (
+              <button key={emo}
+                onClick={e => { e.stopPropagation(); onEmojiChange(emo); setOpen(false); }}
+                style={{
+                  fontSize:15, background: entry.emoji === emo ? `${C.accent}22` : "none",
+                  border: entry.emoji === emo ? `1px solid ${C.accent}55` : `1px solid ${C.border}`,
+                  borderRadius:5, width:30, height:30, cursor:"pointer",
+                  display:"flex", alignItems:"center", justifyContent:"center",
+                }}>
+                {emo}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -760,55 +824,8 @@ export function StreamCard({
                     </div>
                   </div>
 
-                  {/* Emoji picker */}
-                  <div style={{ marginTop:14, marginBottom:14 }}>
-                    <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
-                      <span style={{ fontSize:10, fontWeight:700, color: C.dim,
-                                     textTransform:"uppercase" as const,
-                                     letterSpacing:"0.08em", flexShrink:0 }}>
-                        Emoji
-                      </span>
-                      <input
-                        value={entry.emoji || ""}
-                        onChange={e => onEmojiChange(e.target.value.trim())}
-                        placeholder="Emoji…"
-                        style={{ width:60, background: C.input, border:`1px solid ${C.border}`,
-                                 borderRadius:6, padding:"4px 9px", fontSize:12,
-                                 color: C.text, fontFamily:"inherit", outline:"none" }}
-                        onClick={e => e.stopPropagation()}
-                      />
-                      {entry.emoji && (
-                        <button onClick={e => { e.stopPropagation(); onEmojiChange(""); }}
-                          style={{ fontSize:11, background:"none", border:`1px solid ${C.border}`,
-                                   color: C.dim, cursor:"pointer", padding:"4px 9px",
-                                   borderRadius:6, fontFamily:"inherit", flexShrink:0 }}>
-                          ✕ Remove
-                        </button>
-                      )}
-                    </div>
-                    <div style={{ display:"flex", flexWrap:"wrap", gap:5 }}>
-                      {[
-                        "✅","🚀","💡","📅","🔥","⭐","📌","📝","🛒","✈️","🎬","🎵","🎮","☕","🐾","🚗",
-                        "💰","💪","🎁","🏠","🎨","🎯","⚠️","🔖","❤️","💬","👍","🎉","💯","🙏","🤝","👏",
-                        "🇦🇺","🇺🇸","🇬🇧","🇯🇵","🇰🇷","🇨🇳","🇫🇷","🇩🇪","🇮🇹","🇪🇸","🇧🇷","🇨🇦","🇮🇳","🇲🇽","🇿🇦","🇳🇿",
-                      ].map(emo => (
-                        <button key={emo}
-                          onClick={e => { e.stopPropagation(); onEmojiChange(emo); }}
-                          style={{
-                            fontSize:16,
-                            background: entry.emoji === emo ? `${C.accent}22` : "none",
-                            border: entry.emoji === emo
-                              ? `1px solid ${C.accent}55`
-                              : `1px solid ${C.border}`,
-                            borderRadius:6, width:32, height:32, cursor:"pointer",
-                            display:"flex", alignItems:"center", justifyContent:"center",
-                            transition:"all .1s",
-                          }}>
-                          {emo}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  {/* Emoji picker — collapsed by default */}
+                  <EmojiPicker entry={entry} C={C} onEmojiChange={onEmojiChange} />
 
                   {/* Photos */}
                   <div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { TM } from '../constants';
 
 interface Entry {
@@ -39,7 +39,8 @@ export function CalendarView({ entries, C, onEntryClick, isMobile }: Props) {
     const d = new Date();
     return new Date(d.getFullYear(), d.getMonth(), 1);
   });
-  const [selectedDay, setSelectedDay] = useState<string | null>(today);
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [overdueFilter, setOverdueFilter] = useState(false);
 
   const year  = pivotDate.getFullYear();
   const month = pivotDate.getMonth();
@@ -68,9 +69,23 @@ export function CalendarView({ entries, C, onEntryClick, isMobile }: Props) {
     setSelectedDay(today);
   }
 
-  const selectedEntries  = selectedDay ? (byDate[selectedDay] || []) : [];
-  const selectedIsToday  = selectedDay === today;
-  const selectedIsPast   = !!selectedDay && selectedDay < today;
+  // All dated entries sorted by date (for "no selection" view)
+  const allDatedEntries = useMemo(() => {
+    const result: Entry[] = [];
+    Object.entries(byDate)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .forEach(([, es]) => result.push(...es));
+    return result;
+  }, [byDate]);
+
+  const selectedEntries: Entry[] = overdueFilter
+    ? overdueEntries
+    : selectedDay
+    ? (byDate[selectedDay] || [])
+    : allDatedEntries;
+
+  const selectedIsToday  = !overdueFilter && selectedDay === today;
+  const selectedIsPast   = !overdueFilter && !!selectedDay && selectedDay < today;
 
   const btnBase: React.CSSProperties = {
     background: 'none', border: `1px solid ${C.border}`, color: C.muted,
@@ -111,20 +126,23 @@ export function CalendarView({ entries, C, onEntryClick, isMobile }: Props) {
 
         {/* Overdue banner */}
         {overdueEntries.length > 0 && (
-          <div style={{
-            marginBottom: 14, padding: '8px 14px', borderRadius: 8,
-            background: '#ef444414', border: '1px solid #ef444440',
-            display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
-          }}>
+          <div
+            onClick={() => { setOverdueFilter(f => !f); setSelectedDay(null); }}
+            style={{
+              marginBottom: 14, padding: '8px 14px', borderRadius: 8,
+              background: overdueFilter ? '#ef444428' : '#ef444414',
+              border: `1px solid ${overdueFilter ? '#ef444480' : '#ef444440'}`,
+              display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
+              cursor: 'pointer', transition: 'all .15s',
+            }}>
             <span style={{
               fontSize: 10, color: '#ef4444', fontWeight: 800,
               textTransform: 'uppercase', letterSpacing: '0.06em', flexShrink: 0,
             }}>
               ⚠ {overdueEntries.length} overdue
             </span>
-            <span style={{ fontSize: 11, color: C.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {overdueEntries.slice(0, 3).map(e => e.title).join(' · ')}
-              {overdueEntries.length > 3 ? ` +${overdueEntries.length - 3} more` : ''}
+            <span style={{ fontSize: 11, color: C.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+              {overdueFilter ? 'Click to clear filter' : overdueEntries.slice(0, 3).map((e: Entry) => e.title).join(' · ') + (overdueEntries.length > 3 ? ` +${overdueEntries.length - 3} more` : '')}
             </span>
           </div>
         )}
@@ -168,7 +186,7 @@ export function CalendarView({ entries, C, onEntryClick, isMobile }: Props) {
             return (
               <div
                 key={day}
-                onClick={() => setSelectedDay(isSel ? null : dk)}
+                onClick={() => { setSelectedDay(isSel ? null : dk); setOverdueFilter(false); }}
                 style={{
                   minHeight: isMobile ? 52 : 76,
                   borderRadius: 6, padding: isMobile ? '5px 6px' : '7px 9px',
@@ -275,11 +293,13 @@ export function CalendarView({ entries, C, onEntryClick, isMobile }: Props) {
       }}>
         <div style={{
           fontSize: 13, fontWeight: 700,
-          color: selectedIsToday ? C.accent : C.text,
+          color: overdueFilter ? '#ef4444' : selectedIsToday ? C.accent : C.text,
           marginBottom: 2,
         }}>
-          {!selectedDay
-            ? 'Select a day'
+          {overdueFilter
+            ? `⚠ ${overdueEntries.length} Overdue`
+            : !selectedDay
+            ? 'Upcoming'
             : selectedIsToday
             ? '⭑ Today'
             : new Date(selectedDay + 'T12:00:00').toLocaleDateString('en-AU', {
@@ -288,17 +308,25 @@ export function CalendarView({ entries, C, onEntryClick, isMobile }: Props) {
           }
         </div>
         <div style={{ fontSize: 11, color: C.dim, marginBottom: 14 }}>
-          {!selectedDay
-            ? 'Click any day to see its entries'
+          {overdueFilter
+            ? 'Click banner to clear'
+            : !selectedDay
+            ? `${allDatedEntries.length} item${allDatedEntries.length !== 1 ? 's' : ''} with due dates`
             : selectedEntries.length === 0
             ? 'Nothing due'
             : `${selectedEntries.length} item${selectedEntries.length !== 1 ? 's' : ''} due`
           }
         </div>
 
-        {selectedEntries.length === 0 && selectedDay && (
+        {selectedEntries.length === 0 && selectedDay && !overdueFilter && (
           <div style={{ padding: '24px 0', textAlign: 'center', color: C.dimmer, fontSize: 12 }}>
             {selectedIsPast ? 'Clear day ✓' : '🗓 Nothing scheduled'}
+          </div>
+        )}
+
+        {!selectedDay && !overdueFilter && allDatedEntries.length === 0 && (
+          <div style={{ padding: '24px 0', textAlign: 'center', color: C.dimmer, fontSize: 12 }}>
+            No upcoming items with due dates
           </div>
         )}
 
@@ -330,6 +358,11 @@ export function CalendarView({ entries, C, onEntryClick, isMobile }: Props) {
                 <div style={{ fontSize: 12, color: C.text, lineHeight: 1.4, fontWeight: 500 }}>
                   {entry.title}
                 </div>
+                {!selectedDay && !overdueFilter && entry.dueDate && (
+                  <div style={{ fontSize: 10, color: C.dim, marginTop: 3 }}>
+                    {new Date(entry.dueDate + 'T12:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })}
+                  </div>
+                )}
               </div>
             );
           })}

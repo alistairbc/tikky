@@ -1,6 +1,15 @@
 import { CLR } from "./constants";
 
 export const CHANGELOG = [
+  { version:"1.5.0", date:"2026-04-27", label:"UX Polish", items:[
+    "Renamed to Ticky Notes",
+    "Desktop nav: consistent SVG outline icons (no more colored calendar emoji)",
+    "Sidebar Done tab: label tightened to prevent layout overflow",
+    "Emoji section in expanded card collapsed by default — click to expand",
+    "Calendar: right panel shows all upcoming dated entries when no day selected",
+    "Calendar: overdue banner is now clickable to filter to overdue entries",
+    "List items: blank items now show placeholder text and are click-to-edit",
+  ]},
   { version:"1.4.0", date:"2026-04-27", label:"Design System Complete", items:[
     "Correct type colors: Event → sky blue (#0ea5e9), Thought → slate (#64748b), violet reserved for AI",
     "New CSS tokens: --event-ink, --thought-ink, --ai, --ai-light, --glow-event, --glow-thought, --glow-ai",

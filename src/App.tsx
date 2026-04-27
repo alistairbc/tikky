@@ -844,7 +844,7 @@ export default function App() {
     return (
       <div style={{ minHeight:"100vh", background: C.bg, color: C.text, fontFamily: (FONTS as any)[fontFamily], zoom: String(fontScale), display:"flex", flexDirection:"column" }}>
         <div style={{ padding:"15px 20px", borderBottom:`1px solid ${C.border}`, display:"flex", alignItems:"center", justifyContent:"space-between", background:C.surface }}>
-          <div style={{ fontWeight:700 }}>Tikky Guide</div>
+          <div style={{ fontWeight:700 }}>Ticky Notes Guide</div>
           <button onClick={() => setView("main")} style={{ background: C.surface, border:`1px solid ${C.border}`, color: C.text, cursor:"pointer", fontWeight:600, padding:"6px 16px", borderRadius:8, fontSize:13 }}>✕ Close</button>
         </div>
         <div style={{ flex:1, padding:30, maxWidth:700, margin:"0 auto", display:"flex", flexDirection:"column", gap:25 }}>
@@ -1263,7 +1263,7 @@ export default function App() {
             style={{ position:"fixed", bottom: 100, left: "50%", transform: "translateX(-50%)", background: C.surface, border: `1px solid ${C.accent}`, borderRadius: 16, padding: "20px 25px", zIndex: 500, boxShadow: "0 15px 40px rgba(0,0,0,0.4)", maxWidth: 400, width: "90%" }}
           >
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:10 }}>
-              <div style={{ fontSize:12, fontWeight:700, color: C.accent, textTransform:"uppercase" }}>Tikky Assistant</div>
+              <div style={{ fontSize:12, fontWeight:700, color: C.accent, textTransform:"uppercase" }}>Ticky Notes Assistant</div>
               <button onClick={() => setSemanticResponse(null)} style={{ background:"none", border:"none", color: C.dim, cursor:"pointer", fontSize:16 }}>✕</button>
             </div>
             <div style={{ fontSize:14, lineHeight:1.6, color: C.text }}>
@@ -1319,7 +1319,7 @@ export default function App() {
       <div style={{ padding: isMobile ? "8px 15px" : "11px 18px", borderBottom:`1px solid ${C.border}`, display:"flex", alignItems:"center", justifyContent:"space-between", flexShrink:0, background: isMobile ? C.bg : "rgba(15,23,42,0.97)", backdropFilter: isMobile ? "none" : "blur(8px)", zIndex:10 }}>
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
           <span style={{ color: C.accent, fontSize: isMobile ? 18 : 15, filter: isMobile ? "none" : "drop-shadow(0 0 5px #6366f1)" }}>{isMobile ? "✔️" : "◈"}</span>
-          <span style={{ fontWeight:700, fontSize: isMobile ? 18 : 15, letterSpacing:"-0.3px" }}>Tikky</span>
+          <span style={{ fontWeight:700, fontSize: isMobile ? 18 : 15, letterSpacing:"-0.3px" }}>Ticky Notes</span>
         </div>
         <div style={{ display:"flex", gap: isMobile ? 12 : 6, alignItems:"center" }}>
           {isMobile ? (
@@ -1353,17 +1353,35 @@ export default function App() {
 
       {!isMobile && (
         <div style={{ display:"flex", borderBottom:`1px solid ${C.border}`, flexShrink:0, background: C.bg, padding:"0 18px", alignItems:"center" }}>
-          {[
-            { key:"stream",   label:"Stream",   icon:"◎" },
-            { key:"lists",    label:"Lists",    icon:"☰" },
-            { key:"insights", label:"Insights", icon:"✦" },
-            { key:"calendar", label:"Calendar", icon:"📅" },
-            { key:"settings", label:"Settings", icon:"⚙" },
-          ].map(({ key, label, icon }) => (
+          {([
+            { key:"stream",   label:"Stream" },
+            { key:"lists",    label:"Lists" },
+            { key:"insights", label:"Insights" },
+            { key:"calendar", label:"Calendar" },
+            { key:"settings", label:"Settings" },
+          ] as {key:string,label:string}[]).map(({ key, label }) => {
+            const iconPath: Record<string,string> = {
+              stream:   "M4 6h16M4 12h10M4 18h13",
+              lists:    "M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01",
+              insights: "M3 17l5-5 4 4 7-9",
+              settings: "M12 15a3 3 0 100-6 3 3 0 000 6z M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z",
+            };
+            const isCalendar = key === "calendar";
+            return (
             <button key={key} onClick={() => setPrimaryTab(key)} style={{ padding:"9px 16px", background:"none", border:"none", borderBottom: primaryTab===key ? `2px solid ${C.accent}` : "2px solid transparent", color: primaryTab===key ? C.accent : C.dim, cursor:"pointer", fontSize:13, fontWeight: primaryTab===key ? 600 : 400, fontFamily:"inherit", display:"flex", alignItems:"center", gap:6, transition:"all .15s", marginBottom:"-1px" }}>
-              <span style={{ fontSize:11 }}>{icon}</span>{label}
+              {isCalendar ? (
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+                </svg>
+              ) : iconPath[key] ? (
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d={iconPath[key]}/>
+                </svg>
+              ) : null}
+              {label}
             </button>
-          ))}
+            );
+          })}
           <div className="no-scrollbar" style={{ marginLeft:"auto", display:"flex", gap:2, padding:"4px 0", alignItems:"center", overflowX:"auto" }}>
             <button onClick={() => setSpaceFilter("all")} style={{ padding:"3px 10px", background: spaceFilter==="all" ? `${C.accent}22` : "none", border: spaceFilter==="all" ? `1px solid ${C.accent}55` : "1px solid transparent", borderRadius:6, color: spaceFilter==="all" ? C.accent : C.dim, cursor:"pointer", fontSize:11, fontWeight: spaceFilter==="all" ? 600 : 400, fontFamily:"inherit", transition:"all .15s" }}>All</button>
             {allContexts.map(ctx => (
@@ -1726,9 +1744,9 @@ export default function App() {
                 { k:"tasks",  l:"Tasks",  c:"#10b981", n: entries.filter(e=>e.type==="task"&&!e.done).length },
                 { k:"events", l:"Events", c:"#0ea5e9", n: entries.filter(e=>e.type==="event"&&!e.done).length },
                 { k:"notes",  l:"Notes",  c:"#fde047", n: entries.filter(e=>(e.type==="note"||e.type==="thought")&&!e.done).length },
-                { k:"done",   l:"✓ Done", c:"#64748b", n: entries.filter(e=>e.done).length },
+                { k:"done",   l:"Done",   c:"#64748b", n: entries.filter(e=>e.done).length },
               ].map(({ k, l, c, n }) => (
-                <button key={k} onClick={() => setDashTab(k)} style={{ flex:1, padding:"5px 4px", borderRadius:6, border:"none", cursor:"pointer", fontSize:11, fontWeight:600, fontFamily:"inherit", background: dashTab===k ? `${c}22` : "transparent", color: dashTab===k ? c : C.dim, display:"flex", alignItems:"center", justifyContent:"center", gap:4 }}>
+                <button key={k} onClick={() => setDashTab(k)} style={{ flex:1, padding:"4px 2px", borderRadius:6, border:"none", cursor:"pointer", fontSize:10, fontWeight:700, fontFamily:"inherit", background: dashTab===k ? `${c}22` : "transparent", color: dashTab===k ? c : C.dim, display:"flex", alignItems:"center", justifyContent:"center", gap:3 }}>
                   {l}
                   {n > 0 && <span style={{ fontSize:10, background: dashTab===k ? `${c}33` : C.surface, padding:"0 4px", borderRadius:5 }}>{n}</span>}
                 </button>
