@@ -1564,7 +1564,7 @@ export default function App() {
           <div 
             onClick={() => inputRef.current?.focus()}
             className="no-scrollbar"
-            style={{ flex:1, overflowY:"auto", padding: isMobile ? "15px 15px 80px" : "15px", position:"relative" }}
+            style={{ flex:1, overflowY:"auto", padding: isMobile ? "15px 15px 68px" : "15px", position:"relative" }}
           >
             <div style={{ maxWidth: isMobile ? "100%" : 860, margin:"0 auto" }}>
             {(() => {
@@ -1724,7 +1724,7 @@ export default function App() {
               {[
                 { k:"all",    l:"All",    c: C.accent,  n: entries.filter(e=>!e.done).length },
                 { k:"tasks",  l:"Tasks",  c:"#10b981", n: entries.filter(e=>e.type==="task"&&!e.done).length },
-                { k:"events", l:"Events", c:"#6366f1", n: entries.filter(e=>e.type==="event"&&!e.done).length },
+                { k:"events", l:"Events", c:"#0ea5e9", n: entries.filter(e=>e.type==="event"&&!e.done).length },
                 { k:"notes",  l:"Notes",  c:"#fde047", n: entries.filter(e=>(e.type==="note"||e.type==="thought")&&!e.done).length },
                 { k:"done",   l:"✓ Done", c:"#64748b", n: entries.filter(e=>e.done).length },
               ].map(({ k, l, c, n }) => (
@@ -1956,7 +1956,7 @@ export default function App() {
                         <button onClick={() => setLists(lists.filter(l => l.id !== list.id))} style={{ background:"none", border:`1px solid ${C.border}`, color: C.dim, cursor:"pointer", padding:"6px 10px", borderRadius:8, fontSize:14 }}>🗑</button>
                       </div>
                     </div>
-                    <div style={{ flex:1, overflowY:"auto", padding: isMobile ? "25px 25px 80px" : "25px" }}>
+                    <div style={{ flex:1, overflowY:"auto", padding: isMobile ? "25px 25px 68px" : "25px" }}>
                       <div style={{ maxWidth:700, margin:"0 auto" }}>
                         <div style={{ marginBottom:20, position:"relative" }}>
                           <input 
@@ -2029,7 +2029,7 @@ export default function App() {
             </div>
           </div>
         ) : primaryTab === "insights" ? (
-          <div style={{ flex:1, overflowY:"auto", background: C.bg, padding: isMobile ? "20px 20px 80px" : 40 }}>
+          <div style={{ flex:1, overflowY:"auto", background: C.bg, padding: isMobile ? "20px 20px 68px" : 40 }}>
             <div style={{ maxWidth: 800, margin:"0 auto" }}>
               <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:30 }}>
                 <div style={{ width:40, height:40, borderRadius:12, background:`linear-gradient(135deg, ${C.accent}, #818cf8)`, display:"flex", alignItems:"center", justifyContent:"center", color:"white", fontSize:20 }}>✦</div>
@@ -2111,7 +2111,7 @@ export default function App() {
             onEntryClick={(id) => { setExpanded(id); setPrimaryTab("stream"); }}
           />
         ) : (
-          <div className="no-scrollbar" style={{ flex:1, overflowY:"auto", background: "transparent", padding: isMobile ? "20px 20px 80px" : 40 }}>
+          <div className="no-scrollbar" style={{ flex:1, overflowY:"auto", background: "transparent", padding: isMobile ? "20px 20px 68px" : 40 }}>
             <div style={{ maxWidth: 640, margin:"0 auto" }}>
               <div style={{ marginBottom:36 }}>
                 <div style={{ fontSize:10, fontWeight:700, color: C.accent, textTransform:"uppercase", letterSpacing:"0.12em", marginBottom:14 }}>Theme & Accent</div>
@@ -2286,50 +2286,41 @@ export default function App() {
       </div>
 
       {isMobile && (
-        <div style={{ position:"fixed", bottom:0, left:0, right:0, height:64, background: C.surface, borderTop:`1px solid ${C.border}`, display:"flex", alignItems:"center", justifyContent:"space-around", zIndex:500, backdropFilter:"blur(12px)", paddingBottom:"env(safe-area-inset-bottom)" }}>
-          {[
-            { key:"stream",   label:"Stream",   icon:"🗂️" },
-            { key:"insights", label:"Insights", icon:"📈" },
-            { key:"add",      label:"Add",      icon:"➕" },
-            { key:"lists",    label:"Lists",    icon:"📋" },
-            { key:"settings", label:"Settings", icon:"⚙️" },
-          ].map(({ key, label, icon }) => (
-            <button 
-              key={key} 
-              onClick={() => {
-                if (key === "add") setShowMobileCompose(true);
-                else setPrimaryTab(key as any);
-              }} 
-              style={{ 
-                flex:1, 
-                height:"100%", 
-                background:"none", 
-                border:"none", 
-                display:"flex", 
-                flexDirection:"column", 
-                alignItems:"center", 
-                justifyContent:"center", 
-                gap:2, 
-                color: (key === "add") ? C.accent : (primaryTab === key ? C.accent : C.dim), 
-                transition:"all .2s",
-                opacity: (key === "add" || primaryTab === key) ? 1 : 0.6
-              }}
-            >
-              <div style={{ 
-                width: key === "add" ? 40 : "auto", 
-                height: key === "add" ? 40 : "auto", 
-                borderRadius: key === "add" ? 12 : 0,
-                background: key === "add" ? `${C.accent}22` : "none",
-                display:"flex",
-                alignItems:"center",
-                justifyContent:"center",
-                marginBottom: key === "add" ? 2 : 0
-              }}>
-                <span style={{ fontSize: key === "add" ? 24 : 20 }}>{icon}</span>
-              </div>
-              <span style={{ fontSize:8, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.05em" }}>{label}</span>
-            </button>
-          ))}
+        <div style={{ position:"fixed", bottom:0, left:0, right:0, height:52, background:"#0e0e0e", borderTop:"1px solid #1c1c1c", display:"flex", alignItems:"center", zIndex:500, paddingBottom:"env(safe-area-inset-bottom)" }}>
+
+          {/* Stream */}
+          <button onClick={() => setPrimaryTab("stream")} style={{ flex:1, height:"100%", background:"none", border:"none", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:2, color: primaryTab==="stream" ? "#fde047" : "#666", cursor:"pointer", fontFamily:"inherit" }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+            <span style={{ fontSize:8, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.04em" }}>Stream</span>
+          </button>
+
+          {/* Insights */}
+          <button onClick={() => setPrimaryTab("insights")} style={{ flex:1, height:"100%", background:"none", border:"none", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:2, color: primaryTab==="insights" ? "#fde047" : "#666", cursor:"pointer", fontFamily:"inherit" }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 17l5-5 4 4 7-9"/></svg>
+            <span style={{ fontSize:8, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.04em" }}>Insights</span>
+          </button>
+
+          {/* Add — raised yellow button */}
+          <div style={{ flex:1, display:"flex", justifyContent:"center", position:"relative" }}>
+            <button
+              className="nav-add-btn"
+              onClick={() => setShowMobileCompose(true)}
+              aria-label="Add entry"
+            >+</button>
+          </div>
+
+          {/* Lists */}
+          <button onClick={() => setPrimaryTab("lists")} style={{ flex:1, height:"100%", background:"none", border:"none", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:2, color: primaryTab==="lists" ? "#fde047" : "#666", cursor:"pointer", fontFamily:"inherit" }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="5" width="16" height="3" rx="1"/><rect x="4" y="11" width="16" height="3" rx="1"/><rect x="4" y="17" width="16" height="3" rx="1"/></svg>
+            <span style={{ fontSize:8, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.04em" }}>Lists</span>
+          </button>
+
+          {/* Settings */}
+          <button onClick={() => setPrimaryTab("settings")} style={{ flex:1, height:"100%", background:"none", border:"none", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:2, color: primaryTab==="settings" ? "#fde047" : "#666", cursor:"pointer", fontFamily:"inherit" }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+            <span style={{ fontSize:8, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.04em" }}>Settings</span>
+          </button>
+
         </div>
       )}
 

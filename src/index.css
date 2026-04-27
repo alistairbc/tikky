@@ -53,12 +53,17 @@
   --accent-44: #6366f170;
   --accent-66: #6366f1a8;
 
-  /* Semantic type colors */
-  --note:      #fde047; /* yellow · the sticky                          */
-  --note-ink:  #1a1410; /* dark ink on yellow note                      */
-  --task:      #10b981; /* green  · ✓ checkable                         */
-  --event:     #6366f1; /* indigo · ◈ scheduled (was amber)             */
-  --thought:   #8b5cf6; /* violet · ◎ thread / idea                     */
+  /* Semantic type colors — canonical design-system values */
+  --note:      #fde047; /* yellow · ◉ the genesis sticky                 */
+  --note-ink:  #1a1410; /* dark ink on yellow note                       */
+  --note-edge: #a16207; /* amber border for note chip                    */
+  --task:      #10b981; /* green  · ✓ checkable                          */
+  --event:     #0ea5e9; /* sky    · ◈ scheduled in time                  */
+  --event-ink: #7dd3fc; /* light-sky text on event badge                 */
+  --thought:   #64748b; /* slate  · ◎ open-ended / thread                */
+  --thought-ink: #cbd5e1; /* light-slate text on thought badge           */
+  --ai:        #8b5cf6; /* violet · AI orchestrated (5th type, evolved)  */
+  --ai-light:  #a78bfa; /* lighter violet for AI glow/spine              */
 
   /* Priority */
   --pri-high:   #ef4444;
@@ -115,6 +120,9 @@
   --glow-accent:  0 0 12px var(--accent-22);
   --glow-task:    0 0 6px #10b98166;
   --glow-note:    0 0 6px #fde04766;
+  --glow-event:   0 0 6px #0ea5e966;
+  --glow-thought: 0 0 6px #64748b66;
+  --glow-ai:      0 0 10px #8b5cf699;
 
   /* Motion — brisk, not bouncy */
   --dur-instant: 80ms;
@@ -195,5 +203,33 @@
     background: var(--border);
     flex: 1;
     margin-top: 3px;
+  }
+
+  /* Mobile bottom nav raised add button */
+  .nav-add-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #fde047, #fbbf24);
+    color: #1a1410;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 300;
+    margin-top: -22px;
+    box-shadow: 0 6px 12px -2px rgba(253,191,36,0.4), 0 0 0 4px #0e0e0e;
+    position: relative;
+    flex-shrink: 0;
+    border: none;
+    cursor: pointer;
+    line-height: 0;
+  }
+  .nav-add-btn::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(253,224,71,0.35);
   }
 }

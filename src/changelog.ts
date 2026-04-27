@@ -1,6 +1,12 @@
 import { CLR } from "./constants";
 
 export const CHANGELOG = [
+  { version:"1.4.0", date:"2026-04-27", label:"Design System Complete", items:[
+    "Correct type colors: Event → sky blue (#0ea5e9), Thought → slate (#64748b), violet reserved for AI",
+    "New CSS tokens: --event-ink, --thought-ink, --ai, --ai-light, --glow-event, --glow-thought, --glow-ai",
+    "Mobile bottom nav redesigned: SVG icons, raised yellow + button, 52px height, yellow active state",
+    "Mobile scroll padding adjusted for new nav height",
+  ]},
   { version:"1.3.0", date:"2026-04-27", label:"Calendar View", items:[
     "New Calendar tab (📅) — full month-grid view of all entries that have a due date",
     "Overdue banner at the top of the calendar when you have past-due items, with a live summary",
