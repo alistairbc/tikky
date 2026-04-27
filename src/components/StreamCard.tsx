@@ -285,19 +285,25 @@ export function StreamCard({
         </div>
       )}
 
-      <div style={{ flex:1, borderRadius:16, minWidth:0 }}>
+      <div style={{ flex:1, borderRadius:16, minWidth:0, position:"relative", overflow:"hidden" }}>
         {/* Mobile swipe-action reveals */}
-        {isMobile && (
-          <div style={{ position:"absolute", right:0, top:0, bottom:0, width:76,
-                        background:"#ef4444", display:"flex", alignItems:"center", justifyContent:"center" }}>
-            <span style={{ fontSize:22, color:"#fff" }}>🗑</span>
-          </div>
-        )}
+        {/* Swipe-right action: complete / restore */}
         {isMobile && (entry.type === "task" || entry.type === "event") && (
           <div style={{ position:"absolute", left:0, top:0, bottom:0, width:76,
                         background: entry.done ? "#6366f1" : "#10b981",
                         display:"flex", alignItems:"center", justifyContent:"center" }}>
-            <span style={{ fontSize:22, color:"#fff" }}>{entry.done ? "↩" : "✓"}</span>
+            {entry.done ? (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.17"/></svg>
+            ) : (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+            )}
+          </div>
+        )}
+        {/* Swipe-left action: delete */}
+        {isMobile && (
+          <div style={{ position:"absolute", right:0, top:0, bottom:0, width:76,
+                        background:"#ef4444", display:"flex", alignItems:"center", justifyContent:"center" }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14a2,2,0,0,1-2,2H8a2,2,0,0,1-2-2L5,6"/><path d="M10,11v6M14,11v6"/><path d="M9,6V4a1,1,0,0,1,1-1h4a1,1,0,0,1,1,1v2"/></svg>
           </div>
         )}
 
@@ -362,7 +368,7 @@ export function StreamCard({
             else if (dx >  72) onToggleDone();
           }}
           style={{
-            background: overdueEntry ? "#ef444408" : entry.pinned ? `${C.accent}08` : C.surface,
+            background: C.surface,
             borderRadius: 16,                                         /* --r-9: hero card */
             padding: isMobile ? "10px 11px" : compact ? "6px 10px" : "12px",
             border: entry.isNew
@@ -401,23 +407,37 @@ export function StreamCard({
             }} />
           )}
 
-          <div style={{ display:"flex", gap: isMobile ? 16 : 10 }}>
+          {/* Ghost swipe hint icons — subtle always-visible indicators of swipe actions */}
+          {isMobile && !isExpanded && (
+            <>
+              {(entry.type === "task" || entry.type === "event") && (
+                <div style={{ position:"absolute", left:8, top:"50%", transform:"translateY(-50%)", opacity:0.12, pointerEvents:"none" }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={entry.done ? "#6366f1" : "#10b981"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                </div>
+              )}
+              <div style={{ position:"absolute", right:8, top:"50%", transform:"translateY(-50%)", opacity:0.12, pointerEvents:"none" }}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14a2,2,0,0,1-2,2H8a2,2,0,0,1-2-2L5,6"/></svg>
+              </div>
+            </>
+          )}
+
+          <div style={{ display:"flex", gap: isMobile ? 10 : 10 }}>
             {/* Mobile: type icon */}
             {isMobile && (
-              <div style={{ width:36, height:36, borderRadius:9,
+              <div style={{ width:28, height:28, borderRadius:7,
                             background:`${meta.color}15`, border:`1px solid ${meta.color}33`,
                             display:"flex", alignItems:"center", justifyContent:"center",
-                            fontSize:18, flexShrink:0 }}>
+                            flexShrink:0 }}>
                 {entry.emoji ? (
                   <span style={{ fontSize:20, lineHeight:1 }}>{entry.emoji}</span>
                 ) : entry.type === "task" ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={meta.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={meta.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
                 ) : entry.type === "event" ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={meta.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={meta.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
                 ) : entry.type === "note" ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={meta.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={meta.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={meta.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={meta.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
                 )}
               </div>
             )}
