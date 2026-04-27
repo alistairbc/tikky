@@ -30,7 +30,7 @@ export const PM = {
 };
 export type Priority = keyof typeof PM;
 
-export const TIKKY_VERSION = "1.8.0";
+export const TIKKY_VERSION = "0.111";
 
 export const FONTS = {
   inter:  "'Inter','Segoe UI',system-ui,sans-serif",
@@ -51,3 +51,4 @@ export const LIST_TEMPLATES = [
   { name:"Ideas",            icon:"💡", color:"#8b5cf6" },
   { name:"Goals",            icon:"🎯", color:"#ef4444" },
 ];
+

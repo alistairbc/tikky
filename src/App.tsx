@@ -1899,9 +1899,8 @@ export default function App() {
                     return (
                       <div key={list.id} style={{ display:"flex", alignItems:"center", gap:4 }}>
                       <button 
-                        style={{ flex:1 }}
                         onClick={() => { setSelectedListId(list.id); setListSearch(''); }}
-                        style={{ width:"100%", display:"flex", alignItems:"center", gap:10, padding:"10px 12px", borderRadius:10, background: active ? `${list.color}15` : "none", border:"none", cursor:"pointer", textAlign:"left", marginBottom:4, transition:"all .15s" }}
+                        style={{ flex:1, width:"100%", display:"flex", alignItems:"center", gap:10, padding:"10px 12px", borderRadius:10, background: active ? `${list.color}15` : "none", border:"none", cursor:"pointer", textAlign:"left", marginBottom:4, transition:"all .15s" }}
                       >
                         <span style={{ fontSize:16 }}>{list.icon || "📋"}</span>
                         <div style={{ flex:1, minWidth:0 }}>
@@ -1972,7 +1971,7 @@ export default function App() {
             <div style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden" }}>
               {isMobile && (
                 <div className="no-scrollbar" style={{ padding:"10px 15px", borderBottom:`1px solid ${C.border}`, overflowX:"auto", display:"flex", gap:8, background:C.surface }}>
-                  {lists.map(list => (
+                  {[...lists].sort((a,b) => (b.pinned ? 1:0) - (a.pinned ? 1:0)).map(list => (
                     <button 
                       key={list.id} 
                       onClick={() => { setSelectedListId(list.id); setListSearch(''); }}
@@ -2045,7 +2044,7 @@ export default function App() {
                 );
                 return (
                   <>
-                    <div style={{ padding:"15px 25px", borderBottom:`1px solid ${C.border}`, display:"flex", alignItems:"center", justifyContent:"space-between", background:`${C.bg}ee`, backdropFilter:"blur(10px)" }}>
+                    <div style={{ padding: isMobile ? "10px 12px" : "15px 25px", borderBottom:`1px solid ${C.border}`, display:"flex", alignItems:"center", justifyContent:"space-between", background:`${C.bg}ee`, backdropFilter:"blur(10px)" }}>
                       <div style={{ display:"flex", alignItems:"center", gap:12 }}>
                         <input 
                           value={list.icon || "📋"} 
@@ -2066,7 +2065,7 @@ export default function App() {
                         </div>
                       </div>
                       <div style={{ display:"flex", gap:8, alignItems:"center" }}>
-                        {(["list","sticky","board"] as const).map(mode => (
+                        {!isMobile && (["list","sticky","board"] as const).map(mode => (
                           <button key={mode}
                             onClick={() => setListLayout(mode)}
                             title={mode === "list" ? "List view" : mode === "sticky" ? "Sticky notes" : "Board view"}
@@ -2138,7 +2137,7 @@ export default function App() {
                             setLists(lists.map(l => l.id === list.id ? { ...l, items: [...l.items, newItem] } : l));
                             setEditingListItemId(newItemId);
                             setEditListItemText("");
-                          }} style={{ width:"100%", padding:"15px", background:"none", border:"none", borderTop:`1px solid ${C.border}`, color: C.accent, cursor:"pointer", fontSize:13, fontWeight:600, textAlign:"left", display:"flex", alignItems:"center", gap:10 }}>
+                          }} style={{ width:"100%", padding:"15px", background:"none", border:"none", color: C.accent, cursor:"pointer", fontSize:13, fontWeight:600, textAlign:"left", display:"flex", alignItems:"center", gap:10 }}>
                             <span style={{ fontSize:18 }}>+</span> Add item
                           </button>
                         </div>
@@ -2745,6 +2744,7 @@ export default function App() {
     </div>
   );
 }
+
 
 
 

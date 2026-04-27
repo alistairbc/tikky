@@ -1,7 +1,16 @@
 import { CLR } from "./constants";
 
 export const CHANGELOG = [
-  { version:"1.8.0", date:"2026-04-27", label:"Design Learnings", items:[
+  { version:"0.111", date:"2026-04-27", label:"Mobile Polish + Versioning", items:[
+    "Versioning scheme updated: pre-production releases now use v0.xxx format",
+    "List item swipe-to-delete: redundant delete button hidden on mobile",
+    "List controls: padding and layout corrected for mobile viewports",
+    "List layout toggles (☰/sticky/⊞) hidden on mobile for a cleaner header",
+    "Add item button: removed duplicate border that caused double-underline effect",
+    "Pinned lists now sort to top on mobile pill nav",
+    "Sidebar list button: fixed duplicate style prop that lost flex:1",
+  ]},
+  { version:"0.108", date:"2026-04-27", label:"Design Learnings", items:[
     "Due date displayed inline on the title line with a small calendar icon",
     "BodyText renders ## headings and --- dividers for structured notes",
     "Type badge replaced with smaller, denser inline pill (10px uppercase)",
@@ -11,7 +20,7 @@ export const CHANGELOG = [
     "Mobile inline search bar toggles from magnifier icon in header",
     "Polished empty states for Stream, Lists, and Calendar views",
   ]},
-  { version:"1.7.0", date:"2026-04-27", label:"Tikky Pro", items:[
+  { version:"0.107", date:"2026-04-27", label:"Tikky Pro", items:[
     "Logo click navigates back to Stream from any view",
     "Lists and Insights positions swapped on mobile nav for better thumb reach",
     "Lists sticky-note grid layout option (☰ / sticky / ⊞ toggle)",
@@ -21,7 +30,7 @@ export const CHANGELOG = [
     "Rich body editor with formatting toolbar (B / I / bullets / checkboxes / H2)",
     "SVG type icons on mobile cards, stroked in type color",
   ]},
-  { version:"1.6.0", date:"2026-04-27", label:"Polish + Themes", items:[
+  { version:"0.106", date:"2026-04-27", label:"Polish + Themes", items:[
     "Calendar entry cards now show entry title and formatted due date",
     "Consistent diamond ◆ logo icon on desktop and mobile",
     "Mobile header: SVG search/filter/settings icons replace emoji",
@@ -30,7 +39,7 @@ export const CHANGELOG = [
     "Add/remove custom image: layout fixed on mobile",
     "11 new themes: Paper, Sage, Daylight, Hi-Contrast Dark/Light, Color-blind Safe, Low Stim, Night Shift, Sunshine, Terminal",
   ]},
-  { version:"1.5.0", date:"2026-04-27", label:"UX Polish", items:[
+  { version:"0.105", date:"2026-04-27", label:"UX Polish", items:[
     "Renamed to Ticky Notes",
     "Desktop nav: consistent SVG outline icons (no more colored calendar emoji)",
     "Sidebar Done tab: label tightened to prevent layout overflow",
@@ -39,13 +48,13 @@ export const CHANGELOG = [
     "Calendar: overdue banner is now clickable to filter to overdue entries",
     "List items: blank items now show placeholder text and are click-to-edit",
   ]},
-  { version:"1.4.0", date:"2026-04-27", label:"Design System Complete", items:[
+  { version:"0.104", date:"2026-04-27", label:"Design System Complete", items:[
     "Correct type colors: Event → sky blue (#0ea5e9), Thought → slate (#64748b), violet reserved for AI",
     "New CSS tokens: --event-ink, --thought-ink, --ai, --ai-light, --glow-event, --glow-thought, --glow-ai",
     "Mobile bottom nav redesigned: SVG icons, raised yellow + button, 52px height, yellow active state",
     "Mobile scroll padding adjusted for new nav height",
   ]},
-  { version:"1.3.0", date:"2026-04-27", label:"Calendar View", items:[
+  { version:"0.103", date:"2026-04-27", label:"Calendar View", items:[
     "New Calendar tab (📅) — full month-grid view of all entries that have a due date",
     "Overdue banner at the top of the calendar when you have past-due items, with a live summary",
     "Day detail panel — click any date to see all entries due that day, color-coded by type",
@@ -53,20 +62,20 @@ export const CHANGELOG = [
     "Month type breakdown — shows a count of tasks / events / notes / thoughts scheduled this month",
     "Today is highlighted with an accent ring; past days with no entries are visually muted",
   ]},
-  { version:"1.2.0", date:"2026-04-05", label:"Insights · Markdown · Alerts · Saved filters", items:[
+  { version:"0.102", date:"2026-04-05", label:"Insights · Markdown · Alerts · Saved filters", items:[
     "Insights tab (✦) — streak counter, entries-per-day bar chart, tag frequency, type breakdown, and completion rate, all computed live from your stream",
     "Markdown rendering in entry text — use **bold**, *italic*, `code`, and [text](url) anywhere in your entries",
     "Due-date alerts on load — a dismissible banner appears at the top of the stream when you have overdue or due-today tasks/events",
     "Saved filter combos — while any filter is active, click ⭐ Save in the filter bar to bookmark type+tag+due combinations for one-click recall",
   ]},
-  { version:"1.1.0", date:"2026-04-05", label:"Multi-select · Grouping · Duplicate", items:[
+  { version:"0.101", date:"2026-04-05", label:"Multi-select · Grouping · Duplicate", items:[
     "Multi-select mode — click ☑ in the toolbar to enter select mode, then click cards to select them",
     "Bulk actions — complete, reopen, set priority (H/M/L), or delete an entire selection at once; bulk delete supports undo",
     "Stream grouping — 'Group' dropdown groups the stream by type, priority, context, or due date with collapsible section headers",
     "Entry duplication — ⎘ Duplicate button in the expanded panel clones a card with a fresh timestamp",
     "Collapsible What's New / Coming Soon / Shipped sections in Preference Centre — collapsed by default to keep settings clean",
   ]},
-  { version:"1.0.0", date:"2026-04-05", label:"Search & filter upgrades", items:[
+  { version:"0.100", date:"2026-04-05", label:"Search & filter upgrades", items:[
     "Type filter chips in the stream header — click Tasks, Events, Notes, or Thoughts to narrow the stream instantly",
     "Due-status quick filters — Overdue, Today, and This week buttons filter by resolved due date",
     "Search now scans comments and subtask text, not just the entry title — a card surfaces if any part of it matches",
@@ -213,4 +222,5 @@ export const THEMES = [
   { id:"terminal",     name:"Terminal",            desc:"Phosphor · power user",         dark:true,  colors:{ bg:"#000d00", surface:"#001800", border:"#003800", text:"#00ee44", muted:"#00bb33", dim:"#008822", dimmer:"#005511", accent:"#00ff44", input:"#000900" } },
   { id:"sticky",      name:"Yellow Pad",          desc:"Sticky-note warmth · sunlit",    dark:false, colors:{ bg:"#fffde7", surface:"#fff9c4", border:"#f9e04b", text:"#1a1600", muted:"#4a4000", dim:"#7a6f00", dimmer:"#b09a00", accent:"#e65100", input:"#fffde7" } },
 ];
+
 

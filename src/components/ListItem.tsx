@@ -229,14 +229,17 @@ export function ListItem({
                        fontSize:12, color: item.note ? listColor : C.border, padding:"1px 3px" }}>
               ✎
             </button>
-            <button onClick={onDelete} title="Delete"
-              style={{ background:"none", border:"none", cursor:"pointer",
-                       fontSize:11, color: C.border, padding:"1px 3px" }}>
-              ✕
-            </button>
+            {!isMobile && (
+              <button onClick={onDelete} title="Delete"
+                style={{ background:"none", border:"none", cursor:"pointer",
+                         fontSize:11, color: C.border, padding:"1px 3px" }}>
+                ✕
+              </button>
+            )}
           </div>
         )}
       </div>
     </div>
   );
 }
+
