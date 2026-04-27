@@ -1,6 +1,26 @@
 import { CLR } from "./constants";
 
 export const CHANGELOG = [
+  { version:"1.8.0", date:"2026-04-27", label:"Design Learnings", items:[
+    "Due date displayed inline on the title line with a small calendar icon",
+    "BodyText renders ## headings and --- dividers for structured notes",
+    "Type badge replaced with smaller, denser inline pill (10px uppercase)",
+    "Tighter mobile card density — 10px padding, 36px type icon",
+    "@context shown as plain muted text; #tags keep coloured pills",
+    "Lists board view: two-column To Do / Done layout with coloured borders",
+    "Mobile inline search bar toggles from magnifier icon in header",
+    "Polished empty states for Stream, Lists, and Calendar views",
+  ]},
+  { version:"1.7.0", date:"2026-04-27", label:"Tikky Pro", items:[
+    "Logo click navigates back to Stream from any view",
+    "Lists and Insights positions swapped on mobile nav for better thumb reach",
+    "Lists sticky-note grid layout option (☰ / sticky / ⊞ toggle)",
+    "Yellow Pad theme: warm sticky-note aesthetic with amber tones",
+    "Insights: avg time to start/complete metrics, due this week/month counts",
+    "Overdue text case unified across Stream and Calendar",
+    "Rich body editor with formatting toolbar (B / I / bullets / checkboxes / H2)",
+    "SVG type icons on mobile cards, stroked in type color",
+  ]},
   { version:"1.6.0", date:"2026-04-27", label:"Polish + Themes", items:[
     "Calendar entry cards now show entry title and formatted due date",
     "Consistent diamond ◆ logo icon on desktop and mobile",

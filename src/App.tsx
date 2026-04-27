@@ -128,25 +128,26 @@ export default function App() {
   const [lightboxImg,    setLightboxImg]    = useState<string | null>(null);
 
   const roadmap = [
-    { icon: "📅", label: "Calendar View", desc: "Full-screen interactive calendar to manage events and deadlines visually." },
-    { icon: "🔖", label: "Smart Templates", desc: "Create reusable blueprints for recurring tasks, meetings, or daily logs." },
+    { icon: "🔖", label: "Smart Templates", desc: "Reusable blueprints for recurring tasks, meetings, or daily logs." },
     { icon: "🔔", label: "Native Notifications", desc: "Desktop and mobile push alerts for time-sensitive events and reminders." },
-    { icon: "☁️", label: "Cloud Sync", desc: "Seamlessly sync your stream across all your devices with end-to-end encryption." },
-    { icon: "🎙️", label: "Voice-to-Entry", desc: "Dictate thoughts and tasks on the go with automatic NLP parsing." },
+    { icon: "☁️", label: "Cloud Sync", desc: "Sync your stream across all devices with end-to-end encryption." },
     { icon: "👥", label: "Collaboration", desc: "Share lists and streams with others for real-time teamwork." },
     { icon: "📱", label: "Native Apps", desc: "Dedicated iOS and Android apps for the best mobile experience." },
-    { icon: "🔌", label: "API & Webhooks", desc: "Connect Tikky to your favorite tools and automate your workflow." },
+    { icon: "🔌", label: "API & Webhooks", desc: "Connect Tikky to your favourite tools and automate your workflow." },
+    { icon: "🔁", label: "Recurring Tasks", desc: "Set any task or event to repeat daily, weekly, or on a custom schedule." },
+    { icon: "🧩", label: "Widgets", desc: "Quick-capture and glanceable stream summary right from your home screen." },
   ];
 
   const shipped = [
-    { label: "Insights Dashboard", desc: "Live productivity metrics and streak tracking." },
-    { label: "Markdown Engine", desc: "Rich text formatting with search highlighting." },
-    { label: "Smart Filters", desc: "Saved combinations for rapid context switching." },
-    { label: "Bulk Operations", desc: "Multi-select actions for stream management." },
-    { label: "NLP Parser", desc: "Automatic extraction of dates, tags, and contexts." },
-    { label: "Themes & Customization", desc: "Deep UI personalization with fonts and backgrounds." },
-    { label: "Undo/Redo", desc: "Safety net for deletions and major changes." },
-    { label: "Subtasks & Comments", desc: "Break down tasks and keep logs of progress." },
+    { label: "Calendar View", desc: "Full month grid with overdue banner and day detail panel." },
+    { label: "Body Editor", desc: "Formatting toolbar for bold, italic, bullets, checkboxes, headings." },
+    { label: "Board & Sticky Views", desc: "Lists switch between row, sticky-note, and To Do/Done board layouts." },
+    { label: "17 Themes", desc: "Dark, light, accessibility, and specialised themes including Yellow Pad." },
+    { label: "Insights Dashboard", desc: "Streak, completion rate, due metrics, and type breakdown." },
+    { label: "Smart Filters", desc: "Saved filter combos for rapid context switching." },
+    { label: "Bulk Operations", desc: "Multi-select with batch complete, prioritise, and delete." },
+    { label: "Voice Input", desc: "Dictate entries with Web Speech API and live transcript preview." },
+    { label: "Image Attachments", desc: "Attach photos via camera, file picker, or drag-and-drop." },
   ];
 
   const [lists, setLists] = useState<List[]>(() => {
@@ -2485,25 +2486,26 @@ export default function App() {
               <div style={{ marginBottom:36 }}>
                 <div style={{ fontSize:10, fontWeight:700, color: C.accent, textTransform:"uppercase", letterSpacing:"0.12em", marginBottom:14 }}>Product Pulse</div>
                 <div style={{ display:"flex", flexDirection:"column", gap:12, marginBottom:20 }}>
-                  {[
-                    { v: "v1.2.0", name: "The Precision Update", status: "ACTIVE", color: C.accent, notes: ["Claude AI integration for smart entry classification", "Railway deployment — accessible anywhere", "Async compose with live feedback"] },
-                    { v: "v1.1.0", name: "Foundation Layer", status: "SHIPPED", color: "#10b981", notes: ["Core task management engine", "Focus / Pomodoro timer", "Bulk operations & select mode"] },
-                    { v: "v1.3.0", name: "Neural Workflows", status: "UPCOMING", color: C.dim, notes: ["Calendar view for events", "Smart templates & recurring tasks", "Native push notifications"] },
-                  ].map(pulse => (
-                    <div key={pulse.v} style={{ background: `${C.surface}cc`, backdropFilter:"blur(12px)", borderRadius:16, border:`1px solid ${C.border}`, padding:20, position:"relative", overflow:"hidden" }}>
-                      <div style={{ position:"absolute", left:0, top:0, bottom:0, width:4, background: pulse.color }} />
-                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
-                        <div>
-                          <div style={{ fontSize:10, fontWeight:700, color: pulse.color, fontFamily:"monospace", marginBottom:4 }}>{pulse.v}</div>
-                          <div style={{ fontSize:15, fontWeight:700 }}>{pulse.name}</div>
+                  {changelog.slice(0, 4).map((entry, idx) => {
+                    const isLatest = idx === 0;
+                    const pulseColor = isLatest ? C.accent : "#10b981";
+                    const pulseStatus = isLatest ? "CURRENT" : "SHIPPED";
+                    return (
+                      <div key={entry.version} style={{ background: `${C.surface}cc`, backdropFilter:"blur(12px)", borderRadius:16, border:`1px solid ${C.border}`, padding:20, position:"relative", overflow:"hidden" }}>
+                        <div style={{ position:"absolute", left:0, top:0, bottom:0, width:4, background: pulseColor }} />
+                        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
+                          <div>
+                            <div style={{ fontSize:10, fontWeight:700, color: pulseColor, fontFamily:"monospace", marginBottom:4 }}>v{entry.version}</div>
+                            <div style={{ fontSize:15, fontWeight:700 }}>{entry.label}</div>
+                          </div>
+                          <div style={{ fontSize:9, fontWeight:800, background: `${pulseColor}22`, color: pulseColor, padding:"3px 8px", borderRadius:4, letterSpacing:"0.05em" }}>{pulseStatus}</div>
                         </div>
-                        <div style={{ fontSize:9, fontWeight:800, background: `${pulse.color}22`, color: pulse.color, padding:"3px 8px", borderRadius:4, letterSpacing:"0.05em" }}>{pulse.status}</div>
+                        <ul style={{ margin:0, padding:"0 0 0 18px", fontSize:12, color: C.dim, lineHeight:1.6 }}>
+                          {entry.items.slice(0, 5).map((note, i) => <li key={i}>{note}</li>)}
+                        </ul>
                       </div>
-                      <ul style={{ margin:0, padding:"0 0 0 18px", fontSize:12, color: C.dim, lineHeight:1.6 }}>
-                        {pulse.notes.map((note, i) => <li key={i}>{note}</li>)}
-                      </ul>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 <div style={{ fontSize:10, fontWeight:700, color: C.accent, textTransform:"uppercase", letterSpacing:"0.12em", marginBottom:12 }}>Coming Up</div>
