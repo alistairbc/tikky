@@ -55,6 +55,7 @@ export default function App() {
   const [view,       setView]       = useState("main");
   const [primaryTab, setPrimaryTab] = useState<"stream" | "lists" | "insights" | "calendar" | "settings">("stream");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [showMobileSearch,  setShowMobileSearch]  = useState(false);
   const [showMobileCompose, setShowMobileCompose] = useState(false);
   const [sumPeriod,  setSumPeriod]  = useState("all");
   const [preview,    setPreview]    = useState<any>(null);
@@ -219,7 +220,7 @@ export default function App() {
   const [listSearch,    setListSearch]    = useState("");
   const [editingListItemId, setEditingListItemId] = useState<number | null>(null);
   const [editListItemText,  setEditListItemText]  = useState("");
-  const [listLayout,        setListLayout]        = useState<"list"|"sticky">("list");
+  const [listLayout,        setListLayout]        = useState<"list"|"sticky"|"board">("list");
 
   const [acType,        setAcType]        = useState<"tag" | "context" | null>(null);
   const [acQuery,       setAcQuery]       = useState("");
@@ -1350,7 +1351,7 @@ export default function App() {
         <div style={{ display:"flex", gap: isMobile ? 12 : 6, alignItems:"center" }}>
           {isMobile ? (
             <>
-              <button onClick={() => setShowMobileFilters(true)} title="Search & filter" style={{ background:"none", border:"none", color: C.muted, cursor:"pointer", padding:4, display:"flex" }}>
+              <button onClick={() => { setShowMobileSearch(s => !s); }} title="Search" style={{ background: showMobileSearch ? `${C.accent}22` : "none", border:"none", color: showMobileSearch ? C.accent : C.muted, cursor:"pointer", padding:4, display:"flex", borderRadius:6 }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
               </button>
               <button onClick={() => setShowMobileFilters(true)} title="Filters" style={{ background:"none", border:"none", color: C.muted, cursor:"pointer", padding:4, display:"flex" }}>
@@ -1380,6 +1381,26 @@ export default function App() {
       </div>
 
       {/* Removed mobile spaces bar to save space */}
+
+      {/* Mobile inline search bar */}
+      {isMobile && showMobileSearch && (
+        <div style={{ padding:"8px 14px", borderBottom:`1px solid ${C.border}`, background: C.bg, flexShrink:0, display:"flex", alignItems:"center", gap:8 }}>
+          <div style={{ flex:1, position:"relative", display:"flex", alignItems:"center" }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.dim} strokeWidth="2" strokeLinecap="round" style={{ position:"absolute", left:10, pointerEvents:"none" }}><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input
+              autoFocus
+              placeholder="Search entries…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{ width:"100%", background: C.surface, border:`1px solid ${search ? C.accent+"55" : C.border}`, borderRadius:9, padding:"8px 10px 8px 30px", fontSize:13, color: C.text, fontFamily:"inherit", outline:"none" }}
+            />
+            {search && (
+              <button onClick={() => setSearch("")} style={{ position:"absolute", right:8, background:"none", border:"none", color: C.dim, cursor:"pointer", fontSize:13, padding:2, lineHeight:1 }}>✕</button>
+            )}
+          </div>
+          <button onClick={() => { setShowMobileSearch(false); setSearch(""); }} style={{ background:"none", border:"none", color: C.accent, cursor:"pointer", fontSize:12, fontWeight:600, padding:"4px 2px", whiteSpace:"nowrap" as const }}>Done</button>
+        </div>
+      )}
 
       {!isMobile && (
         <div style={{ display:"flex", borderBottom:`1px solid ${C.border}`, flexShrink:0, background: C.bg, padding:"0 18px", alignItems:"center" }}>
@@ -1758,6 +1779,30 @@ export default function App() {
                 ));
               }
 
+              if (filteredEntries.length === 0) {
+                const hasAnyFilter = search || typeFilter || dueFilter || filterTag || !showCompleted;
+                return (
+                  <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"60px 20px", gap:14, textAlign:"center" }}>
+                    <div style={{ width:56, height:56, borderRadius:16, background: C.surface, border:`1px solid ${C.border}`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:26 }}>
+                      {hasAnyFilter ? "🔍" : "✦"}
+                    </div>
+                    <div>
+                      <div style={{ fontSize:15, fontWeight:700, color: C.text, marginBottom:4 }}>
+                        {hasAnyFilter ? "No matching entries" : "Nothing here yet"}
+                      </div>
+                      <div style={{ fontSize:12, color: C.dim, lineHeight:1.5 }}>
+                        {hasAnyFilter ? "Try clearing a filter, or type something new above." : "Type anything above to get started — tasks, notes, events, or ideas."}
+                      </div>
+                    </div>
+                    {hasAnyFilter && (
+                      <button onClick={() => { setSearch(""); setTypeFilter(null); setDueFilter(null); setFilterTag(null); }}
+                        style={{ fontSize:12, background: C.surface, border:`1px solid ${C.border}`, color: C.text, cursor:"pointer", padding:"6px 16px", borderRadius:8, fontFamily:"inherit", fontWeight:600 }}>
+                        Clear filters
+                      </button>
+                    )}
+                  </div>
+                );
+              }
               return filteredEntries.map((entry, i) => renderCard(entry, i, filteredEntries.length));
             })()}
             </div>{/* /tramline */}
@@ -1973,8 +2018,19 @@ export default function App() {
               {(() => {
                 const list = lists.find(l => l.id === selectedListId) || lists[0];
                 if (!list) return (
-                  <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", color: C.dim, fontSize:14 }}>
-                    Create a list to get started
+                  <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:14, padding:40, textAlign:"center" }}>
+                    <div style={{ width:56, height:56, borderRadius:16, background: C.surface, border:`1px solid ${C.border}`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:26 }}>📋</div>
+                    <div>
+                      <div style={{ fontSize:15, fontWeight:700, color: C.text, marginBottom:4 }}>No list selected</div>
+                      <div style={{ fontSize:12, color: C.dim }}>Choose a list from the sidebar, or create a new one.</div>
+                    </div>
+                    <button onClick={() => {
+                      const newList: List = { id: Date.now(), name: "New List", color: "#6366f1", items: [], icon: "📋", pinned: false, createdAt: new Date() };
+                      setLists([...lists, newList]);
+                      setSelectedListId(newList.id);
+                    }} style={{ fontSize:13, background: C.accent, border:"none", color:"#000", cursor:"pointer", padding:"8px 20px", borderRadius:9, fontFamily:"inherit", fontWeight:700 }}>
+                      + New List
+                    </button>
                   </div>
                 );
                 return (
@@ -2000,11 +2056,13 @@ export default function App() {
                         </div>
                       </div>
                       <div style={{ display:"flex", gap:8, alignItems:"center" }}>
-                        <button
-                          onClick={() => setListLayout(listLayout === "list" ? "sticky" : "list")}
-                          title={listLayout === "list" ? "Switch to sticky notes" : "Switch to list view"}
-                          style={{ background: listLayout === "sticky" ? `${C.accent}22` : "none", border:`1px solid ${listLayout === "sticky" ? C.accent : C.border}`, color: listLayout === "sticky" ? C.accent : C.dim, cursor:"pointer", padding:"6px 10px", borderRadius:8, fontSize:14 }}
-                        >{listLayout === "sticky" ? "🗒" : "☰"}</button>
+                        {(["list","sticky","board"] as const).map(mode => (
+                          <button key={mode}
+                            onClick={() => setListLayout(mode)}
+                            title={mode === "list" ? "List view" : mode === "sticky" ? "Sticky notes" : "Board view"}
+                            style={{ background: listLayout === mode ? `${C.accent}22` : "none", border:`1px solid ${listLayout === mode ? C.accent : C.border}`, color: listLayout === mode ? C.accent : C.dim, cursor:"pointer", padding:"5px 8px", borderRadius:6, fontSize:12, lineHeight:1 }}
+                          >{mode === "list" ? "☰" : mode === "sticky" ? "🗒" : "⊞"}</button>
+                        ))}
                         <button onClick={() => setLists(lists.filter(l => l.id !== list.id))} style={{ background:"none", border:`1px solid ${C.border}`, color: C.dim, cursor:"pointer", padding:"6px 10px", borderRadius:8, fontSize:14 }}>🗑</button>
                       </div>
                     </div>
@@ -2146,6 +2204,62 @@ export default function App() {
                               style={{ minHeight:110, borderRadius:10, border:`2px dashed ${C.border}`, background:"none", color: C.dim, cursor:"pointer", fontSize:28, display:"flex", alignItems:"center", justifyContent:"center" }}
                             >+</button>
                           </div>
+                        </div>
+                        ) : (
+                        /* Board / Kanban view */
+                        <div style={{ display:"flex", gap:14, overflowX:"auto", paddingBottom:8 }}>
+                          {(["todo","done"] as const).map(col => {
+                            const colItems = list.items.filter(item =>
+                              (!listSearch || item.text.toLowerCase().includes(listSearch.toLowerCase())) &&
+                              (col === "todo" ? !item.done : item.done)
+                            );
+                            const colLabel = col === "todo" ? "To Do" : "Done";
+                            const colColor = col === "todo" ? C.accent : "#10b981";
+                            return (
+                              <div key={col} style={{ minWidth:220, flex:1, display:"flex", flexDirection:"column", gap:8 }}>
+                                <div style={{ display:"flex", alignItems:"center", gap:7, padding:"6px 4px", borderBottom:`2px solid ${colColor}33` }}>
+                                  <div style={{ width:8, height:8, borderRadius:"50%", background: colColor }} />
+                                  <span style={{ fontSize:11, fontWeight:800, textTransform:"uppercase" as const, letterSpacing:"0.07em", color: colColor }}>{colLabel}</span>
+                                  <span style={{ fontSize:10, color: C.dim, marginLeft:"auto" }}>{colItems.length}</span>
+                                </div>
+                                <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                                  {colItems.map(item => (
+                                    <div key={item.id}
+                                      style={{ background: C.surface, border:`1px solid ${C.border}`, borderRadius:10, padding:"10px 12px", position:"relative", borderLeft:`3px solid ${list.color}` }}
+                                    >
+                                      <div style={{ display:"flex", alignItems:"flex-start", gap:8 }}>
+                                        <button
+                                          onClick={() => setLists(lists.map(l => l.id === list.id ? { ...l, items: l.items.map(i => i.id === item.id ? { ...i, done: !i.done } : i) } : l))}
+                                          style={{ width:16, height:16, borderRadius:4, border:`2px solid ${item.done ? "#10b981" : C.border}`, background: item.done ? "#10b981" : "none", flexShrink:0, marginTop:1, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer" }}
+                                        >
+                                          {item.done && <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><path d="M5 13l4 4L19 7"/></svg>}
+                                        </button>
+                                        <div style={{ flex:1, minWidth:0 }}>
+                                          {item.emoji && <span style={{ fontSize:13, marginRight:4 }}>{item.emoji}</span>}
+                                          <span style={{ fontSize:12, fontWeight:600, color: item.done ? C.dim : C.text, textDecoration: item.done ? "line-through" : "none", wordBreak:"break-word" as const }}>
+                                            {item.text || <span style={{ color: C.dimmer, fontStyle:"italic" }}>Untitled</span>}
+                                          </span>
+                                        </div>
+                                        <button onClick={() => setLists(lists.map(l => l.id === list.id ? { ...l, items: l.items.filter(i => i.id !== item.id) } : l))}
+                                          style={{ background:"none", border:"none", color: C.dimmer, cursor:"pointer", fontSize:12, padding:0, lineHeight:1, flexShrink:0 }}>✕</button>
+                                      </div>
+                                    </div>
+                                  ))}
+                                  {col === "todo" && (
+                                    <button onClick={() => {
+                                      const newItemId = Date.now();
+                                      const newItem = { id: newItemId, text: "", emoji: null, done: false, addedAt: new Date(), note: "" };
+                                      setLists(lists.map(l => l.id === list.id ? { ...l, items: [...l.items, newItem] } : l));
+                                      setEditingListItemId(newItemId);
+                                      setEditListItemText("");
+                                    }} style={{ width:"100%", padding:"9px", background:"none", border:`1px dashed ${C.border}`, borderRadius:9, color: C.dim, cursor:"pointer", fontSize:12, display:"flex", alignItems:"center", justifyContent:"center", gap:6 }}>
+                                      + Add item
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                         )}
                       </div>

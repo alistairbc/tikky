@@ -126,6 +126,9 @@ function BodyText({ text, C }: { text: string; C: any }) {
   return (
     <>
       {lines.map((line, i) => {
+        if (/^---+$/.test(line.trim())) return <hr key={i} style={{ border:"none", borderTop:`1px solid ${C.border}`, margin:"6px 0" }} />;
+        if (/^## /.test(line)) return <div key={i} style={{ fontSize:13, fontWeight:800, color: C.text, marginTop: i>0?10:0, marginBottom:2, letterSpacing:"-0.01em" }}>{line.slice(3)}</div>;
+        if (/^# /.test(line))  return <div key={i} style={{ fontSize:15, fontWeight:800, color: C.text, marginTop: i>0?12:0, marginBottom:3, letterSpacing:"-0.02em" }}>{line.slice(2)}</div>;
         const isCheck   = /^- \[[ xX]\]\s/.test(line);
         const isChecked = isCheck && line[3] !== " ";
         const isBullet  = !isCheck && /^[-*•]\s/.test(line);
@@ -361,7 +364,7 @@ export function StreamCard({
           style={{
             background: overdueEntry ? "#ef444408" : entry.pinned ? `${C.accent}08` : C.surface,
             borderRadius: 16,                                         /* --r-9: hero card */
-            padding: isMobile ? "12px" : compact ? "6px 10px" : "12px",
+            padding: isMobile ? "10px 11px" : compact ? "6px 10px" : "12px",
             border: entry.isNew
               ? `1.5px solid ${C.accent}`
               : `1px solid ${
@@ -401,10 +404,10 @@ export function StreamCard({
           <div style={{ display:"flex", gap: isMobile ? 16 : 10 }}>
             {/* Mobile: type icon */}
             {isMobile && (
-              <div style={{ width:40, height:40, borderRadius:10,
+              <div style={{ width:36, height:36, borderRadius:9,
                             background:`${meta.color}15`, border:`1px solid ${meta.color}33`,
                             display:"flex", alignItems:"center", justifyContent:"center",
-                            fontSize:20, flexShrink:0 }}>
+                            fontSize:18, flexShrink:0 }}>
                 {entry.emoji ? (
                   <span style={{ fontSize:20, lineHeight:1 }}>{entry.emoji}</span>
                 ) : entry.type === "task" ? (
@@ -482,6 +485,22 @@ export function StreamCard({
                   {!isMobile && entry.emoji && !isEditing && (
                     <span style={{ fontSize:14 }}>{entry.emoji}</span>
                   )}
+                  {/* Due date inline on title row — right-aligned, dimmed */}
+                  {!isEditing && entry.dueDate && editingDueDate !== entry.id && (
+                    <span
+                      onClick={e => { e.stopPropagation(); onDueDateEdit(); }}
+                      title="Click to change date"
+                      style={{ fontSize:10.5, color: overdueEntry ? "#ef4444" : C.dim, flexShrink:0,
+                               display:"flex", alignItems:"center", gap:2, cursor:"pointer",
+                               fontWeight: overdueEntry ? 700 : 400 }}>
+                      {overdueEntry ? (
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>
+                      ) : (
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                      )}
+                      {relDueLabel(entry.dueDate, entry.timestamp)}
+                    </span>
+                  )}
                 </div>
 
                 {isEditing ? (
@@ -553,22 +572,20 @@ export function StreamCard({
                   {(PM as any)[entry.priority].label}
                 </span>
 
-                {/* Type badge */}
+                {/* Type badge — small pill */}
                 {onCycleType && (
-                  <TypeBadge type={entry.type} onClick={onCycleType} />
-                )}
-
-                {/* Due date */}
-                {entry.dueDate && editingDueDate !== entry.id && (
-                  <span
-                    onClick={e => { e.stopPropagation(); onDueDateEdit(); }}
-                    title="Click to change date"
-                    style={{ fontSize:11, color: overdueEntry ? "#ef4444" : C.dim,
-                             display:"flex", alignItems:"center", gap:3, cursor:"pointer" }}>
-                    <span>{overdueEntry ? "⚠️" : "📅"}</span>
-                    {relDueLabel(entry.dueDate, entry.timestamp)}
+                  <span onClick={e => { e.stopPropagation(); onCycleType(); }}
+                    title="Click to change type"
+                    style={{ fontSize:9, fontWeight:800, textTransform:"uppercase" as const,
+                             letterSpacing:"0.06em", color: meta.color,
+                             background:`${meta.color}15`, border:`1px solid ${meta.color}33`,
+                             padding:"1px 5px", borderRadius:3, cursor:"pointer",
+                             userSelect:"none" as const, lineHeight:1.5 }}>
+                    {meta.label}
                   </span>
                 )}
+
+                {/* + date button shown only when no date set */}
                 {!entry.dueDate && editingDueDate !== entry.id && (
                   <button
                     onClick={e => { e.stopPropagation(); onDueDateEdit(); }}
@@ -691,17 +708,24 @@ export function StreamCard({
 
               {/* Mobile: tags */}
               {isMobile && (entry.tags.length > 0 || entry.contexts.length > 0) && (
-                <div style={{ display:"flex", gap:5, flexWrap:"wrap", marginTop:8 }}>
-                  {[...entry.tags, ...entry.contexts].map(t => {
+                <div style={{ display:"flex", gap:4, flexWrap:"wrap", marginTop:7 }}>
+                  {entry.tags.map(t => {
                     const col = tagColor(t);
                     return (
                       <span key={t} style={{ fontSize:10, fontWeight:600, color: col,
-                                            background:`${col}28`, padding:"1px 6px",
-                                            borderRadius:3, border:`1px solid ${col}44` }}>
-                        {t.startsWith("#") || t.startsWith("@") ? t : `#${t}`}
+                                            background:`${col}22`, padding:"1px 6px",
+                                            borderRadius:3, border:`1px solid ${col}33` }}>
+                        {t.startsWith("#") ? t : `#${t}`}
                       </span>
                     );
                   })}
+                  {entry.contexts.map((c: string) => (
+                    <span key={c} style={{ fontSize:10, fontWeight:600, color: C.muted,
+                                          background:"none", padding:"1px 4px",
+                                          borderRadius:3 }}>
+                      {c.startsWith("@") ? c : `@${c}`}
+                    </span>
+                  ))}
                 </div>
               )}
             </div>
