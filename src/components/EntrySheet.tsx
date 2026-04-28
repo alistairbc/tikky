@@ -343,7 +343,7 @@ export function EntrySheet({
         </AnimatePresence>
 
         {/* ─── Scrollable body ─── */}
-        <div ref={scrollRef} style={{ flex:1, overflowY:"auto", padding:"8px 14px 0" }}>
+        <div ref={scrollRef} style={{ flex:1, overflowY:"auto", padding:"8px 14px 0", display:"flex", flexDirection:"column" }}>
 
           {/* Title */}
           <textarea ref={titleRef} value={title}
@@ -382,10 +382,10 @@ export function EntrySheet({
 
           <div style={{ height:1, background: C.border, marginBottom:12, opacity:.4 }} />
 
-          {/* Body — always in edit mode */}
-          <div style={{ marginBottom:16 }}>
+          {/* Body — fills remaining space */}
+          <div style={{ flex:1, display:"flex", flexDirection:"column", minHeight:80, marginBottom:0 }}>
             {editingBody ? (
-              <>
+              <div style={{ flex:1, display:"flex", flexDirection:"column" }}>
                 {/* Formatting toolbar */}
                 <div style={{ display:"flex", gap:4, marginBottom:8, flexWrap:"wrap" }}>
                   {([["B","**","**"],["I","_","_"],["•","\n- ",""],["[ ]","\n- [ ] ",""],["H2","## ",""]] as [string,string,string][]).map(([label, prefix, suffix]) => (
@@ -415,13 +415,13 @@ export function EntrySheet({
                   onChange={e => setBody(e.target.value)}
                   onBlur={saveBody}
                   placeholder="Add notes, details, links…"
-                  style={{ display:"block", width:"100%", minHeight:120, background:C.bg,
+                  style={{ display:"block", width:"100%", flex:1, minHeight:80, background:C.bg,
                     border:`1px solid ${C.border}`, borderRadius:10, padding:"10px 12px",
                     fontSize:14, color:C.text, fontFamily:"inherit", resize:"none",
                     outline:"none", lineHeight:1.65, boxSizing:"border-box" as const }}
-                  rows={5}
+                  rows={4}
                 />
-              </>
+              </div>
             ) : (
               <div onClick={() => setEditingBody(true)} style={{ cursor:"text", minHeight:50 }}>
                 {body ? <BodyDisplay text={body} C={C} /> :

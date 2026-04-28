@@ -986,8 +986,13 @@ export default function App() {
   }, [entries]);
 
   // Hash routing for entry sheet — must be before all early returns (Rules of Hooks)
+  // Use history.replaceState to avoid triggering navigation events on Android
   useEffect(() => {
-    window.location.hash = sheetEntryId ? `entry/${sheetEntryId}` : "";
+    if (sheetEntryId) {
+      history.replaceState(null, "", `#entry/${sheetEntryId}`);
+    } else if (window.location.hash.startsWith("#entry/")) {
+      history.replaceState(null, "", window.location.pathname);
+    }
   }, [sheetEntryId]);
 
   useEffect(() => {
@@ -1277,7 +1282,14 @@ export default function App() {
 
   return (
     <div style={{ background: C.bg, height: "100%", color: C.text, fontFamily: (FONTS as any)[fontFamily], display:"flex", flexDirection:"column", overflow:"hidden", position:"relative", zoom: String(fontScale) }}>
-      {bgOverlayStyle && <div style={{ position:"absolute", inset:0, zIndex:0, pointerEvents:"none", ...bgOverlayStyle }} />}
+      {/* Non-image presets: CSS overlay */}
+      {bgOverlayStyle && bgPreset !== "image" && <div style={{ position:"absolute", inset:0, zIndex:0, pointerEvents:"none", ...bgOverlayStyle }} />}
+      {/* Image preset: <img> tag — more reliable than CSS background-image with large data URLs */}
+      {bgPreset === "image" && bgImage && (
+        <img src={bgImage} alt="" style={{ position:"absolute", inset:0 as any, width:"100%", height:"100%",
+          objectFit:"cover", objectPosition:"center", opacity: bgOpacity,
+          pointerEvents:"none", zIndex:0, userSelect:"none" as const }} />
+      )}
       
       {/* ── Image lightbox ── */}
       {lightboxImg && (
@@ -2682,7 +2694,7 @@ export default function App() {
                   ].map(p => (
                     <div key={p.id} style={{ position:"relative" }}>
                       <button onClick={() => {
-                        if (p.id === "image") { document.getElementById("bg-img-picker")?.click(); }
+                        if (p.id === "image") { setBgPreset("image"); document.getElementById("bg-img-picker")?.click(); }
                         else { setBgPreset(p.id); }
                       }} style={{ width:"100%", background: `${C.surface}cc`, backdropFilter:"blur(12px)", border:`2px solid ${bgPreset === p.id ? C.accent : C.border}`, borderRadius:12, padding:"10px 12px", cursor:"pointer", display:"flex", flexDirection:"column", gap:8, textAlign:"left", transition:"border-color .15s" }}>
                         <div style={{ width:"100%", height:44, borderRadius:7, background: C.bg, border:`1px solid ${C.border}`, overflow:"hidden", position:"relative", flexShrink:0 }}>
