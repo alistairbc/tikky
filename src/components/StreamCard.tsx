@@ -243,6 +243,9 @@ export function StreamCard({
 }: any) {
   const meta = (TM as any)[entry.type];
   const overdueEntry = isOverdue(entry);
+  // pastDue: like overdueEntry but for ALL types — used for date text colour
+  const pastDue = !entry.done && !!entry.dueDate &&
+    new Date(entry.dueDate + "T00:00") < new Date(new Date().setHours(0,0,0,0));
   const priorities: Array<"low"|"medium"|"high"> = ["low","medium","high"];
   const cyclePriority = () => {
     const next = priorities[(priorities.indexOf(entry.priority) + 1) % 3];
@@ -511,10 +514,10 @@ export function StreamCard({
                     <span
                       onClick={e => { e.stopPropagation(); onDueDateEdit(); }}
                       title="Click to change date"
-                      style={{ fontSize:10.5, color: overdueEntry ? "#ef4444" : C.dim, flexShrink:0,
+                      style={{ fontSize:10.5, color: pastDue ? "#ef4444" : C.dim, flexShrink:0,
                                display:"flex", alignItems:"center", gap:2, cursor:"pointer",
-                               fontWeight: overdueEntry ? 700 : 400 }}>
-                      {overdueEntry ? (
+                               fontWeight: pastDue ? 700 : 400 }}>
+                      {pastDue ? (
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>
                       ) : (
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
@@ -562,21 +565,10 @@ export function StreamCard({
                 )}
               </div>
 
-              {/* Body preview (collapsed) */}
-              {!isEditing && entry.body && (
-                <div
-                  onClick={e => { e.stopPropagation(); onBodyEdit(); }}
-                  title="Click to edit body"
-                  style={{ margin:"0 0 6px", fontSize:11.5, color: C.muted, lineHeight:1.5,
-                           cursor:"text", display:"-webkit-box" as any,
-                           WebkitLineClamp:2, WebkitBoxOrient:"vertical" as any,
-                           overflow:"hidden" }}>
-                  <BodyText text={entry.body} C={C} />
-                </div>
-              )}
-
-              {/* Priority · type · due date row */}
-              <div style={{ display:"flex", alignItems:"center", gap:6, flexWrap:"wrap" }}>
+              {/* Priority · type · tags — single scrollable line under title */}
+              <div style={{ display:"flex", alignItems:"center", gap:5, flexWrap:"nowrap",
+                            overflowX:"auto", msOverflowStyle:"none", scrollbarWidth:"none" as any,
+                            marginBottom: entry.body ? 4 : 0 }}>
                 {/* Priority badge — UPPERCASE per design spec */}
                 <span
                   onClick={e => { e.stopPropagation(); cyclePriority(); }}
@@ -606,6 +598,24 @@ export function StreamCard({
                   </span>
                 )}
 
+                {/* Tags */}
+                {(entry.tags||[]).map((tag: string) => (
+                  <span key={tag} style={{ fontSize:9, fontWeight:800, textTransform:"uppercase" as const,
+                    letterSpacing:"0.05em", color: C.accent, background:`${C.accent}18`,
+                    border:`1px solid ${C.accent}30`, padding:"1px 5px", borderRadius:3,
+                    flexShrink:0, whiteSpace:"nowrap" as const }}>
+                    #{tag}
+                  </span>
+                ))}
+                {(entry.contexts||[]).map((ctx: string) => (
+                  <span key={ctx} style={{ fontSize:9, fontWeight:700,
+                    color: C.dim, background: C.bg,
+                    border:`1px solid ${C.border}`, padding:"1px 5px", borderRadius:3,
+                    flexShrink:0, whiteSpace:"nowrap" as const }}>
+                    @{ctx}
+                  </span>
+                ))}
+
                 {/* + date button shown only when no date set */}
                 {!entry.dueDate && editingDueDate !== entry.id && (
                   <button
@@ -617,6 +627,19 @@ export function StreamCard({
                   </button>
                 )}
               </div>
+              {/* Body preview (collapsed) */}
+              {!isEditing && entry.body && (
+                <div
+                  onClick={e => { e.stopPropagation(); onBodyEdit(); }}
+                  title="Click to edit body"
+                  style={{ margin:"4px 0 4px", fontSize:11.5, color: C.muted, lineHeight:1.5,
+                           cursor:"text", display:"-webkit-box" as any,
+                           WebkitLineClamp:2, WebkitBoxOrient:"vertical" as any,
+                           overflow:"hidden" }}>
+                  <BodyText text={entry.body} C={C} />
+                </div>
+              )}
+
 
               {/* Inline date picker */}
               {editingDueDate === entry.id && (
