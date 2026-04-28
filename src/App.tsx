@@ -473,20 +473,6 @@ export default function App() {
     })();
   }, [session?.user?.id, syncCounter]);
 
-  // ── Auto-sync when user returns to tab (mobile: switching back to browser) ─
-  useEffect(() => {
-    const onVisible = () => {
-      if (!document.hidden && session) {
-        if (cloudSaveTimer.current) clearTimeout(cloudSaveTimer.current);
-        suppressSaveUntil.current = Date.now() + 3000;
-        setCloudLoaded(false);
-        setSyncCounter(c => c + 1);
-      }
-    };
-    document.addEventListener("visibilitychange", onVisible);
-    return () => document.removeEventListener("visibilitychange", onVisible);
-  }, [session]);
-
   // ── Save to cloud (debounced 2s) when data changes ───────────────────
   useEffect(() => {
     if (!session || !cloudLoaded) return;
@@ -1598,7 +1584,7 @@ export default function App() {
           <div className="no-scrollbar" style={{ marginLeft:"auto", display:"flex", gap:2, padding:"4px 0", alignItems:"center", overflowX:"auto" }}>
             {/* Sync status indicator */}
             <div title={syncStatus === "syncing" ? "Syncing…" : syncStatus === "error" ? "Sync failed — click to retry" : "Click to pull latest from cloud"}
-              onClick={() => { if (syncStatus !== "syncing") { setCloudLoaded(false); setSyncCounter(c => c+1); } }}
+              onClick={() => { if (syncStatus !== "syncing") { if (cloudSaveTimer.current) { clearTimeout(cloudSaveTimer.current); cloudSaveTimer.current = null; } setCloudLoaded(false); setSyncCounter(c => c+1); } }}
               style={{ display:"flex", alignItems:"center", gap:5, padding:"4px 8px", borderRadius:8, background: syncStatus === "error" ? "#ef444420" : "none", marginRight:4, cursor: syncStatus === "syncing" ? "default" : "pointer" }}>
               {syncStatus === "syncing" ? (
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={C.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation:"spin 1s linear infinite" }}>
