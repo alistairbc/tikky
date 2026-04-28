@@ -257,6 +257,7 @@ export function StreamCard({
 
   /* More menu state — closes on outside click/tap */
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [showEmojiPick, setShowEmojiPick] = useState(false);
   React.useEffect(() => {
     if (!showMoreMenu) return;
     const close = () => setShowMoreMenu(false);
@@ -844,54 +845,91 @@ export function StreamCard({
                 <div style={{ marginTop:16, paddingTop:16, borderTop:`1px solid ${C.border}` }}>
 
                   {/* ── Action bar ─────────────────────────────── */}
-                  <div style={{ display:"flex", gap:6, marginBottom:12, alignItems:"center" }}>
+                  <div style={{ display:"flex", gap:6, marginBottom:10, alignItems:"center", flexWrap:"nowrap" as const }}>
                     <button onClick={onAiTitle} disabled={aiTitling}
                       style={{ fontSize:11, background:`${C.accent}18`, border:`1px solid ${C.accent}44`,
                                color: C.accent, cursor: aiTitling ? "wait" : "pointer",
-                               padding:"4px 11px", borderRadius:6, fontFamily:"inherit",
-                               display:"flex", alignItems:"center", gap:5 }}>
+                               padding:"4px 10px", borderRadius:6, fontFamily:"inherit", whiteSpace:"nowrap" as const,
+                               display:"flex", alignItems:"center", gap:4, flexShrink:0 }}>
                       ✨ {aiTitling ? "Thinking…" : "AI Title"}
                     </button>
-                    {!entry.body && editingBodyId !== entry.id && (
-                      <button onClick={onBodyEdit}
-                        style={{ fontSize:11, background:"none", border:`1px solid ${C.border}`,
-                                 color: C.dim, cursor:"pointer", padding:"4px 11px",
-                                 borderRadius:6, fontFamily:"inherit" }}>
-                        + Add notes
-                      </button>
-                    )}
-                    {/* Emoji inline in action bar */}
-                    <div style={{ marginLeft:"auto", display:"flex", alignItems:"center", gap:6 }}>
-                      {entry.emoji && (
-                        <button onClick={() => onEmojiChange("")}
-                          title="Remove emoji"
-                          style={{ fontSize:18, background:"none", border:"none", cursor:"pointer", padding:0 }}>
-                          {entry.emoji}
+                    <div style={{ marginLeft:"auto", display:"flex", alignItems:"center", gap:4, flexShrink:0 }}>
+                      {entry.emoji ? (
+                        <>
+                          <button onClick={e => { e.stopPropagation(); setShowEmojiPick(o => !o); }}
+                            title="Change emoji"
+                            style={{ fontSize:16, background:"none", border:"none", cursor:"pointer", padding:"2px 4px", lineHeight:1 }}>
+                            {entry.emoji}
+                          </button>
+                          <button onClick={e => { e.stopPropagation(); onEmojiChange(""); setShowEmojiPick(false); }}
+                            title="Remove emoji"
+                            style={{ fontSize:10, background:"none", border:`1px solid ${C.border}`,
+                                     color: C.dim, cursor:"pointer", padding:"2px 6px",
+                                     borderRadius:4, fontFamily:"inherit" }}>✕</button>
+                        </>
+                      ) : (
+                        <button onClick={e => { e.stopPropagation(); setShowEmojiPick(o => !o); }}
+                          style={{ fontSize:11, background:"none", border:`1px solid ${C.border}`,
+                                   color: C.dim, cursor:"pointer", padding:"4px 9px",
+                                   borderRadius:6, fontFamily:"inherit", whiteSpace:"nowrap" as const }}>
+                          😊 Emoji
                         </button>
                       )}
-                      <EmojiPicker entry={entry} C={C} onEmojiChange={onEmojiChange} compact />
                     </div>
                   </div>
 
-                  {/* ── 2-column body: notes left, tasks+comments right ── */}
-                  <div style={{ display:"flex", gap:16, marginBottom:14, alignItems:"flex-start" }}>
+                  {/* ── Emoji tray (toggled) ──────────────────── */}
+                  {showEmojiPick && (
+                    <div style={{ marginBottom:10, padding:"8px 10px", background: C.bg,
+                                  borderRadius:8, border:`1px solid ${C.border}` }}
+                         onClick={e => e.stopPropagation()}>
+                      <div style={{ display:"flex", gap:4, alignItems:"center", flexWrap:"wrap" as const }}>
+                        <input
+                          value={entry.emoji || ""}
+                          onChange={e => onEmojiChange(e.target.value.trim())}
+                          placeholder="Type or paste…"
+                          autoFocus
+                          style={{ width:110, background: C.input, border:`1px solid ${C.border}`,
+                                   borderRadius:6, padding:"4px 8px", fontSize:12,
+                                   color: C.text, fontFamily:"inherit", outline:"none" }}
+                        />
+                        {["✅","🚀","💡","📅","🔥","⭐","📌","📝","🛒","✈️","🎨","💬","🎯","⚠️","❤️","🎉"].map(emo => (
+                          <button key={emo}
+                            onClick={() => { onEmojiChange(emo); setShowEmojiPick(false); }}
+                            style={{ fontSize:16, background: entry.emoji === emo ? `${C.accent}22` : "none",
+                                     border: entry.emoji === emo ? `1px solid ${C.accent}55` : `1px solid ${C.border}`,
+                                     borderRadius:5, width:30, height:30, cursor:"pointer",
+                                     display:"flex", alignItems:"center", justifyContent:"center" }}>
+                            {emo}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
-                    {/* LEFT — body notes (always takes 55%) */}
-                    <div style={{ flex:"0 0 55%", minWidth:0 }}>
+                  {/* ── 2-column body: notes left, tasks+comments right ── */}
+                  <div style={{ display:"flex", gap:16, marginBottom:14, alignItems:"stretch" }}>
+
+                    {/* LEFT — body notes (55%) */}
+                    <div style={{ flex:"0 0 55%", minWidth:0, display:"flex", flexDirection:"column" as const }}>
+                      <div style={{ fontSize:10, fontWeight:700, color: C.dim,
+                                    textTransform:"uppercase" as const, letterSpacing:"0.08em", marginBottom:6 }}>
+                        Notes
+                      </div>
                       {editingBodyId === entry.id ? (
                         <BodyEditor bodyInput={bodyInput} onBodyChange={onBodyChange} onBodyCancel={onBodyCancel} onBodySave={onBodySave} C={C} />
                       ) : entry.body ? (
                         <div onClick={onBodyEdit} title="Click to edit notes"
                           style={{ fontSize:12, color: C.text, lineHeight:1.6, cursor:"text",
                                    padding:"8px 10px", background: C.bg, borderRadius:8,
-                                   border:`1px solid ${C.border}`, minHeight:60 }}>
+                                   border:`1px solid ${C.border}`, flex:1 }}>
                           <BodyText text={entry.body} C={C} />
                         </div>
                       ) : (
                         <div onClick={onBodyEdit}
                           style={{ fontSize:12, color: C.dimmer, cursor:"text", fontStyle:"italic",
                                    padding:"8px 10px", background: C.bg, borderRadius:8,
-                                   border:`1px dashed ${C.border}`, minHeight:60,
+                                   border:`1px dashed ${C.border}`, flex:1, minHeight:60,
                                    display:"flex", alignItems:"center" }}>
                           Click to add notes…
                         </div>
