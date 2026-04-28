@@ -2678,7 +2678,6 @@ export default function App() {
                   ))}
                 </div>
                 <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
-                  <div style={{ display:"flex", flexDirection:"column", gap:0 }}>
                   <div style={{ display:"flex", alignItems:"center", gap:15, background: `${C.surface}cc`, backdropFilter:"blur(12px)", padding:"12px 15px", borderRadius:12, border:`1px solid ${C.border}` }}>
                     <span style={{ fontSize:12, fontWeight:600, color: C.dim }}>Overlay Opacity</span>
                     <input type="range" min="0" max="1" step="0.05" value={bgOpacity} onChange={e => setBgOpacity(parseFloat(e.target.value))} style={{ flex:1, accentColor: C.accent }} />
