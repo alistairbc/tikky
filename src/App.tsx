@@ -504,7 +504,7 @@ export default function App() {
       setSyncStatus(error ? "error" : "idle");
     }, 2000);
     return () => clearTimeout(cloudSaveTimer.current);
-  }, [entries, lists, streamOrder, theme, accentOverride, fontFamily, fontScale, bgPreset, bgOpacity, streamSort, session]);
+  }, [entries, lists, streamOrder, theme, accentOverride, fontFamily, fontScale, bgPreset, bgOpacity, streamSort, bgImage, session]);
 
   useEffect(() => {
     const now = new Date();
@@ -2652,10 +2652,23 @@ export default function App() {
                           if (file) {
                             const reader = new FileReader();
                             reader.onload = (ev) => {
-                              const base64 = ev.target?.result as string;
-                              setBgImage(base64);
-                              setBgPreset("image");
-                              localStorage.setItem("tikky_bgimage", base64);
+                              const raw = ev.target?.result as string;
+                              const imgEl = new Image();
+                              imgEl.onload = () => {
+                                const MAX_BG = 1920;
+                                const scale = Math.min(1, MAX_BG / Math.max(imgEl.width, imgEl.height));
+                                const cvs = document.createElement("canvas");
+                                cvs.width = Math.round(imgEl.width * scale);
+                                cvs.height = Math.round(imgEl.height * scale);
+                                const ctx2 = cvs.getContext("2d");
+                                const compressed = ctx2 ? cvs.toDataURL("image/jpeg", 0.80) : raw;
+                                if (ctx2) ctx2.drawImage(imgEl, 0, 0, cvs.width, cvs.height);
+                                const final = ctx2 ? cvs.toDataURL("image/jpeg", 0.80) : raw;
+                                setBgImage(final);
+                                setBgPreset("image");
+                                try { localStorage.setItem("tikky_bgimage", final); } catch(_) {}
+                              };
+                              imgEl.src = raw;
                             };
                             reader.readAsDataURL(file);
                           }
