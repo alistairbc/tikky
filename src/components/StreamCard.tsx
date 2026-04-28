@@ -372,23 +372,26 @@ export function StreamCard({
             else if (dx >  72) onToggleDone();
           }}
           style={{
-            background: overdueEntry && !isSelected && !isExpanded ? "#ef44440d" : C.surface,
+            background: C.surface,
             borderRadius: 16,                                         /* --r-9: hero card */
             padding: isMobile ? "10px 11px" : compact ? "6px 10px" : "12px",
             border: entry.isNew
               ? `1.5px solid ${C.accent}`
-              : `${overdueEntry && !isSelected && !isExpanded ? "1.5" : "1"}px solid ${
-                  isSelected     ? C.accent+"88"   :
-                  isExpanded     ? C.accent+"44"   :
-                  overdueEntry   ? "#ef4444bb"     :
-                  entry.done     ? C.bg            :
-                                   C.border
+              : `1px solid ${
+                  isSelected ? C.accent+"88" :
+                  isExpanded ? C.accent+"44" :
+                  entry.done ? C.bg          :
+                               C.border
                 }`,
             boxShadow: entry.isNew
-              ? `0 0 12px ${C.accent}33`
+              ? `inset 3px 0 0 ${C.accent}, 0 0 12px ${C.accent}33`
               : isSelected
-              ? `0 0 0 2px ${C.accent}22`
-              : "none",
+              ? `inset 3px 0 0 ${C.accent}, 0 0 0 2px ${C.accent}22`
+              : entry.done
+              ? "none"
+              : overdueEntry
+              ? "inset 3px 0 0 #ef4444"
+              : `inset 3px 0 0 ${meta.color}`,
             opacity: entry.done ? 0.55 : 1,
             cursor: "pointer",
             transition: "border-color .2s, box-shadow .2s, opacity .2s",
@@ -569,34 +572,32 @@ export function StreamCard({
               <div style={{ display:"flex", alignItems:"center", gap:5, flexWrap:"nowrap",
                             overflowX:"auto", msOverflowStyle:"none", scrollbarWidth:"none" as any,
                             marginBottom: entry.body ? 4 : 0 }}>
-                {/* Priority badge — UPPERCASE per design spec */}
-                <span
-                  onClick={e => { e.stopPropagation(); cyclePriority(); }}
-                  title="Click to cycle priority"
-                  style={{
-                    fontSize:10, fontWeight:800, letterSpacing:"0.05em",
-                    color: (PM as any)[entry.priority].color,
-                    background:`${(PM as any)[entry.priority].color}18`,
-                    border:`1px solid ${(PM as any)[entry.priority].color}33`,
-                    padding:"1px 6px", borderRadius:4, cursor:"pointer",
-                    userSelect:"none" as const, transition:"all .12s",
-                    textTransform:"uppercase" as const,
-                  }}>
-                  {(PM as any)[entry.priority].label}
-                </span>
-
-                {/* Type badge — small pill */}
+                {/* Type label — spine carries color, this confirms it in text */}
                 {onCycleType && (
                   <span onClick={e => { e.stopPropagation(); onCycleType(); }}
                     title="Click to change type"
-                    style={{ fontSize:9, fontWeight:800, textTransform:"uppercase" as const,
-                             letterSpacing:"0.06em", color: meta.color,
-                             background:`${meta.color}15`, border:`1px solid ${meta.color}33`,
-                             padding:"1px 5px", borderRadius:3, cursor:"pointer",
-                             userSelect:"none" as const, lineHeight:1.5 }}>
+                    style={{ fontSize:10, fontWeight:800, textTransform:"uppercase" as const,
+                             letterSpacing:"0.08em", color: meta.color,
+                             cursor:"pointer", userSelect:"none" as const, flexShrink:0 }}>
                     {meta.label}
                   </span>
                 )}
+
+                {/* Separator */}
+                <span style={{ color: C.border, fontSize:10, flexShrink:0, userSelect:"none" as const }}>·</span>
+
+                {/* Priority: dot + word — doesn't compete with type color */}
+                <span
+                  onClick={e => { e.stopPropagation(); cyclePriority(); }}
+                  title="Click to cycle priority"
+                  style={{ display:"flex", alignItems:"center", gap:4, cursor:"pointer", flexShrink:0 }}>
+                  <span style={{ width:6, height:6, borderRadius:"50%",
+                    background: (PM as any)[entry.priority].color, flexShrink:0, display:"inline-block" }} />
+                  <span style={{ fontSize:10, fontWeight:500, color: C.dim,
+                    userSelect:"none" as const }}>
+                    {(PM as any)[entry.priority].label}
+                  </span>
+                </span>
 
                 {/* Tags */}
                 {(entry.tags||[]).map((tag: string) => (

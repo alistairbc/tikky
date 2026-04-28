@@ -48,6 +48,9 @@ export function DashboardCard({
           background: entry.done ? C.bg : C.surface,
           borderRadius: isDashExp ? "8px 8px 0 0" : 8,   /* --r-6: dashboard card */
           border: `1px solid ${isDashExp ? C.accent+"55" : C.border}`,
+          boxShadow: entry.done ? "none" : overdueEntry
+            ? "inset 3px 0 0 #ef4444"
+            : `inset 3px 0 0 ${meta.color}`,
           opacity: entry.done ? 0.45 : 1,
           transition: "all .2s",
           cursor: "pointer",
@@ -129,11 +132,11 @@ export function DashboardCard({
                   title={`Due: ${entry.dueDate} — click to edit`}
                   style={{
                     fontSize: 10,
-                    color: overdueEntry ? "#ef4444" : "#f59e0b",
-                    background: overdueEntry ? "#ef444418" : "#f59e0b18",
-                    padding:"1px 6px", borderRadius:3, fontWeight:600, cursor:"pointer",
+                    color: overdueEntry ? "#ef4444" : C.dim,
+                    fontWeight: overdueEntry ? 700 : 400,
+                    cursor:"pointer",
                   }}>
-                  ⏱ {relDueLabel(entry.dueDate, entry.timestamp)}
+                  {relDueLabel(entry.dueDate, entry.timestamp)}
                 </span>
               ) : !entry.done ? (
                 <button
