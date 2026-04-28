@@ -2621,68 +2621,64 @@ export default function App() {
               <div style={{ marginBottom:36 }}>
                 <div style={{ fontSize:10, fontWeight:700, color: C.accent, textTransform:"uppercase", letterSpacing:"0.12em", marginBottom:14 }}>Background</div>
                 <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:10, marginBottom:12 }}>
+                  {/* Hidden file input for bg image upload */}
+                  <input id="bg-img-picker" type="file" accept="image/*" style={{ display:"none" }}
+                    onChange={e => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = (ev) => {
+                        const raw = ev.target?.result as string;
+                        const imgEl = new Image();
+                        imgEl.onload = () => {
+                          const MAX_BG = 1920;
+                          const scale = Math.min(1, MAX_BG / Math.max(imgEl.width, imgEl.height));
+                          const cvs = document.createElement("canvas");
+                          cvs.width = Math.round(imgEl.width * scale);
+                          cvs.height = Math.round(imgEl.height * scale);
+                          const ctx2 = cvs.getContext("2d");
+                          if (ctx2) ctx2.drawImage(imgEl, 0, 0, cvs.width, cvs.height);
+                          const final = ctx2 ? cvs.toDataURL("image/jpeg", 0.80) : raw;
+                          setBgImage(final);
+                          setBgPreset("image");
+                          try { localStorage.setItem("tikky_bgimage", final); } catch(_) {}
+                        };
+                        imgEl.src = raw;
+                      };
+                      reader.readAsDataURL(file);
+                      (e.target as HTMLInputElement).value = "";
+                    }}
+                  />
                   {[
                     { id: "none",  label: "None",           preview: null },
                     { id: "mesh",  label: "Mesh Gradient",  preview: { background: `radial-gradient(ellipse at 20% 40%, ${C.accent}99 0%, transparent 60%), radial-gradient(ellipse at 80% 70%, #ec489999 0%, transparent 50%), radial-gradient(ellipse at 60% 10%, #06b6d499 0%, transparent 50%)` } },
                     { id: "noise", label: "Film Grain",     preview: { backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='60' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`, opacity: 0.6 } },
                     { id: "grid",  label: "Blueprint Grid", preview: { backgroundImage: `linear-gradient(${C.accent}44 1px, transparent 1px), linear-gradient(90deg, ${C.accent}44 1px, transparent 1px)`, backgroundSize:"14px 14px" } },
-                    { id: "image", label: "Custom Image",   preview: bgImage ? { backgroundImage:`url(${bgImage})`, backgroundSize:"cover", backgroundPosition:"center" } : null },
+                    { id: "image", label: bgImage ? "Custom Image" : "Upload Image", preview: bgImage ? { backgroundImage:`url(${bgImage})`, backgroundSize:"cover", backgroundPosition:"center" } : null },
                   ].map(p => (
-                    <button key={p.id} onClick={() => setBgPreset(p.id)} style={{ background: `${C.surface}cc`, backdropFilter:"blur(12px)", border:`2px solid ${bgPreset === p.id ? C.accent : C.border}`, borderRadius:12, padding:"10px 12px", cursor:"pointer", display:"flex", flexDirection:"column", gap:8, textAlign:"left", transition:"border-color .15s" }}>
-                      <div style={{ width:"100%", height:44, borderRadius:7, background: C.bg, border:`1px solid ${C.border}`, overflow:"hidden", position:"relative", flexShrink:0 }}>
-                        {p.preview ? (
-                          <div style={{ position:"absolute", inset:0, ...p.preview }} />
-                        ) : (
-                          <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, color: C.dimmer }}>∅</div>
-                        )}
-                      </div>
-                      <span style={{ fontSize:12, fontWeight:600, color: bgPreset === p.id ? C.accent : C.text }}>{p.label}</span>
-                    </button>
+                    <div key={p.id} style={{ position:"relative" }}>
+                      <button onClick={() => {
+                        if (p.id === "image") { document.getElementById("bg-img-picker")?.click(); }
+                        else { setBgPreset(p.id); }
+                      }} style={{ width:"100%", background: `${C.surface}cc`, backdropFilter:"blur(12px)", border:`2px solid ${bgPreset === p.id ? C.accent : C.border}`, borderRadius:12, padding:"10px 12px", cursor:"pointer", display:"flex", flexDirection:"column", gap:8, textAlign:"left", transition:"border-color .15s" }}>
+                        <div style={{ width:"100%", height:44, borderRadius:7, background: C.bg, border:`1px solid ${C.border}`, overflow:"hidden", position:"relative", flexShrink:0 }}>
+                          {p.preview ? (
+                            <div style={{ position:"absolute", inset:0, ...p.preview }} />
+                          ) : (
+                            <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", fontSize:p.id === "image" ? 22 : 18, color: C.dimmer }}>{p.id === "image" ? "+" : "∅"}</div>
+                          )}
+                        </div>
+                        <span style={{ fontSize:12, fontWeight:600, color: bgPreset === p.id ? C.accent : C.text }}>{p.label}</span>
+                      </button>
+                      {p.id === "image" && bgImage && (
+                        <button onClick={e => { e.stopPropagation(); setBgImage(null); if(bgPreset === "image") setBgPreset("none"); try { localStorage.removeItem("tikky_bgimage"); } catch(_) {} }}
+                          style={{ position:"absolute", top:6, right:6, width:18, height:18, borderRadius:"50%", background:"#ef4444", border:"none", color:"#fff", fontSize:11, lineHeight:"18px", textAlign:"center", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:700 }}>×</button>
+                      )}
+                    </div>
                   ))}
                 </div>
                 <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
-                  <div style={{ display:"flex", flexDirection:"column", gap:10, background: `${C.surface}cc`, backdropFilter:"blur(12px)", padding:"12px 15px", borderRadius:12, border:`1px solid ${C.border}` }}>
-                    <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
-                      <span style={{ fontSize:12, fontWeight:600, color: C.dim }}>Upload Image</span>
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        onChange={e => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onload = (ev) => {
-                              const raw = ev.target?.result as string;
-                              const imgEl = new Image();
-                              imgEl.onload = () => {
-                                const MAX_BG = 1920;
-                                const scale = Math.min(1, MAX_BG / Math.max(imgEl.width, imgEl.height));
-                                const cvs = document.createElement("canvas");
-                                cvs.width = Math.round(imgEl.width * scale);
-                                cvs.height = Math.round(imgEl.height * scale);
-                                const ctx2 = cvs.getContext("2d");
-                                const compressed = ctx2 ? cvs.toDataURL("image/jpeg", 0.80) : raw;
-                                if (ctx2) ctx2.drawImage(imgEl, 0, 0, cvs.width, cvs.height);
-                                const final = ctx2 ? cvs.toDataURL("image/jpeg", 0.80) : raw;
-                                setBgImage(final);
-                                setBgPreset("image");
-                                try { localStorage.setItem("tikky_bgimage", final); } catch(_) {}
-                              };
-                              imgEl.src = raw;
-                            };
-                            reader.readAsDataURL(file);
-                          }
-                        }}
-                        style={{ fontSize:11, color: C.dim, flex:1, minWidth:0 }}
-                      />
-                      {bgImage && (
-                        <button onClick={() => { setBgImage(null); if(bgPreset === "image") setBgPreset("none"); localStorage.removeItem("tikky_bgimage"); }} style={{ background:"none", border:"none", color:"#ef4444", fontSize:11, cursor:"pointer" }}>Remove</button>
-                      )}
-                    </div>
-                    {bgImage && (
-                      <div style={{ width:"100%", height:80, borderRadius:8, background:`url(${bgImage})`, backgroundSize:"cover", backgroundPosition:"center", border:`1px solid ${C.border}` }} />
-                    )}
-                  </div>
+                  <div style={{ display:"flex", flexDirection:"column", gap:0 }}>
                   <div style={{ display:"flex", alignItems:"center", gap:15, background: `${C.surface}cc`, backdropFilter:"blur(12px)", padding:"12px 15px", borderRadius:12, border:`1px solid ${C.border}` }}>
                     <span style={{ fontSize:12, fontWeight:600, color: C.dim }}>Overlay Opacity</span>
                     <input type="range" min="0" max="1" step="0.05" value={bgOpacity} onChange={e => setBgOpacity(parseFloat(e.target.value))} style={{ flex:1, accentColor: C.accent }} />
