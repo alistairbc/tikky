@@ -1815,32 +1815,30 @@ export default function App() {
                       </div>
                     </div>
 
+                    {/* Tag filter pills — inline under search row */}
+                    {(allTags.length > 0 || savedFilters.length > 0 || filterTag) && (
+                      <div className="no-scrollbar" style={{ display:"flex", gap:5, alignItems:"center", overflowX:"auto", paddingTop:2, paddingBottom:2 }}>
+                        {(typeFilter || filterTag || dueFilter || search) && (
+                          <button
+                            onClick={() => { setTypeFilter(null); setFilterTag(null); setDueFilter(null); setSearch(""); }}
+                            style={{ fontSize:10, padding:"2px 8px", borderRadius:5, border:"1px solid #ef444455", background:"#ef444411", color:"#ef4444", cursor:"pointer", fontFamily:"inherit", fontWeight:700, whiteSpace:"nowrap", flexShrink:0 }}>
+                            ✕ Clear
+                          </button>
+                        )}
+                        {savedFilters.map(f => (
+                          <div key={f.id} style={{ display:"flex", alignItems:"center", background:`${C.accent}12`, border:`1px solid ${C.accent}33`, borderRadius:6, padding:"1px 2px 1px 8px", gap:4, flexShrink:0 }}>
+                            <span onClick={() => { setTypeFilter(f.type); setFilterTag(f.tag); setDueFilter(f.due); setSearch(f.search || ""); }} style={{ fontSize:10, color:C.accent, fontWeight:600, cursor:"pointer", whiteSpace:"nowrap" }}>{f.name}</span>
+                            <button onClick={() => setSavedFilters(savedFilters.filter(x => x.id !== f.id))} style={{ background:"none", border:"none", color:C.dim, cursor:"pointer", fontSize:10, padding:"2px 4px" }}>✕</button>
+                          </div>
+                        ))}
+                        {allTags.map(t => <TagPill key={t} tag={t} active={filterTag === t} onClick={() => setFilterTag(filterTag === t ? null : t)} />)}
+                      </div>
+                    )}
                   </div>
-                )}
-              {(allTags.length > 0 || savedFilters.length > 0 || typeFilter || filterTag || dueFilter || search) && (
-                <div style={{ padding:"0 15px 7px", display:"flex", gap:5, flexWrap:"wrap", alignItems:"center" }}>
-                  {(typeFilter || filterTag || dueFilter || search) && (
-                    <button 
-                      onClick={() => { setTypeFilter(null); setFilterTag(null); setDueFilter(null); setSearch(""); }}
-                      style={{ fontSize:10, padding:"2px 8px", borderRadius:5, border:`1px solid #ef444455`, background:"#ef444411", color: "#ef4444", cursor:"pointer", fontFamily:"inherit", fontWeight:700, transition:"all .12s", marginRight:5 }}
-                    >
-                      ✕ Clear all
-                    </button>
-                  )}
-                  {savedFilters.map(f => (
-                  <div key={f.id} style={{ display:"flex", alignItems:"center", background: `${C.accent}12`, border:`1px solid ${C.accent}33`, borderRadius:6, padding:"1px 2px 1px 8px", gap:4 }}>
-                    <span 
-                      onClick={() => { setTypeFilter(f.type); setFilterTag(f.tag); setDueFilter(f.due); setSearch(f.search || ""); }}
-                      style={{ fontSize:10, color: C.accent, fontWeight:600, cursor:"pointer" }}
-                    >
-                      {f.name}
-                    </span>
-                    <button onClick={() => setSavedFilters(savedFilters.filter(x => x.id !== f.id))} style={{ background:"none", border:"none", color: C.dim, cursor:"pointer", fontSize:10, padding:"2px 4px" }}>✕</button>
-                  </div>
-                ))}
-                {allTags.map(t => <TagPill key={t} tag={t} active={filterTag === t} onClick={() => setFilterTag(filterTag === t ? null : t)} />)}
-              </div>
-            )}
+
+                </div>
+              )}
+
           </div>
           
           <div 
@@ -3026,6 +3024,7 @@ export default function App() {
     </div>
   );
 }
+
 
 
 

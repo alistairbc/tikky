@@ -255,6 +255,19 @@ export function StreamCard({
   /* Card has substantive content = expanded with body, comments, or subtasks */
   const hasContent = entry.body || (entry.comments||[]).length > 0 || entry.subtasks.length > 0;
 
+  /* More menu state */
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+
+  /* Strip #tag and @context from display title — they appear in chip row separately */
+  const displayTitle = (() => {
+    const stripped = (entry.text || "")
+      .replace(/#[\w-]+/g, "")
+      .replace(/@[\w-]+/g, "")
+      .replace(/\s{2,}/g, " ")
+      .trim();
+    return stripped || (entry.text || "");
+  })();
+
   return (
     <div style={{ display:"flex", gap: isMobile ? 0 : 10, marginBottom: isMobile ? 8 : compact ? 5 : 10 }}>
 
@@ -288,7 +301,7 @@ export function StreamCard({
         </div>
       )}
 
-      <div style={{ flex:1, borderRadius:16, minWidth:0, position:"relative", overflow:"hidden" }}>
+      <div style={{ flex:1, borderRadius:11, minWidth:0, position:"relative", overflow:"hidden" }}>
         {/* Mobile swipe-action reveals */}
         {/* Swipe-right action: complete / restore */}
         {isMobile && (entry.type === "task" || entry.type === "event") && (
@@ -373,7 +386,7 @@ export function StreamCard({
           }}
           style={{
             background: C.surface,
-            borderRadius: 16,                                         /* --r-9: hero card */
+            borderRadius: 11,
             padding: isMobile ? "10px 11px" : compact ? "6px 10px" : "12px",
             border: entry.isNew
               ? `1.5px solid ${C.accent}`
@@ -452,8 +465,8 @@ export function StreamCard({
             <div style={{ flex:1, minWidth:0 }}>
 
               {/* Title row */}
-              <div style={{ display:"flex", alignItems:"center", gap:5,
-                            marginBottom: compact ? 3 : 4, flexWrap:"wrap" }}>
+              <div style={{ display:"flex", alignItems:"center", gap:6,
+                            marginBottom: compact ? 3 : 4 }}>
                 {!isMobile && (
                   <span
                     title="Drag to reorder"
@@ -472,7 +485,7 @@ export function StreamCard({
                   <span style={{ fontSize:10, color:"#f59e0b", lineHeight:1, flexShrink:0 }}>📌</span>
                 )}
 
-                <div style={{ flex:1, display:"flex", alignItems:"center", gap:8, minWidth:0 }}>
+                <div style={{ flex:1, display:"flex", alignItems:"center", gap:12, minWidth:0 }}>
                   {isEditing ? (
                     <textarea
                       ref={editRef}
@@ -497,16 +510,16 @@ export function StreamCard({
                     />
                   ) : (
                     <span
-                      onClick={e => { e.stopPropagation(); onEditStart(); }}
-                      title="Click to edit"
+                      onDoubleClick={e => { e.stopPropagation(); onEditStart(); }}
+                      title="Double-click to edit"
                       style={{
                         fontSize: isMobile ? 15 : 13, fontWeight:700, color: C.text,
                         overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap",
                         textDecoration: entry.done ? "line-through" : "none",
-                        cursor:"text", flex:1,
+                        cursor:"default", flex:1,
                         letterSpacing:"-0.005em",
                       }}>
-                      {entry.text}
+                      {displayTitle}
                     </span>
                   )}
                   {!isMobile && entry.emoji && !isEditing && (
@@ -553,17 +566,54 @@ export function StreamCard({
                       style={{
                         fontSize:13, background:"none", border:"none", color: C.dim,
                         cursor:"pointer", padding:"2px 5px", borderRadius:4, lineHeight:1,
-                        transform: isExpanded ? "rotate(180deg)" : "none",
+                        transform: isExpanded && !isMobile ? "rotate(180deg)" : "none",
                         transition:"transform .15s",
                       }}>
                       ▾
                     </button>
-                    <button
-                      onClick={e => { e.stopPropagation(); onDelete(); }}
-                      style={{ background:"none", border:"none", color: C.dim,
-                               fontSize:14, cursor:"pointer", opacity:0.35 }}>
-                      ⋮
-                    </button>
+                    {/* ⋮ More menu — not delete */}
+                    <div style={{ position:"relative" }}>
+                      <button
+                        onClick={e => { e.stopPropagation(); setShowMoreMenu(m => !m); }}
+                        style={{ background:"none", border:"none", color: C.dim,
+                                 fontSize:16, cursor:"pointer", opacity:0.4, padding:"0 3px",
+                                 lineHeight:1, display:"flex", alignItems:"center" }}>
+                        ⋮
+                      </button>
+                      {showMoreMenu && (
+                        <div
+                          onMouseLeave={() => setShowMoreMenu(false)}
+                          style={{
+                            position:"absolute", right:0, top:"100%", zIndex:200,
+                            background: C.surface, border:`1px solid ${C.border}`,
+                            borderRadius:8, boxShadow:"0 8px 24px rgba(0,0,0,.25)",
+                            minWidth:140, overflow:"hidden", marginTop:4,
+                          }}>
+                          {[
+                            { label: entry.done ? "↩ Restore" : "✓ Done", action: () => { onToggleDone(); setShowMoreMenu(false); } },
+                            { label: entry.pinned ? "📌 Unpin" : "📌 Pin", action: () => { onPin(); setShowMoreMenu(false); } },
+                            { label: "↲ Duplicate", action: () => { onDuplicate && onDuplicate(); setShowMoreMenu(false); } },
+                            { label: "🗑 Delete", action: () => { onDelete(); setShowMoreMenu(false); }, danger: true },
+                          ].map(item => (
+                            <button
+                              key={item.label}
+                              onClick={e => { e.stopPropagation(); item.action(); }}
+                              style={{
+                                display:"block", width:"100%", textAlign:"left",
+                                background:"none", border:"none", cursor:"pointer",
+                                padding:"9px 14px", fontSize:12, fontFamily:"inherit",
+                                color: (item as any).danger ? "#ef4444" : C.text,
+                                transition:"background .1s",
+                              }}
+                              onMouseEnter={e => { (e.currentTarget as any).style.background = (item as any).danger ? "#ef444415" : `${C.accent}15`; }}
+                              onMouseLeave={e => { (e.currentTarget as any).style.background = "none"; }}
+                            >
+                              {item.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </>
                 )}
               </div>
@@ -1061,4 +1111,5 @@ export function StreamCard({
     </div>
   );
 }
+
 

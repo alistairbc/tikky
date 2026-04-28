@@ -1,6 +1,23 @@
 import { CLR } from "./constants";
 
 export const CHANGELOG = [
+  { version:"0.116", date:"2026-04-28", label:"UX Polish", items:[
+    "Cards now open on any click — whole card is the tap target, not just the chevron",
+    "Three-dots (⋮) opens a more menu with Done / Pin / Duplicate / Delete — no accidental deletion",
+    "Priority labels show full words: Medium instead of Med",
+    "Card corner radius reduced for a more refined, less rounded look",
+    "Tags and saved filters now sit inline with the search bar — one less row of UI chrome",
+    "Title display strips hash and context tags — they appear once in the chip row only",
+    "Double-click a title to edit it directly; single click expands the card",
+  ]},
+  { version:"0.115", date:"2026-04-28", label:"EntrySheet Layout", items:[
+    "Condensed single chip row: Type + Priority + Due + tags + contexts on one scrollable line",
+    "Title row: large title textarea alongside done circle and close button",
+    "Body textarea always visible and focusable — no tap required to start editing",
+    "Formatting toolbar moved above body textarea",
+    "AI Title no longer creates double tags or hashes in the title",
+  ]},
+
   { version:"0.113", date:"2026-04-28", label:"Cloud Sync", items:[
     "Sign in with Google — your data syncs across all your devices",
     "First login prompts to import any existing local data",
