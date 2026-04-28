@@ -305,7 +305,8 @@ export default function App() {
   const [cloudLoaded,     setCloudLoaded]     = useState(false);
   const [showImportPrompt,setShowImportPrompt]= useState(false);
   const [syncCounter,      setSyncCounter]      = useState(0);
-  const cloudSaveTimer = useRef<any>(null);
+  const cloudSaveTimer     = useRef<any>(null);
+  const suppressSaveUntil  = useRef<number>(0);
 
   const searchRef = useRef<HTMLInputElement>(null);
   const streamEndRef  = useRef<HTMLDivElement>(null);
@@ -463,9 +464,11 @@ export default function App() {
         if (p.font) setFontFamily(p.font);
         if (p.scale) setFontScale(p.scale);
         if (p.bgPreset) setBgPreset(p.bgPreset);
-        if (p.bgOpacity) setBgOpacity(p.bgOpacity);
+        if (p.bgOpacity !== undefined) setBgOpacity(p.bgOpacity);
+        if (p.bgImage) { setBgImage(p.bgImage); try { localStorage.setItem("tikky_bgimage", p.bgImage); } catch(_) {} }
         if (p.streamSort) setStreamSort(p.streamSort);
       }
+      suppressSaveUntil.current = Date.now() + 3000;
       setCloudLoaded(true); setSyncStatus("idle");
     })();
   }, [session?.user?.id, syncCounter]);
@@ -474,6 +477,8 @@ export default function App() {
   useEffect(() => {
     const onVisible = () => {
       if (!document.hidden && session) {
+        if (cloudSaveTimer.current) clearTimeout(cloudSaveTimer.current);
+        suppressSaveUntil.current = Date.now() + 3000;
         setCloudLoaded(false);
         setSyncCounter(c => c + 1);
       }
@@ -487,10 +492,11 @@ export default function App() {
     if (!session || !cloudLoaded) return;
     if (cloudSaveTimer.current) clearTimeout(cloudSaveTimer.current);
     cloudSaveTimer.current = setTimeout(async () => {
+      if (Date.now() < suppressSaveUntil.current) { setSyncStatus("idle"); return; }
       setSyncStatus("syncing");
       const se = entries.map(e => ({ ...e, timestamp: e.timestamp.toISOString(), comments: (e.comments || []).map(c => ({ ...c, createdAt: c.createdAt.toISOString() })) }));
       const sl = lists.map(l => ({ ...l, createdAt: l.createdAt.toISOString(), items: (l.items || []).map(i => ({ ...i, addedAt: i.addedAt.toISOString() })) }));
-      const prefs = { theme, accent: accentOverride, font: fontFamily, scale: fontScale, bgPreset, bgOpacity, streamSort };
+      const prefs = { theme, accent: accentOverride, font: fontFamily, scale: fontScale, bgPreset, bgOpacity, streamSort, bgImage };
       const { error } = await supabase.from("user_data").upsert(
         { user_id: session.user.id, entries: se, lists: sl, stream_order: streamOrder, preferences: prefs, updated_at: new Date().toISOString() },
         { onConflict: "user_id" }
