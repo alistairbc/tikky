@@ -130,7 +130,11 @@ export function EntrySheet({
   const [showPhotos,   setShowPhotos]   = useState((entry.images   || []).length > 0);
   const [commentText,  setCommentText]  = useState("");
   const [editingBody,  setEditingBody]  = useState(true);   // open by default
-  const [kbOffset,     setKbOffset]     = useState(0);      // keyboard height compensation
+  const [kbOffset,     setKbOffset]     = useState(0);
+  const [sheetMaxH,    setSheetMaxH]    = useState(() => {
+    const vv = (window as any).visualViewport as VisualViewport | undefined;
+    return vv ? vv.height - 70 : window.innerHeight - 120;
+  });
 
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const bodyRef  = useRef<HTMLTextAreaElement>(null);
@@ -142,17 +146,27 @@ export function EntrySheet({
   useEffect(() => { setBody(entry.body || ""); }, [entry.body]);
   useEffect(() => { autoSize(titleRef.current); }, [title]);
 
-  // Visual viewport — lift sheet above keyboard
+  // Visual viewport — lift sheet above keyboard and maintain correct height
   useEffect(() => {
     const vv = (window as any).visualViewport as VisualViewport | undefined;
     if (!vv) return;
     const update = () => {
-      const offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-      setKbOffset(offset);
+      const kh = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      setKbOffset(kh);
+      setSheetMaxH(vv.height - 70); // always leave 70px visible above sheet
     };
+    update();
     vv.addEventListener("resize", update);
     vv.addEventListener("scroll", update);
     return () => { vv.removeEventListener("resize", update); vv.removeEventListener("scroll", update); };
+  }, []);
+
+  // Focus body textarea without scrolling the sheet's content container
+  useEffect(() => {
+    const id = setTimeout(() => {
+      bodyRef.current?.focus({ preventScroll: true });
+    }, 350); // after spring animation settles
+    return () => clearTimeout(id);
   }, []);
 
   const saveTitle = () => {
@@ -225,9 +239,7 @@ export function EntrySheet({
           position:"fixed",
           bottom: kbOffset,
           left:0, right:0,
-          /* svh = small viewport height (stable, excludes browser chrome) */
-          height: `calc(92svh - ${kbOffset}px)`,
-          maxHeight: `calc(100svh - 52px - ${kbOffset}px)`,
+          height: sheetMaxH,
           background: C.surface,
           borderRadius:"20px 20px 0 0",
           zIndex:901,
@@ -240,9 +252,6 @@ export function EntrySheet({
         <div style={{ display:"flex", justifyContent:"center", paddingTop:8, paddingBottom:4, flexShrink:0, cursor:"grab" }}>
           <div style={{ width:36, height:4, borderRadius:2, background: C.border }} />
         </div>
-
-        {/* Accent line */}
-        <div style={{ height:2, background: meta.color, opacity:0.6, flexShrink:0 }} />
 
         {/* Header: chips + done toggle + close */}
         <div style={{ display:"flex", alignItems:"center", padding:"10px 14px 6px", gap:6, flexShrink:0, flexWrap:"wrap" }}>
@@ -406,7 +415,6 @@ export function EntrySheet({
                   onChange={e => setBody(e.target.value)}
                   onBlur={saveBody}
                   placeholder="Add notes, details, links…"
-                  autoFocus
                   style={{ display:"block", width:"100%", minHeight:120, background:C.bg,
                     border:`1px solid ${C.border}`, borderRadius:10, padding:"10px 12px",
                     fontSize:14, color:C.text, fontFamily:"inherit", resize:"none",
