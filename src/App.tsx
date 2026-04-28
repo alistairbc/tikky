@@ -304,6 +304,7 @@ export default function App() {
   const [syncStatus,      setSyncStatus]      = useState<"idle"|"syncing"|"error">("idle");
   const [cloudLoaded,     setCloudLoaded]     = useState(false);
   const [showImportPrompt,setShowImportPrompt]= useState(false);
+  const [syncCounter,      setSyncCounter]      = useState(0);
   const cloudSaveTimer = useRef<any>(null);
 
   const searchRef = useRef<HTMLInputElement>(null);
@@ -428,7 +429,7 @@ export default function App() {
 
   // ── Load from cloud when user logs in ────────────────────────────────
   useEffect(() => {
-    if (!session || cloudLoaded) return;
+    if (!session) return;
     (async () => {
       setSyncStatus("syncing");
       const { data, error } = await supabase
@@ -467,7 +468,7 @@ export default function App() {
       }
       setCloudLoaded(true); setSyncStatus("idle");
     })();
-  }, [session?.user?.id]);
+  }, [session?.user?.id, syncCounter]);
 
   // ── Save to cloud (debounced 2s) when data changes ───────────────────
   useEffect(() => {
@@ -485,7 +486,7 @@ export default function App() {
       setSyncStatus(error ? "error" : "idle");
     }, 2000);
     return () => clearTimeout(cloudSaveTimer.current);
-  }, [entries, lists, streamOrder, theme, accentOverride, fontFamily, fontScale, bgPreset, bgOpacity, streamSort, session, cloudLoaded]);
+  }, [entries, lists, streamOrder, theme, accentOverride, fontFamily, fontScale, bgPreset, bgOpacity, streamSort, session]);
 
   useEffect(() => {
     const now = new Date();
@@ -1578,8 +1579,9 @@ export default function App() {
           })}
           <div className="no-scrollbar" style={{ marginLeft:"auto", display:"flex", gap:2, padding:"4px 0", alignItems:"center", overflowX:"auto" }}>
             {/* Sync status indicator */}
-            <div title={syncStatus === "syncing" ? "Syncing…" : syncStatus === "error" ? "Sync failed" : `Signed in as ${session?.user?.email}`}
-              style={{ display:"flex", alignItems:"center", gap:5, padding:"4px 8px", borderRadius:8, background: syncStatus === "error" ? "#ef444420" : "none", marginRight:4, cursor:"default" }}>
+            <div title={syncStatus === "syncing" ? "Syncing…" : syncStatus === "error" ? "Sync failed — click to retry" : "Click to pull latest from cloud"}
+              onClick={() => { if (syncStatus !== "syncing") { setCloudLoaded(false); setSyncCounter(c => c+1); } }}
+              style={{ display:"flex", alignItems:"center", gap:5, padding:"4px 8px", borderRadius:8, background: syncStatus === "error" ? "#ef444420" : "none", marginRight:4, cursor: syncStatus === "syncing" ? "default" : "pointer" }}>
               {syncStatus === "syncing" ? (
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={C.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation:"spin 1s linear infinite" }}>
                   <path d="M21 12a9 9 0 11-6.219-8.56"/>
