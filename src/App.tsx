@@ -802,7 +802,13 @@ export default function App() {
       if (result) {
         const clean = result.replace(/```json?|```/g, "").trim();
         const parsed = JSON.parse(clean);
-        if (parsed.title) up(id, { text: parsed.title.trim(), rawText: parsed.title.trim(), body: parsed.body || "" });
+        if (parsed.title) {
+          // Strip any #tags and @contexts the AI included in the title — they live in the pills
+          const aiTitle = parsed.title.trim()
+            .replace(/#[\w-]+/g, "").replace(/@[\w-]+/g, "")
+            .replace(/\s{2,}/g, " ").trim();
+          up(id, { text: aiTitle, rawText: aiTitle, body: parsed.body?.trim() || "" });
+        }
       }
     } catch {}
     setAiTitlingId(null);
