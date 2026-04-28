@@ -470,6 +470,18 @@ export default function App() {
     })();
   }, [session?.user?.id, syncCounter]);
 
+  // ── Auto-sync when user returns to tab (mobile: switching back to browser) ─
+  useEffect(() => {
+    const onVisible = () => {
+      if (!document.hidden && session) {
+        setCloudLoaded(false);
+        setSyncCounter(c => c + 1);
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [session]);
+
   // ── Save to cloud (debounced 2s) when data changes ───────────────────
   useEffect(() => {
     if (!session || !cloudLoaded) return;
@@ -2667,9 +2679,15 @@ export default function App() {
                   <div>
                     <div style={{ fontSize:13, fontWeight:600, color: C.text }}>{session?.user?.user_metadata?.full_name || session?.user?.email?.split("@")[0]}</div>
                     <div style={{ fontSize:11, color: C.dim, marginTop:2 }}>{session?.user?.email}</div>
-                    <div style={{ fontSize:10, color: C.dimmer, marginTop:4, display:"flex", alignItems:"center", gap:4 }}>
+                    <div style={{ fontSize:10, color: C.dimmer, marginTop:4, display:"flex", alignItems:"center", gap:6 }}>
                       <span style={{ width:6, height:6, borderRadius:"50%", background: syncStatus === "error" ? "#ef4444" : syncStatus === "syncing" ? C.accent : "#10b981", display:"inline-block" }} />
                       {syncStatus === "syncing" ? "Syncing…" : syncStatus === "error" ? "Sync error — check connection" : "Synced"}
+                      {syncStatus !== "syncing" && (
+                        <button onClick={() => { setCloudLoaded(false); setSyncCounter(c => c+1); }}
+                          style={{ marginLeft:4, padding:"1px 8px", background:"none", border:`1px solid ${C.border}`, borderRadius:4, color: C.dim, fontSize:9, cursor:"pointer", fontFamily:"inherit", fontWeight:600 }}>
+                          Pull
+                        </button>
+                      )}
                     </div>
                   </div>
                   <button
