@@ -1,6 +1,12 @@
 import { CLR } from "./constants";
 
 export const CHANGELOG = [
+  { version:"0.118", date:"2026-04-28", label:"UX: 2-col editor, consistent WYSIWYG, chip-to-sheet", items:[
+    "Desktop expanded card redesigned: 2-column layout (body 55% left, subtasks+comments 45% right)",
+    "WYSIWYG toolbar standardised desktop + mobile: ☑ checkbox, H heading labels",
+    "Type/priority chips on mobile now open entry sheet instead of cycling inline",
+    "List item emoji: removed full emoji grid, compact text input instead",
+  ]},
   { version:"0.117", date:"2026-04-28", label:"Bug Fixes", items:[
     "Fixed ## and @@ double-prefix on tags and contexts in chip row",
     "Tapping the body preview on mobile now opens the entry sheet",

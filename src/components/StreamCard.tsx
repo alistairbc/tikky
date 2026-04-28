@@ -58,8 +58,8 @@ function BodyEditor({ bodyInput, onBodyChange, onBodyCancel, onBodySave, C }: { 
         {btn("B","Bold","**","**")}
         {btn("I","Italic","_","_")}
         {btn("•","Bullet","\n- ")}
-        {btn("[ ]","Checkbox","\n- [ ] ")}
-        {btn("H2","Heading","## ")}
+        {btn("☑","Checkbox","\n- [ ] ")}
+        {btn("H","Heading","## ")}
       </div>
       <textarea autoFocus ref={bodyRef} rows={5} value={bodyInput}
         onChange={e => onBodyChange(e.target.value)}
@@ -114,7 +114,7 @@ function FormatToolbar({ bodyRef, value, onChange, C }: { bodyRef: React.RefObje
       {btn("B","Bold","**","**")}
       {btn("I","Italic","_","_")}
       {btn("•","Bullet","\n- ")}
-      {btn("[ ]","Checkbox","\n- [ ] ")}
+      {btn("☑","Checkbox","\n- [ ] ")}
       {btn("H","Heading","## ")}
     </div>
   );
@@ -628,10 +628,13 @@ export function StreamCard({
               <div style={{ display:"flex", alignItems:"center", gap:5, flexWrap:"nowrap",
                             overflowX:"auto", msOverflowStyle:"none", scrollbarWidth:"none" as any,
                             marginBottom: entry.body ? 4 : 0 }}>
-                {/* Type label — spine carries color, this confirms it in text */}
+                {/* Type label — on desktop cycles type, on mobile opens sheet */}
                 {onCycleType && (
-                  <span onClick={e => { e.stopPropagation(); onCycleType(); }}
-                    title="Click to change type"
+                  <span onClick={e => {
+                      e.stopPropagation();
+                      if (isMobile && onOpenSheet) { onOpenSheet(); } else { onCycleType(); }
+                    }}
+                    title={isMobile ? "Tap to open" : "Click to change type"}
                     style={{ fontSize:10, fontWeight:800, textTransform:"uppercase" as const,
                              letterSpacing:"0.08em", color: meta.color,
                              cursor:"pointer", userSelect:"none" as const, flexShrink:0 }}>
@@ -642,10 +645,13 @@ export function StreamCard({
                 {/* Separator */}
                 <span style={{ color: C.border, fontSize:10, flexShrink:0, userSelect:"none" as const }}>·</span>
 
-                {/* Priority: dot + word — doesn't compete with type color */}
+                {/* Priority: dot + word — on desktop cycles, on mobile opens sheet */}
                 <span
-                  onClick={e => { e.stopPropagation(); cyclePriority(); }}
-                  title="Click to cycle priority"
+                  onClick={e => {
+                    e.stopPropagation();
+                    if (isMobile && onOpenSheet) { onOpenSheet(); } else { cyclePriority(); }
+                  }}
+                  title={isMobile ? "Tap to open" : "Click to cycle priority"}
                   style={{ display:"flex", alignItems:"center", gap:4, cursor:"pointer", flexShrink:0 }}>
                   <span style={{ width:6, height:6, borderRadius:"50%",
                     background: (PM as any)[entry.priority].color, flexShrink:0, display:"inline-block" }} />
@@ -837,198 +843,188 @@ export function StreamCard({
               >
                 <div style={{ marginTop:16, paddingTop:16, borderTop:`1px solid ${C.border}` }}>
 
-                  {/* Action bar */}
-                  <div style={{ display:"flex", gap:6, marginBottom:12 }}>
+                  {/* ── Action bar ─────────────────────────────── */}
+                  <div style={{ display:"flex", gap:6, marginBottom:12, alignItems:"center" }}>
                     <button onClick={onAiTitle} disabled={aiTitling}
-                      title="Let AI split into title + body"
                       style={{ fontSize:11, background:`${C.accent}18`, border:`1px solid ${C.accent}44`,
                                color: C.accent, cursor: aiTitling ? "wait" : "pointer",
-                               padding:"3px 10px", borderRadius:6, fontFamily:"inherit",
+                               padding:"4px 11px", borderRadius:6, fontFamily:"inherit",
                                display:"flex", alignItems:"center", gap:5 }}>
                       ✨ {aiTitling ? "Thinking…" : "AI Title"}
                     </button>
                     {!entry.body && editingBodyId !== entry.id && (
                       <button onClick={onBodyEdit}
                         style={{ fontSize:11, background:"none", border:`1px solid ${C.border}`,
-                                 color: C.dim, cursor:"pointer", padding:"3px 10px",
+                                 color: C.dim, cursor:"pointer", padding:"4px 11px",
                                  borderRadius:6, fontFamily:"inherit" }}>
-                        + Add body
+                        + Add notes
                       </button>
                     )}
+                    {/* Emoji inline in action bar */}
+                    <div style={{ marginLeft:"auto", display:"flex", alignItems:"center", gap:6 }}>
+                      {entry.emoji && (
+                        <button onClick={() => onEmojiChange("")}
+                          title="Remove emoji"
+                          style={{ fontSize:18, background:"none", border:"none", cursor:"pointer", padding:0 }}>
+                          {entry.emoji}
+                        </button>
+                      )}
+                      <EmojiPicker entry={entry} C={C} onEmojiChange={onEmojiChange} compact />
+                    </div>
                   </div>
 
-                  {/* Body */}
-                  {(entry.body || editingBodyId === entry.id) && (
-                    <div style={{ marginBottom:14 }}>
-                      <div style={{ fontSize:10, fontWeight:700, color: C.dim,
-                                    textTransform:"uppercase" as const,
-                                    letterSpacing:"0.08em", marginBottom:6 }}>
-                        Body
-                      </div>
+                  {/* ── 2-column body: notes left, tasks+comments right ── */}
+                  <div style={{ display:"flex", gap:16, marginBottom:14, alignItems:"flex-start" }}>
+
+                    {/* LEFT — body notes (always takes 55%) */}
+                    <div style={{ flex:"0 0 55%", minWidth:0 }}>
                       {editingBodyId === entry.id ? (
                         <BodyEditor bodyInput={bodyInput} onBodyChange={onBodyChange} onBodyCancel={onBodyCancel} onBodySave={onBodySave} C={C} />
-                      ) : (
-                        <div onClick={onBodyEdit} title="Click to edit"
+                      ) : entry.body ? (
+                        <div onClick={onBodyEdit} title="Click to edit notes"
                           style={{ fontSize:12, color: C.text, lineHeight:1.6, cursor:"text",
                                    padding:"8px 10px", background: C.bg, borderRadius:8,
-                                   border:`1px solid ${C.border}` }}>
+                                   border:`1px solid ${C.border}`, minHeight:60 }}>
                           <BodyText text={entry.body} C={C} />
                         </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Sub-tasks */}
-                  {entry.type === "task" && (
-                    <div style={{ marginBottom:14 }}>
-                      <div style={{ fontSize:10, fontWeight:700, color: C.dim,
-                                    textTransform:"uppercase" as const,
-                                    letterSpacing:"0.08em", marginBottom:7 }}>
-                        Sub-tasks
-                      </div>
-                      {entry.subtasks.length === 0 && (
-                        <div style={{ fontSize:11, color: C.dimmer, marginBottom:8, fontStyle:"italic" }}>
-                          No sub-tasks yet.
+                      ) : (
+                        <div onClick={onBodyEdit}
+                          style={{ fontSize:12, color: C.dimmer, cursor:"text", fontStyle:"italic",
+                                   padding:"8px 10px", background: C.bg, borderRadius:8,
+                                   border:`1px dashed ${C.border}`, minHeight:60,
+                                   display:"flex", alignItems:"center" }}>
+                          Click to add notes…
                         </div>
                       )}
-                      {entry.subtasks.map((st: any) => (
-                        <div key={st.id}
-                          style={{ display:"flex", alignItems:"center", gap:7, marginBottom:6 }}>
-                          <Tick checked={st.done} onChange={() => onSubtaskToggle(st.id)} size={15} />
-                          <span style={{ flex:1, fontSize:12, color: st.done ? C.dim : C.text,
-                                         textDecoration: st.done ? "line-through" : "none" }}>
-                            {renderMd(st.text, searchQuery)}
-                          </span>
-                          <button onClick={() => onSubtaskDelete(st.id)}
-                            style={{ background:"none", border:"none", cursor:"pointer",
-                                     fontSize:12, color:"#ef4444", padding:"1px 4px", opacity:.6 }}>
-                            ✕
+                    </div>
+
+                    {/* RIGHT — subtasks (tasks only) + comments */}
+                    <div style={{ flex:1, minWidth:0, display:"flex", flexDirection:"column", gap:12 }}>
+
+                      {/* Sub-tasks */}
+                      {entry.type === "task" && (
+                        <div>
+                          <div style={{ fontSize:10, fontWeight:700, color: C.dim,
+                                        textTransform:"uppercase" as const,
+                                        letterSpacing:"0.08em", marginBottom:7 }}>
+                            Sub-tasks {entry.subtasks.length > 0 && <span style={{ color:C.accent, fontWeight:400 }}>· {entry.subtasks.filter((s:any)=>s.done).length}/{entry.subtasks.length}</span>}
+                          </div>
+                          {entry.subtasks.map((st: any) => (
+                            <div key={st.id}
+                              style={{ display:"flex", alignItems:"center", gap:7, marginBottom:5 }}>
+                              <Tick checked={st.done} onChange={() => onSubtaskToggle(st.id)} size={14} />
+                              <span style={{ flex:1, fontSize:12, color: st.done ? C.dim : C.text,
+                                             textDecoration: st.done ? "line-through" : "none" }}>
+                                {renderMd(st.text, searchQuery)}
+                              </span>
+                              <button onClick={() => onSubtaskDelete(st.id)}
+                                style={{ background:"none", border:"none", cursor:"pointer",
+                                         fontSize:11, color:"#ef4444", padding:"1px 3px", opacity:.5 }}>
+                                ✕
+                              </button>
+                            </div>
+                          ))}
+                          <div style={{ display:"flex", gap:5, marginTop:5 }}>
+                            <input
+                              value={stInputs[entry.id] || ""}
+                              onChange={e => onSubtaskInput(e.target.value)}
+                              onKeyDown={e => { if (e.key === "Enter") onSubtaskAdd(); }}
+                              placeholder="Add sub-task…"
+                              style={{ flex:1, background: C.input, border:`1px solid ${C.border}`,
+                                       borderRadius:6, padding:"4px 8px", fontSize:12,
+                                       color: C.text, fontFamily:"inherit", outline:"none" }}
+                            />
+                            <button onClick={onSubtaskAdd}
+                              style={{ background: C.accent, border:"none", color:"#fff",
+                                       cursor:"pointer", padding:"4px 10px", borderRadius:6,
+                                       fontSize:13, fontFamily:"inherit" }}>+</button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Comments */}
+                      <div>
+                        <div style={{ fontSize:10, fontWeight:700, color: C.dim,
+                                      textTransform:"uppercase" as const,
+                                      letterSpacing:"0.08em", marginBottom:7 }}>
+                          Comments {(entry.comments||[]).length > 0 && <span style={{ color:C.accent, fontWeight:400 }}>· {(entry.comments||[]).length}</span>}
+                        </div>
+                        {(entry.comments||[]).map((comment: any) => (
+                          <div key={comment.id}
+                            style={{ marginBottom:6, padding:"6px 9px", background: C.bg,
+                                     borderRadius:6, border:`1px solid ${C.border}` }}>
+                            {editingComment && editingComment.commentId === comment.id ? (
+                              <div>
+                                <textarea
+                                  value={editCommentText}
+                                  onChange={e => onCommentEditChange(e.target.value)}
+                                  onKeyDown={e => {
+                                    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onCommentEditSave(); }
+                                    if (e.key === "Escape") onCommentEditCancel();
+                                  }}
+                                  rows={2} autoFocus
+                                  style={{ width:"100%", resize:"none", background: C.input,
+                                           border:`1px solid ${C.accent}55`, borderRadius:5,
+                                           padding:"4px 7px", fontSize:12, fontFamily:"inherit",
+                                           color: C.text, outline:"none", boxSizing:"border-box" as const }}
+                                />
+                                <div style={{ display:"flex", gap:4, marginTop:4 }}>
+                                  <button onClick={onCommentEditSave}
+                                    style={{ fontSize:11, background: C.accent, border:"none",
+                                             color:"#fff", cursor:"pointer", padding:"2px 8px",
+                                             borderRadius:4, fontFamily:"inherit" }}>Save</button>
+                                  <button onClick={onCommentEditCancel}
+                                    style={{ fontSize:11, background:"none",
+                                             border:`1px solid ${C.border}`, color: C.dim,
+                                             cursor:"pointer", padding:"2px 8px",
+                                             borderRadius:4, fontFamily:"inherit" }}>Cancel</button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div style={{ display:"flex", alignItems:"flex-start", gap:6 }}>
+                                <div style={{ flex:1 }}>
+                                  <p onDoubleClick={() => onCommentEditStart(comment.id, comment.text)}
+                                    style={{ margin:"0 0 3px", fontSize:12, color: C.text,
+                                             lineHeight:1.4, wordBreak:"break-word", cursor:"default" }}>
+                                    {renderMd(comment.text, searchQuery)}
+                                  </p>
+                                  <span style={{ fontSize:9, color: C.dimmer }}>{fmt(comment.createdAt)}</span>
+                                </div>
+                                <button onClick={() => onCommentDelete(comment.id)}
+                                  style={{ background:"none", border:"none", cursor:"pointer",
+                                           fontSize:11, color:"#ef4444", padding:"1px 3px", opacity:.4 }}>✕</button>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                        <div style={{ display:"flex", gap:5, marginTop:5 }}>
+                          <textarea
+                            value={commentInputs[entry.id] || ""}
+                            onChange={e => onCommentInput(e.target.value)}
+                            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onCommentAdd(); } }}
+                            placeholder="Add a comment…"
+                            rows={2}
+                            style={{ flex:1, resize:"none", background: C.input,
+                                     border:`1px solid ${C.border}`, borderRadius:6,
+                                     padding:"5px 8px", fontSize:12, fontFamily:"inherit",
+                                     color: C.text, outline:"none", lineHeight:1.5,
+                                     boxSizing:"border-box" as const, transition:"border-color .15s" }}
+                            onFocus={e => e.target.style.borderColor=`${C.accent}66`}
+                            onBlur={e  => e.target.style.borderColor=C.border}
+                          />
+                          <button onClick={onCommentAdd}
+                            disabled={!(commentInputs[entry.id]||"").trim()}
+                            style={{ padding:"0 10px", borderRadius:6, border:"none",
+                                     background: (commentInputs[entry.id]||"").trim() ? C.accent : C.dimmer,
+                                     color:"#fff", cursor: (commentInputs[entry.id]||"").trim() ? "pointer" : "default",
+                                     fontSize:13, alignSelf:"stretch", transition:"background .15s" }}>
+                            ↑
                           </button>
                         </div>
-                      ))}
-                      <div style={{ display:"flex", gap:6, marginTop:6 }}>
-                        <input
-                          value={stInputs[entry.id] || ""}
-                          onChange={e => onSubtaskInput(e.target.value)}
-                          onKeyDown={e => { if (e.key === "Enter") onSubtaskAdd(); }}
-                          placeholder="Add sub-task…"
-                          style={{ flex:1, background: C.input, border:`1px solid ${C.border}`,
-                                   borderRadius:6, padding:"5px 9px", fontSize:12,
-                                   color: C.text, fontFamily:"inherit", outline:"none" }}
-                        />
-                        <button onClick={onSubtaskAdd}
-                          style={{ background: C.accent, border:"none", color:"#fff",
-                                   cursor:"pointer", padding:"5px 11px", borderRadius:6,
-                                   fontSize:13, fontFamily:"inherit" }}>
-                          +
-                        </button>
                       </div>
-                    </div>
-                  )}
 
-                  {/* Comments */}
-                  <div>
-                    <div style={{ fontSize:10, fontWeight:700, color: C.dim,
-                                  textTransform:"uppercase" as const,
-                                  letterSpacing:"0.08em", marginBottom:8 }}>
-                      💬 Comments
-                      {(entry.comments||[]).length > 0 && (
-                        <span style={{ color: C.accent, fontWeight:400 }}>
-                          {" "}· {(entry.comments||[]).length}
-                        </span>
-                      )}
-                    </div>
-                    {(entry.comments||[]).map((comment: any) => (
-                      <div key={comment.id}
-                        style={{ marginBottom:8, padding:"7px 10px", background: C.bg,
-                                 borderRadius:7, border:`1px solid ${C.border}` }}>
-                        {editingComment && editingComment.commentId === comment.id ? (
-                          <div>
-                            <textarea
-                              value={editCommentText}
-                              onChange={e => onCommentEditChange(e.target.value)}
-                              onKeyDown={e => {
-                                if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onCommentEditSave(); }
-                                if (e.key === "Escape") onCommentEditCancel();
-                              }}
-                              rows={2} autoFocus
-                              style={{ width:"100%", resize:"none", background: C.input,
-                                       border:`1px solid ${C.accent}55`, borderRadius:5,
-                                       padding:"5px 8px", fontSize:12, fontFamily:"inherit",
-                                       color: C.text, outline:"none",
-                                       boxSizing:"border-box" as const }}
-                            />
-                            <div style={{ display:"flex", gap:5, marginTop:5 }}>
-                              <button onClick={onCommentEditSave}
-                                style={{ fontSize:11, background: C.accent, border:"none",
-                                         color:"#fff", cursor:"pointer", padding:"2px 9px",
-                                         borderRadius:4, fontFamily:"inherit" }}>
-                                Save
-                              </button>
-                              <button onClick={onCommentEditCancel}
-                                style={{ fontSize:11, background:"none",
-                                         border:`1px solid ${C.border}`, color: C.dim,
-                                         cursor:"pointer", padding:"2px 9px",
-                                         borderRadius:4, fontFamily:"inherit" }}>
-                                Cancel
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div style={{ display:"flex", alignItems:"flex-start", gap:7 }}>
-                            <div style={{ flex:1 }}>
-                              <p
-                                onDoubleClick={() => onCommentEditStart(comment.id, comment.text)}
-                                title="Double-click to edit"
-                                style={{ margin:"0 0 4px", fontSize:12, color: C.text,
-                                         lineHeight:1.5, wordBreak:"break-word", cursor:"default" }}>
-                                {renderMd(comment.text, searchQuery)}
-                              </p>
-                              <span style={{ fontSize:9, color: C.dimmer }}>
-                                {fmt(comment.createdAt)}
-                              </span>
-                            </div>
-                            <button onClick={() => onCommentDelete(comment.id)}
-                              style={{ background:"none", border:"none", cursor:"pointer",
-                                       fontSize:11, color:"#ef4444", padding:"1px 3px",
-                                       opacity:.5, flexShrink:0 }}>
-                              ✕
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                    <div style={{ display:"flex", gap:6, marginTop:6 }}>
-                      <textarea
-                        value={commentInputs[entry.id] || ""}
-                        onChange={e => onCommentInput(e.target.value)}
-                        onKeyDown={e => {
-                          if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onCommentAdd(); }
-                        }}
-                        placeholder="Add a comment… (Enter to submit)"
-                        rows={2}
-                        style={{ flex:1, resize:"none", background: C.input,
-                                 border:`1px solid ${C.border}`, borderRadius:7,
-                                 padding:"6px 9px", fontSize:12, fontFamily:"inherit",
-                                 color: C.text, outline:"none", lineHeight:1.5,
-                                 boxSizing:"border-box" as const, transition:"border-color .15s" }}
-                        onFocus={e => e.target.style.borderColor=`${C.accent}66`}
-                        onBlur={e  => e.target.style.borderColor=C.border}
-                      />
-                      <button onClick={onCommentAdd}
-                        disabled={!(commentInputs[entry.id]||"").trim()}
-                        style={{ padding:"0 12px", borderRadius:7, border:"none",
-                                 background: (commentInputs[entry.id]||"").trim() ? C.accent : C.dimmer,
-                                 color:"#fff",
-                                 cursor: (commentInputs[entry.id]||"").trim() ? "pointer" : "default",
-                                 fontSize:13, alignSelf:"stretch", transition:"background .15s" }}>
-                        ↑
-                      </button>
                     </div>
                   </div>
-
-                  {/* Emoji picker — collapsed by default */}
-                  <EmojiPicker entry={entry} C={C} onEmojiChange={onEmojiChange} />
 
                   {/* Photos */}
                   <div>
