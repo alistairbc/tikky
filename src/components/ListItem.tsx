@@ -73,14 +73,16 @@ export function ListItem({ item, listColor, isEditing, editText, onEditChange, o
                   onKeyDown={e => { if (e.key === "Enter") onEditSave(); if (e.key === "Escape") onEditCancel(); }}
                   style={{ flex:1, background:C.input, border:`1px solid #6366f155`, borderRadius:6, padding:"4px 8px", fontSize:13, color: C.text, fontFamily:"inherit", outline:"none", boxSizing:"border-box" }}
                 />
-                <input
-                  maxLength={4}
-                  value={item.emoji || ""}
-                  onChange={e => onEmojiChange(e.target.value.trim())}
-                  placeholder="🙂"
-                  title="Type or paste an emoji"
-                  style={{ width:40, background:C.input, border:`1px solid ${C.border}`, borderRadius:6, padding:"4px 4px", textAlign:"center", fontSize:16, color: C.text, fontFamily:"inherit", outline:"none" }}
-                />
+                {!isMobile && (
+                  <input
+                    maxLength={4}
+                    value={item.emoji || ""}
+                    onChange={e => onEmojiChange(e.target.value.trim())}
+                    placeholder="🙂"
+                    title="Type or paste an emoji"
+                    style={{ width:40, background:C.input, border:`1px solid ${C.border}`, borderRadius:6, padding:"4px 4px", textAlign:"center", fontSize:16, color: C.text, fontFamily:"inherit", outline:"none" }}
+                  />
+                )}
               </div>
               <div style={{ display:"flex", gap:5 }}>
                 <button onClick={onEditSave} style={{ fontSize:11, background:"#6366f1", border:"none", color:"#fff", cursor:"pointer", padding:"2px 9px", borderRadius:4, fontFamily:"inherit" }}>Save</button>
@@ -88,7 +90,7 @@ export function ListItem({ item, listColor, isEditing, editText, onEditChange, o
               </div>
             </div>
           ) : (
-            <p onDoubleClick={onStartEdit} title="Double-click to edit" style={{ margin:0, fontSize:13, color: item.done ? C.dim : C.text, textDecoration: item.done ? "line-through" : "none", lineHeight:1.5, cursor:"text", wordBreak:"break-word" }}>
+            <p onDoubleClick={!isMobile ? onStartEdit : undefined} onClick={isMobile ? onStartEdit : undefined} title="Tap to edit" style={{ margin:0, fontSize:13, color: item.done ? C.dim : C.text, textDecoration: item.done ? "line-through" : "none", lineHeight:1.5, cursor:"text", wordBreak:"break-word" }}>
               {item.emoji && <span style={{ marginRight:5 }}>{item.emoji}</span>}
               {item.text}
             </p>

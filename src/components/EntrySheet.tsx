@@ -240,7 +240,7 @@ export function EntrySheet({
 
         {/* Title row: textarea + done toggle + close */}
         <div style={{ display:"flex", alignItems:"flex-start", padding:"0 14px 10px", gap:8, flexShrink:0 }}>
-          <textarea ref={titleRef} value={title}
+          <textarea ref={titleRef} data-entry-title value={title}
             onChange={e => { setTitle(e.target.value); autoSize(e.target); }}
             onBlur={saveTitle}
             placeholder="Title…"
@@ -305,21 +305,53 @@ export function EntrySheet({
             </button>
           )}
 
-          {/* Tag pills */}
+          {/* Tag pills — tap × to remove */}
           {(entry.tags||[]).map(tag => (
             <span key={tag} style={{ ...chipBase, background:`${C.accent}22`, color:C.accent,
-              border:`1px solid ${C.accent}33`, cursor:"default", fontWeight:700 }}>
-              #{tag}
+              border:`1px solid ${C.accent}33`, fontWeight:700, display:"flex", alignItems:"center", gap:3 }}>
+              #{tag.startsWith("#") ? tag.slice(1) : tag}
+              <button onClick={() => {
+                const rx = new RegExp('(?:^|\s)#' + (tag.startsWith("#") ? tag.slice(1) : tag) + '(?=\s|$)', 'g');
+                onUpdate({ text: entry.text.replace(rx, '').replace(/\s{2,}/g,' ').trim() });
+              }} style={{ background:"none", border:"none", cursor:"pointer", color:"inherit", opacity:.6,
+                          padding:0, lineHeight:1, fontSize:10, marginLeft:1 }}>✕</button>
             </span>
           ))}
 
-          {/* Context pills */}
+          {/* Context pills — tap × to remove */}
           {(entry.contexts||[]).map(ctx => (
             <span key={ctx} style={{ ...chipBase, background: C.bg, color:C.dim,
-              border:`1px solid ${C.border}`, cursor:"default", fontWeight:700 }}>
-              @{ctx}
+              border:`1px solid ${C.border}`, fontWeight:700, display:"flex", alignItems:"center", gap:3 }}>
+              @{ctx.startsWith("@") ? ctx.slice(1) : ctx}
+              <button onClick={() => {
+                const rx = new RegExp('(?:^|\s)@' + (ctx.startsWith("@") ? ctx.slice(1) : ctx) + '(?=\s|$)', 'g');
+                onUpdate({ text: entry.text.replace(rx, '').replace(/\s{2,}/g,' ').trim() });
+              }} style={{ background:"none", border:"none", cursor:"pointer", color:"inherit", opacity:.6,
+                          padding:0, lineHeight:1, fontSize:10, marginLeft:1 }}>✕</button>
             </span>
           ))}
+
+          {/* Add tag / context buttons */}
+          <button
+            onClick={() => {
+              const ta = document.querySelector('[data-entry-title]') as HTMLTextAreaElement | null;
+              if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+              onUpdate({ text: entry.text + ' #' });
+            }}
+            style={{ ...chipBase, background:"none", border:`1px dashed ${C.border}`,
+                     color: C.dimmer, cursor:"pointer" }}>
+            + #tag
+          </button>
+          <button
+            onClick={() => {
+              const ta = document.querySelector('[data-entry-title]') as HTMLTextAreaElement | null;
+              if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+              onUpdate({ text: entry.text + ' @' });
+            }}
+            style={{ ...chipBase, background:"none", border:`1px dashed ${C.border}`,
+                     color: C.dimmer, cursor:"pointer" }}>
+            + @ctx
+          </button>
         </div>
 
         {/* Due date picker — expandable below chip row */}
