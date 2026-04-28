@@ -985,6 +985,20 @@ export default function App() {
     return { streak, completionRate, activity, dueThisWeek, dueThisMonth, addedThisWeek, avgCompletionDays };
   }, [entries]);
 
+  // Hash routing for entry sheet — must be before all early returns (Rules of Hooks)
+  useEffect(() => {
+    window.location.hash = sheetEntryId ? `entry/${sheetEntryId}` : "";
+  }, [sheetEntryId]);
+
+  useEffect(() => {
+    const hash = window.location.hash.replace(/^#/, "");
+    if (hash.startsWith("entry/")) {
+      const id = hash.slice(6);
+      setSheetEntryId(prev => entries.find(e => e.id === id) ? id : prev);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   if (view === "help") {
     return (
       <div style={{ minHeight:"100vh", background: C.bg, color: C.text, fontFamily: (FONTS as any)[fontFamily], zoom: String(fontScale), display:"flex", flexDirection:"column" }}>
@@ -1259,22 +1273,7 @@ export default function App() {
     );
   }
 
-  // Hash routing for entry sheet
-  useEffect(() => {
-    window.location.hash = sheetEntryId ? `entry/${sheetEntryId}` : "";
-  }, [sheetEntryId]);
-
-  useEffect(() => {
-    const hash = window.location.hash.replace(/^#/, "");
-    if (hash.startsWith("entry/")) {
-      const id = hash.slice(6);
-      if (entries.find(e => e.id === id)) setSheetEntryId(id);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const sheetEntry = sheetEntryId ? (entries.find(e => e.id === sheetEntryId) ?? null) : null;
-
 
   return (
     <div style={{ background: C.bg, height: "100%", color: C.text, fontFamily: (FONTS as any)[fontFamily], display:"flex", flexDirection:"column", overflow:"hidden", position:"relative", zoom: String(fontScale) }}>
@@ -1317,7 +1316,11 @@ export default function App() {
           onUpdate={(updates: any) => up(sheetEntry.id, updates)}
           onDelete={() => { rm(sheetEntry.id); setSheetEntryId(null); }}
           onToggleDone={() => { toggleDone(sheetEntry.id); }}
-          onAddPhoto={() => onAddPhoto(sheetEntry.id)}
+          onAddPhoto={(dataUrl: string) => up(sheetEntry.id, { images: [...(sheetEntry.images || []), dataUrl] })}
+          onAddComment={(text: string) => {
+            const c = { id: Date.now(), text, createdAt: new Date() };
+            up(sheetEntry.id, { comments: [...(sheetEntry.comments || []), c] });
+          }}
           onAiTitle={() => handleAiTitle(sheetEntry.id)}
           aiTitling={aiTitlingId === sheetEntry.id}
         />

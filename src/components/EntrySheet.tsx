@@ -177,7 +177,7 @@ export function EntrySheet({
         style={{
           position:"fixed", bottom:0, left:0, right:0,
           height:"92dvh",
-          background: C.card,
+          background: C.surface,
           borderRadius:"22px 22px 0 0",
           zIndex:901,
           display:"flex", flexDirection:"column",
@@ -460,7 +460,7 @@ export function EntrySheet({
         <div style={{
           flexShrink:0, borderTop:`1px solid ${C.border}`,
           padding:"8px 8px", paddingBottom:"max(10px, env(safe-area-inset-bottom))",
-          display:"flex", alignItems:"center", background: C.card,
+          display:"flex", alignItems:"center", background: C.surface,
         }}>
           <input ref={photoRef} type="file" accept="image/*" capture="environment"
             style={{ display:"none" }} onChange={photoHandler} />
