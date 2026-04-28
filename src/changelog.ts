@@ -1,6 +1,13 @@
 import { CLR } from "./constants";
 
 export const CHANGELOG = [
+  { version:"0.117", date:"2026-04-28", label:"Bug Fixes", items:[
+    "Fixed ## and @@ double-prefix on tags and contexts in chip row",
+    "Tapping the body preview on mobile now opens the entry sheet",
+    "Tapping outside the more menu (⋮) now closes it on both desktop and mobile",
+    "Removed duplicate tag display on mobile — chips show them once only",
+    "Formatting toolbar: checkbox button now shows ☑ (was [ ]), heading shows H (was H2)",
+  ]},
   { version:"0.116", date:"2026-04-28", label:"UX Polish", items:[
     "Cards now open on any click — whole card is the tap target, not just the chevron",
     "Three-dots (⋮) opens a more menu with Done / Pin / Duplicate / Delete — no accidental deletion",

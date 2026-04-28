@@ -30,7 +30,7 @@ export const PM = {
 };
 export type Priority = keyof typeof PM;
 
-export const TIKKY_VERSION = "0.116";
+export const TIKKY_VERSION = "0.117";
 
 export const FONTS = {
   inter:  "'Inter','Segoe UI',system-ui,sans-serif",

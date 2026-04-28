@@ -366,7 +366,7 @@ export function EntrySheet({
 
           {/* Formatting toolbar */}
           <div style={{ display:"flex", gap:4, padding:"8px 14px 6px", flexWrap:"wrap", flexShrink:0 }}>
-            {([["B","**","**"],["I","_","_"],["•","\n- ",""],["[ ]","\n- [ ] ",""],["H2","## ",""]] as [string,string,string][]).map(([label, prefix, suffix]) => (
+            {([["B","**","**"],["I","_","_"],["•","\n- ",""],["☑","\n- [ ] ",""],["H","## ",""]] as [string,string,string][]).map(([label, prefix, suffix]) => (
               <button key={label} type="button"
                 onMouseDown={e => {
                   e.preventDefault();

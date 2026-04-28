@@ -255,8 +255,14 @@ export function StreamCard({
   /* Card has substantive content = expanded with body, comments, or subtasks */
   const hasContent = entry.body || (entry.comments||[]).length > 0 || entry.subtasks.length > 0;
 
-  /* More menu state */
+  /* More menu state — closes on outside click/tap */
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  React.useEffect(() => {
+    if (!showMoreMenu) return;
+    const close = () => setShowMoreMenu(false);
+    document.addEventListener("click", close, { once: true });
+    return () => document.removeEventListener("click", close);
+  }, [showMoreMenu]);
 
   /* Strip #tag and @context from display title — they appear in chip row separately */
   const displayTitle = (() => {
@@ -574,7 +580,7 @@ export function StreamCard({
                     {/* ⋮ More menu — not delete */}
                     <div style={{ position:"relative" }}>
                       <button
-                        onClick={e => { e.stopPropagation(); setShowMoreMenu(m => !m); }}
+                        onClick={e => { e.stopPropagation(); e.nativeEvent.stopImmediatePropagation(); setShowMoreMenu(m => !m); }}
                         style={{ background:"none", border:"none", color: C.dim,
                                  fontSize:16, cursor:"pointer", opacity:0.4, padding:"0 3px",
                                  lineHeight:1, display:"flex", alignItems:"center" }}>
@@ -650,22 +656,28 @@ export function StreamCard({
                 </span>
 
                 {/* Tags */}
-                {(entry.tags||[]).map((tag: string) => (
-                  <span key={tag} style={{ fontSize:9, fontWeight:800, textTransform:"uppercase" as const,
-                    letterSpacing:"0.05em", color: C.accent, background:`${C.accent}18`,
-                    border:`1px solid ${C.accent}30`, padding:"1px 5px", borderRadius:3,
-                    flexShrink:0, whiteSpace:"nowrap" as const }}>
-                    #{tag}
-                  </span>
-                ))}
-                {(entry.contexts||[]).map((ctx: string) => (
-                  <span key={ctx} style={{ fontSize:9, fontWeight:700,
-                    color: C.dim, background: C.bg,
-                    border:`1px solid ${C.border}`, padding:"1px 5px", borderRadius:3,
-                    flexShrink:0, whiteSpace:"nowrap" as const }}>
-                    @{ctx}
-                  </span>
-                ))}
+                {(entry.tags||[]).map((tag: string) => {
+                  const t = tag.startsWith("#") ? tag.slice(1) : tag;
+                  return (
+                    <span key={tag} style={{ fontSize:9, fontWeight:800, textTransform:"uppercase" as const,
+                      letterSpacing:"0.05em", color: C.accent, background:`${C.accent}18`,
+                      border:`1px solid ${C.accent}30`, padding:"1px 5px", borderRadius:3,
+                      flexShrink:0, whiteSpace:"nowrap" as const }}>
+                      #{t}
+                    </span>
+                  );
+                })}
+                {(entry.contexts||[]).map((ctx: string) => {
+                  const c = ctx.startsWith("@") ? ctx.slice(1) : ctx;
+                  return (
+                    <span key={ctx} style={{ fontSize:9, fontWeight:700,
+                      color: C.dim, background: C.bg,
+                      border:`1px solid ${C.border}`, padding:"1px 5px", borderRadius:3,
+                      flexShrink:0, whiteSpace:"nowrap" as const }}>
+                      @{c}
+                    </span>
+                  );
+                })}
 
                 {/* + date button shown only when no date set */}
                 {!entry.dueDate && editingDueDate !== entry.id && (
@@ -681,10 +693,15 @@ export function StreamCard({
               {/* Body preview (collapsed) */}
               {!isEditing && entry.body && (
                 <div
-                  onClick={e => { e.stopPropagation(); onBodyEdit(); }}
-                  title="Click to edit body"
+                  onClick={e => {
+                    e.stopPropagation();
+                    if (isMobile && onOpenSheet) { onOpenSheet(); }
+                    else { onBodyEdit(); }
+                  }}
+                  title={isMobile ? "Tap to open" : "Click to edit body"}
                   style={{ margin:"4px 0 4px", fontSize:11.5, color: C.muted, lineHeight:1.5,
-                           cursor:"text", display:"-webkit-box" as any,
+                           cursor: isMobile ? "pointer" : "text",
+                           display:"-webkit-box" as any,
                            WebkitLineClamp:2, WebkitBoxOrient:"vertical" as any,
                            overflow:"hidden" }}>
                   <BodyText text={entry.body} C={C} />
@@ -802,28 +819,7 @@ export function StreamCard({
                 </div>
               )}
 
-              {/* Mobile: tags */}
-              {isMobile && (entry.tags.length > 0 || entry.contexts.length > 0) && (
-                <div style={{ display:"flex", gap:4, flexWrap:"wrap", marginTop:7 }}>
-                  {entry.tags.map(t => {
-                    const col = tagColor(t);
-                    return (
-                      <span key={t} style={{ fontSize:10, fontWeight:600, color: col,
-                                            background:`${col}22`, padding:"1px 6px",
-                                            borderRadius:3, border:`1px solid ${col}33` }}>
-                        {t.startsWith("#") ? t : `#${t}`}
-                      </span>
-                    );
-                  })}
-                  {entry.contexts.map((c: string) => (
-                    <span key={c} style={{ fontSize:10, fontWeight:600, color: C.muted,
-                                          background:"none", padding:"1px 4px",
-                                          borderRadius:3 }}>
-                      {c.startsWith("@") ? c : `@${c}`}
-                    </span>
-                  ))}
-                </div>
-              )}
+
             </div>
           </div>
 
