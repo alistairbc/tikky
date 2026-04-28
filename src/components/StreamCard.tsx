@@ -157,7 +157,7 @@ function BodyText({ text, C }: { text: string; C: any }) {
 
 /* Collapsible emoji picker — collapsed by default */
 function EmojiPicker({ entry, C, onEmojiChange }: { entry: any, C: any, onEmojiChange: (v: string) => void }) {
-  const [open, setOpen] = useState(entry.emoji ? true : false);
+  const [open, setOpen] = useState(false);
   const EMOJIS = [
     "✅","🚀","💡","📅","🔥","⭐","📌","📝","🛒","✈️","🎬","🎵","🎮","☕","🐾","🚗",
     "💰","💪","🎁","🏠","🎨","🎯","⚠️","🔖","❤️","💬","👍","🎉","💯","🙏","🤝","👏",
