@@ -1729,13 +1729,7 @@ export default function App() {
                         ))}
                       </div>
                     )}
-                    <div style={{ display:"flex", gap:10, fontSize:10, color: C.dim, paddingLeft:2 }}>
-                      <span>💡 Tip: Type <b>/task</b> or <b>/event</b> to change type</span>
-                      <span>·</span>
-                      <span><b>#tag</b> for categories</span>
-                      <span>·</span>
-                      <span><b>@space</b> for context</span>
-                    </div>
+
                   </div>
                 </div>
               )}
@@ -1764,7 +1758,7 @@ export default function App() {
               })()}
               <div style={{ borderBottom: isMobile ? "none" : `1px solid ${C.border}`, flexShrink:0, background: C.surface+"33" }}>
                 {!isMobile && (
-                  <div style={{ padding:"12px 18px", display:"flex", flexDirection:"column", gap:12 }}>
+                  <div style={{ padding:"10px 18px", display:"flex", flexDirection:"column", gap:8 }}>
                     {/* Row 1: Search & Core Filters */}
                     <div style={{ display:"flex", gap:10, alignItems:"center", flexWrap:"wrap" }}>
                       <div style={{ flex:1, minWidth:200, position:"relative", display:"flex", alignItems:"center" }}>
@@ -1801,30 +1795,26 @@ export default function App() {
                           </button>
                         ))}
                       </div>
-                    </div>
-
-                    {/* Row 2: View & Sort */}
-                    <div style={{ display:"flex", gap:10, alignItems:"center", flexWrap:"wrap", borderTop:`1px solid ${C.border}44`, paddingTop:10 }}>
-                      <div style={{ display:"flex", gap:3, background: C.bg, padding:3, borderRadius:10, border:`1px solid ${C.border}` }}>
-                        {[["newest","🕜 New"],["oldest","📅 Old"],["priority","⚡ Priority"],["manual","⠿ Manual"]].map(([s, label]) => (
-                          <button key={s} onClick={() => setStreamSort(s)} style={{ fontSize:11, padding:"5px 12px", borderRadius:7, border: "none", background: streamSort===s ? C.accent : "none", color: streamSort===s ? "#fff" : C.dim, cursor:"pointer", fontFamily:"inherit", fontWeight: streamSort===s ? 700 : 500, transition:"all .2s", whiteSpace:"nowrap" }}>{label}</button>
+                      {/* Sort + Group + Toggles — merged into single row */}
+                      <div style={{ display:"flex", gap:3, background: C.bg, padding:3, borderRadius:8, border:`1px solid ${C.border}`, marginLeft:"auto", flexShrink:0 }}>
+                        {[["newest","New"],["oldest","Old"],["priority","⚡"],["manual","⠿"]].map(([s, label]) => (
+                          <button key={s} onClick={() => setStreamSort(s)} title={s} style={{ fontSize:11, padding:"4px 9px", borderRadius:6, border: "none", background: streamSort===s ? C.accent : "none", color: streamSort===s ? "#fff" : C.dim, cursor:"pointer", fontFamily:"inherit", fontWeight: streamSort===s ? 700 : 500, transition:"all .2s", whiteSpace:"nowrap" }}>{label}</button>
                         ))}
                       </div>
-                      <div style={{ display:"flex", gap:8, alignItems:"center", marginLeft:"auto" }}>
+                      <div style={{ display:"flex", gap:3, flexShrink:0 }}>
                         <select value={groupBy || ""} onChange={e => setGroupBy(e.target.value || null)}
-                          style={{ fontSize:11, padding:"6px 12px", borderRadius:8, border:`1px solid ${groupBy ? C.accent+"55" : C.border}`, background: groupBy ? `${C.accent}18` : C.input, color: groupBy ? C.accent : C.dim, cursor:"pointer", fontFamily:"inherit", outline:"none", transition:"all .12s" }}>
-                          <option value="">Group: off</option>
+                          style={{ fontSize:11, padding:"5px 8px", borderRadius:8, border:`1px solid ${groupBy ? C.accent+"55" : C.border}`, background: groupBy ? `${C.accent}18` : C.input, color: groupBy ? C.accent : C.dim, cursor:"pointer", fontFamily:"inherit", outline:"none" }}>
+                          <option value="">Group</option>
                           <option value="type">Type</option>
                           <option value="priority">Priority</option>
                           <option value="context">Context</option>
-                          <option value="date">Due date</option>
+                          <option value="date">Due</option>
                         </select>
-                        <div style={{ display:"flex", gap:4 }}>
-                          <button onClick={() => { const next = !selectMode; setSelectMode(next); if (!next) setSelectedEntries(new Set()); }} title="Select mode" style={{ fontSize:12, width:34, height:34, borderRadius:8, border: selectMode ? `1px solid ${C.accent}55` : `1px solid ${C.border}`, background: selectMode ? `${C.accent}18` : C.input, color: selectMode ? C.accent : C.dim, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", transition:"all .2s" }}>☑</button>
-                          <button onClick={() => setCompactView(v => !v)} title="Compact view" style={{ fontSize:12, width:34, height:34, borderRadius:8, border: compactView ? `1px solid ${C.accent}55` : `1px solid ${C.border}`, background: compactView ? `${C.accent}18` : C.input, color: compactView ? C.accent : C.dim, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", transition:"all .2s" }}>⊟</button>
-                        </div>
+                        <button onClick={() => { const next = !selectMode; setSelectMode(next); if (!next) setSelectedEntries(new Set()); }} title="Select mode" style={{ fontSize:12, width:32, height:32, borderRadius:8, border: selectMode ? `1px solid ${C.accent}55` : `1px solid ${C.border}`, background: selectMode ? `${C.accent}18` : C.input, color: selectMode ? C.accent : C.dim, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>☑</button>
+                        <button onClick={() => setCompactView(v => !v)} title="Compact view" style={{ fontSize:12, width:32, height:32, borderRadius:8, border: compactView ? `1px solid ${C.accent}55` : `1px solid ${C.border}`, background: compactView ? `${C.accent}18` : C.input, color: compactView ? C.accent : C.dim, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>⊟</button>
                       </div>
                     </div>
+
                   </div>
                 )}
               {(allTags.length > 0 || savedFilters.length > 0 || typeFilter || filterTag || dueFilter || search) && (

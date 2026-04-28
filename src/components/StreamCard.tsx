@@ -369,15 +369,15 @@ export function StreamCard({
             else if (dx >  72) onToggleDone();
           }}
           style={{
-            background: C.surface,
+            background: overdueEntry && !isSelected && !isExpanded ? "#ef44440d" : C.surface,
             borderRadius: 16,                                         /* --r-9: hero card */
             padding: isMobile ? "10px 11px" : compact ? "6px 10px" : "12px",
             border: entry.isNew
               ? `1.5px solid ${C.accent}`
-              : `1px solid ${
+              : `${overdueEntry && !isSelected && !isExpanded ? "1.5" : "1"}px solid ${
                   isSelected     ? C.accent+"88"   :
                   isExpanded     ? C.accent+"44"   :
-                  overdueEntry   ? "#ef444455"     :
+                  overdueEntry   ? "#ef4444bb"     :
                   entry.done     ? C.bg            :
                                    C.border
                 }`,
@@ -696,12 +696,13 @@ export function StreamCard({
                 </div>
               )}
 
-              {/* Mobile: image hero */}
+              {/* Mobile: image hero — tapping opens lightbox */}
               {isMobile && (entry.images||[]).length > 0 && (
                 <div style={{ borderRadius:10, overflow:"hidden", marginTop:8, marginBottom:4,
-                              border:`1px solid ${C.border}` }}>
+                              border:`1px solid ${C.border}`, cursor:"zoom-in" }}
+                  onClick={e => { e.stopPropagation(); onImgClick && onImgClick((entry.images as string[])[0]); }}>
                   <img src={(entry.images as string[])[0]} alt=""
-                    style={{ width:"100%", height:120, objectFit:"cover" }} />
+                    style={{ width:"100%", height:120, objectFit:"cover", pointerEvents:"none" }} />
                 </div>
               )}
 

@@ -135,6 +135,15 @@ export function EntrySheet({
     return () => clearTimeout(id);
   }, []);
 
+
+  // Escape key → close sheet
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") closeSheet(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const saveTitle = () => {
     const t = title.trim();
     if (t && t !== entry.text) onUpdate({ text: t });
@@ -268,7 +277,7 @@ export function EntrySheet({
 
         {/* Single condensed chip row: type + priority + due + tags + contexts */}
         <div style={{ display:"flex", alignItems:"center", gap:5, padding:"0 14px 10px",
-          overflowX:"auto", flexShrink:0,
+          overflowX:"auto", flexShrink:0, flexWrap:"nowrap" as any,
           /* hide scrollbar but keep scrollability */
           msOverflowStyle:"none", scrollbarWidth:"none" as any,
         }}>
