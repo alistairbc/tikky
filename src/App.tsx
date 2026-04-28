@@ -22,6 +22,7 @@ import { StreamCard } from "./components/StreamCard";
 import { DashboardCard } from "./components/DashboardCard";
 import { ListItem } from "./components/ListItem";
 import { CalendarView } from "./components/CalendarView";
+import { EntrySheet } from "./components/EntrySheet";
 import { SumItem, SumSection } from "./components/Summary";
 
 const loadPrefs = (): Prefs => { try { return JSON.parse(localStorage.getItem("tikky_prefs") || "{}"); } catch(_) { return {}; } };
@@ -136,6 +137,7 @@ export default function App() {
   const [focusTaskIds,   setFocusTaskIds]   = useState<Set<number>>(new Set());
   const [celebration,    setCelebration]    = useState(false);
   const [lightboxImg,    setLightboxImg]    = useState<string | null>(null);
+  const [sheetEntryId,   setSheetEntryId]   = useState<string | null>(null);
 
   const roadmap = [
     { icon: "🔖", label: "Smart Templates", desc: "Reusable blueprints for recurring tasks, meetings, or daily logs." },
@@ -1257,6 +1259,23 @@ export default function App() {
     );
   }
 
+  // Hash routing for entry sheet
+  useEffect(() => {
+    window.location.hash = sheetEntryId ? `entry/${sheetEntryId}` : "";
+  }, [sheetEntryId]);
+
+  useEffect(() => {
+    const hash = window.location.hash.replace(/^#/, "");
+    if (hash.startsWith("entry/")) {
+      const id = hash.slice(6);
+      if (entries.find(e => e.id === id)) setSheetEntryId(id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const sheetEntry = sheetEntryId ? (entries.find(e => e.id === sheetEntryId) ?? null) : null;
+
+
   return (
     <div style={{ background: C.bg, height: "100%", color: C.text, fontFamily: (FONTS as any)[fontFamily], display:"flex", flexDirection:"column", overflow:"hidden", position:"relative", zoom: String(fontScale) }}>
       {bgOverlayStyle && <div style={{ position:"absolute", inset:0, zIndex:0, pointerEvents:"none", ...bgOverlayStyle }} />}
@@ -1287,6 +1306,21 @@ export default function App() {
             ✕
           </button>
         </div>
+      )}
+
+      {/* ── Entry bottom sheet (mobile) ── */}
+      {sheetEntry && (
+        <EntrySheet
+          entry={sheetEntry}
+          C={C}
+          onClose={() => setSheetEntryId(null)}
+          onUpdate={(updates: any) => up(sheetEntry.id, updates)}
+          onDelete={() => { rm(sheetEntry.id); setSheetEntryId(null); }}
+          onToggleDone={() => { toggleDone(sheetEntry.id); }}
+          onAddPhoto={() => onAddPhoto(sheetEntry.id)}
+          onAiTitle={() => handleAiTitle(sheetEntry.id)}
+          aiTitling={aiTitlingId === sheetEntry.id}
+        />
       )}
 
       {/* ── Confetti burst ── */}
@@ -1834,6 +1868,7 @@ export default function App() {
                     manualMode={streamSort === "manual"}
                     isExpanded={expanded === entry.id}
                     onExpand={() => setExpanded(expanded === entry.id ? null : entry.id)}
+                    onOpenSheet={() => setSheetEntryId(entry.id)}
                     onDelete={() => rm(entry.id)}
                     onToggleDone={() => toggleDone(entry.id)}
                     showRestore={dashTab === "done"}

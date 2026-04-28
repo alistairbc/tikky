@@ -226,7 +226,7 @@ export function StreamCard({
   commentInputs, editingComment, editCommentText,
   stInputs, filterTag,
   selectMode, isSelected, onToggleSelect, onDuplicate,
-  onExpand, onCycleType, onDelete, onToggleDone, onPin, onPriority,
+  onExpand, onOpenSheet, onCycleType, onDelete, onToggleDone, onPin, onPriority,
   onEditStart, onEditChange, onEditSave, onEditCancel,
   onDueDateEdit, onDueDateChange, onDueDateSave, onDueDateCancel, onDueDateQuickSet,
   onCommentInput, onCommentAdd,
@@ -329,6 +329,7 @@ export function StreamCard({
           onClick={e => {
             if ((e.currentTarget as any)._wasSwiped) { (e.currentTarget as any)._wasSwiped = false; return; }
             if (selectMode) { onToggleSelect && onToggleSelect(); return; }
+            if (isMobile && onOpenSheet) { onOpenSheet(); return; }
             onExpand();
           }}
           onTouchStart={e => {
@@ -394,7 +395,7 @@ export function StreamCard({
           }}
         >
           {/* AI-loaded spine — violet accent bar on left edge when expanded with content */}
-          {isExpanded && hasContent && (
+          {!isMobile && isExpanded && hasContent && (
             <div style={{
               position:"absolute", left:0, top:8, bottom:8, width:3,
               pointerEvents:"none", borderRadius:"0 2px 2px 0",
@@ -541,7 +542,7 @@ export function StreamCard({
                 ) : (
                   <>
                     <button
-                      onClick={e => { e.stopPropagation(); onExpand(); }}
+                      onClick={e => { e.stopPropagation(); isMobile && onOpenSheet ? onOpenSheet() : onExpand(); }}
                       title={isExpanded ? "Collapse" : "Expand"}
                       style={{
                         fontSize:13, background:"none", border:"none", color: C.dim,
@@ -753,7 +754,7 @@ export function StreamCard({
 
           {/* Expanded section */}
           <AnimatePresence initial={false}>
-            {isExpanded && (
+            {!isMobile && isExpanded && (
               <motion.div
                 key="expanded"
                 initial={{ opacity: 0, height: 0 }}
