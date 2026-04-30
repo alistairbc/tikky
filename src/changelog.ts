@@ -1,6 +1,17 @@
 import { CLR } from "./constants";
 
 export const CHANGELOG = [
+  { version:"0.123", date:"2026-05-01", label:"Date Picker Fixes", items:[
+    "Existing due dates now pre-fill correctly in the date picker — you can see and edit the current value.",
+    "Opening a card's date picker on the sidebar no longer opens a second picker simultaneously on the stream card.",
+    "Stream cards now have a Time field in their inline date picker — no longer desktop-only in the full editor.",
+    "Entries stored with plain text dates (like 'Tomorrow') are automatically migrated to proper dates on load.",
+  ]},
+  { version:"0.122", date:"2026-05-01", label:"Date Display Fixes", items:[
+    "Due dates typed as text are now stored as calendar dates straight away — 'Tomorrow' becomes the right day in your calendar.",
+    "The Calendar view now correctly shows entries on the day you gave them.",
+    "'Tomorrow' now shows as 'tomorrow' in the stream, not 'in 2d'.",
+  ]},
   { version:"0.121", date:"2026-04-30", label:"Times on Entries", items:[
     "You can now set a time alongside a due date — type \"meeting at 3pm\" and Tikky picks it up automatically.",
     "Time shows on the card title line next to the due date, so you see the full when at a glance.",
