@@ -1,6 +1,12 @@
 import { CLR } from "./constants";
 
 export const CHANGELOG = [
+  { version:"0.121", date:"2026-04-30", label:"Times on Entries", items:[
+    "You can now set a time alongside a due date — type \"meeting at 3pm\" and Tikky picks it up automatically.",
+    "Time shows on the card title line next to the due date, so you see the full when at a glance.",
+    "The entry editor has a new Time field that appears when a due date is set.",
+    "Calendar day view sorts entries by their time, earliest first.",
+  ]},
   { version:"0.119", date:"2026-04-30", label:"Mobile Lists + Tag Editing", items:[
     "Tap any list item to edit it — no more double-clicking on touch screens.",
     "Emoji field now stays on-screen on mobile; it no longer overflows off the card edge.",
