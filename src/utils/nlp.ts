@@ -316,8 +316,12 @@ export function relDueLabel(dueDateStr: string, createdAt: Date | string) {
   if (!dueDateStr) return dueDateStr;
   const resolved = resolveDueDate(dueDateStr, createdAt);
   if (!resolved) return dueDateStr;
-  const now  = new Date();
-  const diffD = Math.ceil((resolved.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  // Compare at day granularity to avoid time-of-day skew (e.g. "tomorrow at 23:59" showing as "in 2d")
+  const todayMidnight = new Date();
+  todayMidnight.setHours(0, 0, 0, 0);
+  const resolvedMidnight = new Date(resolved);
+  resolvedMidnight.setHours(0, 0, 0, 0);
+  const diffD = Math.round((resolvedMidnight.getTime() - todayMidnight.getTime()) / (1000 * 60 * 60 * 24));
   if (diffD === 0)  return "today";
   if (diffD === 1)  return "tomorrow";
   if (diffD === -1) return "yesterday";

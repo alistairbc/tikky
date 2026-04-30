@@ -679,7 +679,12 @@ export default function App() {
       text: displayText,
       type: a.type,
       priority: a.priority,
-      dueDate: a.dueDate,
+      dueDate: (() => {
+        if (!a.dueDate) return null;
+        const d = resolveDueDate(a.dueDate, new Date());
+        if (!d) return null;
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      })(),
       dueTime: a.dueTime || null,
       emoji: a.emoji || guessEmoji(displayText) || "📝",
       tags: a.tags,
