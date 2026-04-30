@@ -751,61 +751,33 @@ export function StreamCard({
                              fontFamily:"inherit", outline:"none",
                              boxSizing:"border-box" as const, marginBottom:6 }}
                   />
-                  {/* Time picker: hour grid + minute increments + AM/PM */}
-                  {(() => {
-                    let selH12: number | null = null;
-                    let selMin: number | null = null;
-                    let selPeriod: "am" | "pm" | null = null;
-                    if (entry.dueTime) {
-                      const [hh, mm] = entry.dueTime.split(":").map(Number);
-                      selH12 = hh % 12 || 12;
-                      selMin = mm;
-                      selPeriod = hh < 12 ? "am" : "pm";
-                    }
-                    const buildTime = (h12: number, min: number, period: "am" | "pm") => {
-                      const h24 = h12 % 12 + (period === "pm" ? 12 : 0);
-                      return `${String(h24).padStart(2,"0")}:${String(min).padStart(2,"0")}`;
-                    };
-                    const setH = (h12: number) => onDueTimeSet && onDueTimeSet(buildTime(h12, selMin ?? 0, selPeriod || "am"));
-                    const setM = (min: number) => onDueTimeSet && onDueTimeSet(buildTime(selH12 || 9, min, selPeriod || "am"));
-                    const setP = (p: "am" | "pm") => onDueTimeSet && onDueTimeSet(buildTime(selH12 || 9, selMin ?? 0, p));
-                    const btn = (active: boolean) => ({
-                      fontSize:11, padding:"4px 0", borderRadius:6, textAlign:"center" as const,
-                      background: active ? C.accent : `${C.accent}18`,
-                      border:`1px solid ${active ? C.accent : C.accent + "44"}`,
-                      color: active ? "#fff" : C.accent,
-                      cursor:"pointer", fontFamily:"inherit", fontWeight: active ? 700 : 400,
-                    });
-                    const HOURS = [12,1,2,3,4,5,6,7,8,9,10,11];
-                    const MINS  = [{l:":00",v:0},{l:":15",v:15},{l:":30",v:30},{l:":45",v:45}];
-                    return (
-                      <div style={{ marginBottom:6 }}>
-                        {/* Hour grid — 6 cols × 2 rows */}
-                        <div style={{ display:"grid", gridTemplateColumns:"repeat(6,1fr)", gap:4, marginBottom:4 }}>
-                          {HOURS.map(h => (
-                            <button key={h} onClick={() => setH(h)} style={btn(selH12 === h)}>{h}</button>
-                          ))}
-                        </div>
-                        {/* Minutes + AM/PM */}
-                        <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr) 4px repeat(2,1fr)", gap:4, marginBottom: entry.dueTime ? 5 : 0 }}>
-                          {MINS.map(({l,v}) => (
-                            <button key={v} onClick={() => setM(v)} style={btn(selMin === v)}>{l}</button>
-                          ))}
-                          <div style={{ background: C.border }} />
-                          {(["am","pm"] as const).map(p => (
-                            <button key={p} onClick={() => setP(p)} style={btn(selPeriod === p)}>{p.toUpperCase()}</button>
-                          ))}
-                        </div>
-                        {entry.dueTime && (
-                          <button onClick={() => onDueTimeSet && onDueTimeSet(null)}
-                            style={{ fontSize:10, color:"#ef4444", background:"none", border:"none",
-                                     cursor:"pointer", padding:0, fontFamily:"inherit" }}>
-                            Clear time
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })()}
+                  {/* Time picker — styled select with 15-min increments */}
+                  <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:6 }}>
+                    <select
+                      value={entry.dueTime || ""}
+                      onChange={e => onDueTimeSet && onDueTimeSet(e.target.value || null)}
+                      style={{ flex:1, background: C.input, border:`1px solid ${C.border}`,
+                               borderRadius:6, padding:"5px 8px", fontSize:12,
+                               color: entry.dueTime ? C.text : C.dim,
+                               fontFamily:"inherit", outline:"none", cursor:"pointer" }}>
+                      <option value="">Set a time…</option>
+                      {Array.from({length:96}, (_,i) => {
+                        const h24 = Math.floor(i / 4);
+                        const min = (i % 4) * 15;
+                        const val = `${String(h24).padStart(2,"0")}:${String(min).padStart(2,"0")}`;
+                        const h12 = h24 % 12 || 12;
+                        const label = `${h12}:${String(min).padStart(2,"0")} ${h24 < 12 ? "AM" : "PM"}`;
+                        return <option key={val} value={val}>{label}</option>;
+                      })}
+                    </select>
+                    {entry.dueTime && (
+                      <button onClick={() => onDueTimeSet && onDueTimeSet(null)}
+                        style={{ fontSize:11, color:"#ef4444", background:"none", border:"none",
+                                 cursor:"pointer", padding:"2px 4px", lineHeight:1, flexShrink:0 }}>
+                        ✕
+                      </button>
+                    )}
+                  </div>
                   <div style={{ display:"flex", gap:6 }}>
                     {entry.dueDate && (
                       <button
