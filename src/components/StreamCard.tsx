@@ -229,7 +229,7 @@ export function StreamCard({
   selectMode, isSelected, onToggleSelect, onDuplicate,
   onExpand, onOpenSheet, onCycleType, onDelete, onToggleDone, onPin, onPriority,
   onEditStart, onEditChange, onEditSave, onEditCancel,
-  onDueDateEdit, onDueDateChange, onDueDateSave, onDueDateCancel, onDueDateQuickSet,
+  onDueDateEdit, onDueDateChange, onDueDateSave, onDueDateCancel, onDueDateQuickSet, onDueTimeSet,
   onCommentInput, onCommentAdd,
   onCommentEditStart, onCommentEditChange, onCommentEditSave, onCommentEditCancel,
   onCommentDelete,
@@ -738,6 +738,7 @@ export function StreamCard({
                     ))}
                   </div>
                   <input type="date"
+                    value={entry.dueDate && /^\d{4}-\d{2}-\d{2}$/.test(entry.dueDate) ? entry.dueDate : ""}
                     onChange={e => {
                       if (e.target.value) {
                         onDueDateQuickSet
@@ -750,6 +751,17 @@ export function StreamCard({
                              fontFamily:"inherit", outline:"none",
                              boxSizing:"border-box" as const, marginBottom:6 }}
                   />
+                  <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:6 }}>
+                    <span style={{ fontSize:10, color: C.dim, flexShrink:0, width:28 }}>Time</span>
+                    <input type="time"
+                      value={entry.dueTime || ""}
+                      onChange={e => onDueTimeSet && onDueTimeSet(e.target.value || null)}
+                      style={{ flex:1, background: C.input, border:`1px solid ${C.border}`, borderRadius:6, padding:"4px 8px", fontSize:11, color: C.text, fontFamily:"inherit", outline:"none" }} />
+                    {entry.dueTime && (
+                      <button onClick={() => onDueTimeSet && onDueTimeSet(null)}
+                        style={{ fontSize:10, color:"#ef4444", background:"none", border:"none", cursor:"pointer", padding:"2px 4px", lineHeight:1 }}>✕</button>
+                    )}
+                  </div>
                   <div style={{ display:"flex", gap:6 }}>
                     {entry.dueDate && (
                       <button

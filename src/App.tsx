@@ -45,17 +45,30 @@ export default function App() {
       const raw = localStorage.getItem("tikky_entries");
       if (raw) {
         const parsed = JSON.parse(raw);
-        return parsed.map((e: any) => ({
-          ...e,
-          timestamp: new Date(e.timestamp),
-          subtasks:  e.subtasks  || [],
-          comments:  (e.comments || []).map((c: any) => ({ ...c, createdAt: new Date(c.createdAt) })),
-          tags:      e.tags     || [],
-          contexts:  e.contexts || [],
-          images:    e.images   || [],
-          pinned:    e.pinned   || false,
-          completedAt: e.completedAt || null,
-        }));
+        return parsed.map((e: any) => {
+          // Migrate legacy raw-string dueDate ("Tomorrow", "Friday") → YYYY-MM-DD
+          let dueDate = e.dueDate || null;
+          if (dueDate && !/^\d{4}-\d{2}-\d{2}$/.test(dueDate)) {
+            const r = resolveDueDate(dueDate, e.timestamp ? new Date(e.timestamp) : new Date());
+            if (r) {
+              dueDate = `${r.getFullYear()}-${String(r.getMonth()+1).padStart(2,'0')}-${String(r.getDate()).padStart(2,'0')}`;
+            } else {
+              dueDate = null;
+            }
+          }
+          return {
+            ...e,
+            dueDate,
+            timestamp: new Date(e.timestamp),
+            subtasks:  e.subtasks  || [],
+            comments:  (e.comments || []).map((c: any) => ({ ...c, createdAt: new Date(c.createdAt) })),
+            tags:      e.tags     || [],
+            contexts:  e.contexts || [],
+            images:    e.images   || [],
+            pinned:    e.pinned   || false,
+            completedAt: e.completedAt || null,
+          };
+        });
       }
     } catch(_) {}
     return SEED;
@@ -679,12 +692,7 @@ export default function App() {
       text: displayText,
       type: a.type,
       priority: a.priority,
-      dueDate: (() => {
-        if (!a.dueDate) return null;
-        const d = resolveDueDate(a.dueDate, new Date());
-        if (!d) return null;
-        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-      })(),
+      dueDate: a.dueDate,
       dueTime: a.dueTime || null,
       emoji: a.emoji || guessEmoji(displayText) || "📝",
       tags: a.tags,
@@ -1910,6 +1918,7 @@ export default function App() {
                     }}
                     onDueDateQuickSet={(v: string) => { up(entry.id, { dueDate: v || null }); setEditingDueDate(null); }}
                     onDueDateCancel={() => setEditingDueDate(null)}
+                    onDueTimeSet={(v: string | null) => up(entry.id, { dueTime: v || null })}
                     onDuplicate={() => duplicateEntry(entry.id)}
                     onCycleType={() => {
                       const types = ["task", "event", "note", "thought"] as const;
@@ -2062,6 +2071,7 @@ export default function App() {
                     entry={entry} 
                     C={C}
                     isDashExp={dashExpanded === entry.id}
+                    streamExpanded={expanded === entry.id}
                     editingDueDate={editingDueDate}
                     dueDateInput={dueDateInput}
                     commentInputs={commentInputs}

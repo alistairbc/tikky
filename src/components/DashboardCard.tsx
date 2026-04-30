@@ -24,7 +24,7 @@ function getDueDateShortcuts() {
 
 export function DashboardCard({
   entry, C,
-  isDashExp, editingDueDate, dueDateInput,
+  isDashExp, streamExpanded, editingDueDate, dueDateInput,
   commentInputs, editingComment, editCommentText, stInputs,
   onExpand, onToggleDone, onDelete, onPriority,
   onDueDateEdit, onDueDateChange, onDueDateSave, onDueDateCancel, onDueDateQuickSet,
@@ -93,7 +93,7 @@ export function DashboardCard({
               )}
 
               {/* Inline date picker (expanded absolute) */}
-              {editingDueDate === entry.id && !entry.done ? (
+              {editingDueDate === entry.id && !entry.done && !streamExpanded ? (
                 <div onClick={e => e.stopPropagation()} style={{ position:"relative" }}>
                   <div style={{
                     position:"absolute", top:"100%", left:0, zIndex:300,
@@ -113,6 +113,7 @@ export function DashboardCard({
                       ))}
                     </div>
                     <input type="date"
+                      value={entry.dueDate && /^\d{4}-\d{2}-\d{2}$/.test(entry.dueDate) ? entry.dueDate : ""}
                       onChange={e => { if (e.target.value) onDueDateQuickSet(e.target.value); }}
                       style={{ width:"100%", background: C.input, border:`1px solid ${C.border}`,
                                borderRadius:5, padding:"3px 6px", fontSize:10, color: C.text,
