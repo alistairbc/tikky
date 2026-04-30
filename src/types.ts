@@ -23,6 +23,7 @@ export interface Entry {
   done: boolean;
   pinned: boolean;
   dueDate: string | null;
+  dueTime?: string;          // "HH:MM" 24h, e.g. "14:30"
   comments: Comment[];
   tags: string[];
   contexts: string[];

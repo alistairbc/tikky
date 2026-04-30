@@ -301,7 +301,7 @@ export function EntrySheet({
                 color: overdue ? "#ef4444" : entry.dueDate ? C.muted : C.dimmer,
                 border:`1px solid ${overdue ? "#ef444444" : entry.dueDate ? C.border : C.border + "80"}` }}>
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-              {entry.dueDate || "Due"}
+              {entry.dueDate || "Due"}{entry.dueTime ? ` · ${formatTime(entry.dueTime)}` : ""}
             </button>
           )}
 
@@ -385,6 +385,21 @@ export function EntrySheet({
                   style={{ background:C.bg, border:`1px solid ${C.border}`, borderRadius:8,
                     padding:"7px 10px", fontSize:12, color:C.text, fontFamily:"inherit",
                     width:"100%", boxSizing:"border-box" as const, outline:"none" }} />
+                <div style={{ display:"flex", alignItems:"center", gap:8, marginTop:8 }}>
+                  <span style={{ fontSize:11, color:C.dim, flexShrink:0 }}>Time</span>
+                  <input type="time" value={entry.dueTime || ""}
+                    onChange={e => onUpdate({ dueTime: e.target.value || undefined })}
+                    style={{ flex:1, background:C.bg, border:`1px solid ${C.border}`, borderRadius:8,
+                      padding:"6px 10px", fontSize:12, color:C.text, fontFamily:"inherit",
+                      outline:"none" }} />
+                  {entry.dueTime && (
+                    <button onClick={() => onUpdate({ dueTime: undefined })}
+                      style={{ fontSize:11, color:"#ef4444", background:"none", border:`1px solid #ef444433`,
+                               borderRadius:6, padding:"4px 8px", cursor:"pointer", fontFamily:"inherit", flexShrink:0 }}>
+                      Clear
+                    </button>
+                  )}
+                </div>
               </div>
             </motion.div>
           )}

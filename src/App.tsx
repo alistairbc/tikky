@@ -7,7 +7,7 @@ import { CHANGELOG, THEMES } from "./changelog";
 import { SEED, SEED_LISTS } from "./seeds";
 import { Entry, List, ListItemType, Prefs, Subtask, Comment, Priority } from "./types";
 import { 
-  analyze, cleanText, extractDue, extractEventTime, resolveDueDate, isOverdue, relDueLabel, extractTags, extractContexts, guessEmoji, findUpdateTarget
+  analyze, cleanText, extractDue, extractEventTime, extractDueTime, resolveDueDate, isOverdue, relDueLabel, extractTags, extractContexts, guessEmoji, findUpdateTarget
 } from "./utils/nlp";
 import { fmt, inPeriod, tagColor, renderMd } from "./utils/format";
 import { classifyEntry, queryAssistant } from "./api";
@@ -680,6 +680,7 @@ export default function App() {
       type: a.type,
       priority: a.priority,
       dueDate: a.dueDate,
+      dueTime: a.dueTime || null,
       emoji: a.emoji || guessEmoji(displayText) || "📝",
       tags: a.tags,
       contexts: a.contexts,

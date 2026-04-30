@@ -4,6 +4,30 @@ import { ACTION_VERBS, DAYS, DUE_RX } from "../constants_nlp";
 export const extractTags     = (t: string) => [...new Set((t.match(/#[\w-]+/g)  || []).map(x => x.toLowerCase()))];
 export const extractContexts = (t: string) => [...new Set((t.match(/@[\w-]+/g)  || []).map(x => x.toLowerCase()))];
 
+
+// ── Time helpers ─────────────────────────────────────────────────────────────
+function parseTime(raw: string): string | null {
+  const lo = raw.toLowerCase().replace(/\s/g, "");
+  if (lo === "noon")     return "12:00";
+  if (lo === "midnight") return "00:00";
+  const m = lo.match(/^(\d{1,2})(?::(\d{2}))?(am|pm)?$/);
+  if (!m) return null;
+  let h = parseInt(m[1]);
+  const mins = m[2] || "00";
+  const period = m[3];
+  if (period === "pm" && h < 12) h += 12;
+  if (period === "am" && h === 12) h = 0;
+  if (h > 23 || parseInt(mins) > 59) return null;
+  return `${String(h).padStart(2,"0")}:${mins}`;
+}
+
+export function extractDueTime(text: string): string | null {
+  const atM = text.match(/\bat\s+(\d{1,2}(?::\d{2})?\s*(?:am|pm))\b/i);
+  const tmM = text.match(/\b(\d{1,2}(?::\d{2})?\s*(?:am|pm))\b/i);
+  const raw = atM ? atM[1] : (tmM ? tmM[1] : null);
+  return raw ? parseTime(raw.replace(/\s/g,"")) : null;
+}
+
 export const extractDue = (t: string) => { 
   const m = t.match(DUE_RX); 
   return m ? m[1][0].toUpperCase() + m[1].slice(1).toLowerCase() : null; 
@@ -87,7 +111,8 @@ export function analyze(text: string) {
   // Any date/time in compose relates to due date
   const dueDate = extractDue(text) || extractEventTime(text);
   const emoji = guessEmoji(text);
-  return { type, priority, dueDate, emoji, tags: extractTags(text), contexts: extractContexts(text) };
+  const dueTime = extractDueTime(text);
+  return { type, priority, dueDate, dueTime, emoji, tags: extractTags(text), contexts: extractContexts(text) };
 }
 
 export function findUpdateTarget(text: string, entries: any[]) {
@@ -231,14 +256,14 @@ export function cleanText(raw: string, type: EntryType) {
   if (type === "note" || type === "thought") {
     t = t.replace(/^(note[:\s]+|fyi[:\s]+|btw[:\s]+|idea[:\s]+|reminder[:\s]+|summary[:\s]+|recap[:\s]+|update[:\s]+|heads up[:\s]+|info[:\s]+)/i, "");
   }
-  t = t.replace(/^[\s\u2013\u2014\-|:]+|[\s\u2013\u2014\-|:]+$/g, "");
+  t = t.replace(/^[\s–—\-|:]+|[\s–—\-|:]+$/g, "");
   t = t.replace(/\s+(?:to|for|by|with|from|on|at|in|and|or|the|a|an)\.?$/i, "").trim();
   t = t.replace(/\s{2,}/g, " ").trim();
   if (t.length > 0) t = t[0].toUpperCase() + t.slice(1);
   return t || raw.trim();
 }
 
-export function resolveDueDate(dueDateStr: string, createdAt: Date | string) {
+function resolveDueDateInner(dueDateStr: string, createdAt: Date | string): Date | null {
   if (!dueDateStr) return null;
   const base  = new Date(createdAt);
   const baseD = new Date(base.getFullYear(), base.getMonth(), base.getDate());
@@ -268,6 +293,15 @@ export function resolveDueDate(dueDateStr: string, createdAt: Date | string) {
 
   const parsed = new Date(dueDateStr);
   return isNaN(parsed.getTime()) ? null : parsed;
+}
+
+export function resolveDueDate(dueDateStr: string, createdAt: Date | string, dueTime?: string): Date | null {
+  const result = resolveDueDateInner(dueDateStr, createdAt);
+  if (result && dueTime) {
+    const [h, m] = dueTime.split(":").map(Number);
+    result.setHours(h, m, 0, 0);
+  }
+  return result;
 }
 
 export function isOverdue(entry: { done: boolean, dueDate: string | null, type: EntryType, timestamp: Date | string }) {

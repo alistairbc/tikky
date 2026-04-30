@@ -1,11 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { TM } from '../constants';
+import { formatTime } from '../utils/format';
 
 interface Entry {
   id: number;
   text: string;
   type: string;
   dueDate?: string;
+  dueTime?: string;
   done?: boolean;
   priority?: string;
 }
@@ -78,11 +80,17 @@ export function CalendarView({ entries, C, onEntryClick, isMobile }: Props) {
     return result;
   }, [byDate]);
 
-  const selectedEntries: Entry[] = overdueFilter
+  const selectedEntries: Entry[] = (overdueFilter
     ? overdueEntries
     : selectedDay
     ? (byDate[selectedDay] || [])
-    : allDatedEntries;
+    : allDatedEntries
+  ).slice().sort((a, b) => {
+    if (!a.dueTime && !b.dueTime) return 0;
+    if (!a.dueTime) return 1;
+    if (!b.dueTime) return -1;
+    return a.dueTime.localeCompare(b.dueTime);
+  });
 
   const selectedIsToday  = !overdueFilter && selectedDay === today;
   const selectedIsPast   = !overdueFilter && !!selectedDay && selectedDay < today;
@@ -358,6 +366,11 @@ export function CalendarView({ entries, C, onEntryClick, isMobile }: Props) {
                 <div style={{ fontSize: 12, color: C.text, lineHeight: 1.4, fontWeight: 500 }}>
                   {entry.text}
                 </div>
+                {entry.dueTime && (
+                  <div style={{ fontSize: 10, color: C.dim, marginTop: 2 }}>
+                    {formatTime(entry.dueTime)}
+                  </div>
+                )}
                 {!selectedDay && !overdueFilter && (
                   <div style={{ fontSize: 10, color: entry.dueDate ? C.dim : C.dimmer, marginTop: 3 }}>
                     {entry.dueDate

@@ -1,6 +1,18 @@
 import React from 'react';
 import { TAG_PAL } from "./constants_format";
 
+
+export function formatTime(t: string): string {
+  if (!t) return "";
+  const [hStr, mStr] = t.split(":");
+  let h = parseInt(hStr);
+  const m = parseInt(mStr || "0");
+  const period = h >= 12 ? "pm" : "am";
+  if (h > 12) h -= 12;
+  if (h === 0) h = 12;
+  return m === 0 ? `${h}${period}` : `${h}:${mStr}${period}`;
+}
+
 export const tagColor = (tag: string) => { 
   const key = tag.replace(/^[#@]/, ""); 
   let h = 0; 
