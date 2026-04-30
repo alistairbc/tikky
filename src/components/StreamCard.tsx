@@ -751,50 +751,52 @@ export function StreamCard({
                              fontFamily:"inherit", outline:"none",
                              boxSizing:"border-box" as const, marginBottom:6 }}
                   />
-                  {/* Time quick-picks */}
+                  {/* Time picker: hour grid + minute increments + AM/PM */}
                   {(() => {
-                    const TIME_SLOTS = [
-                      {label:"7am",val:"07:00"},{label:"8am",val:"08:00"},{label:"9am",val:"09:00"},
-                      {label:"10am",val:"10:00"},{label:"11am",val:"11:00"},{label:"12pm",val:"12:00"},
-                      {label:"1pm",val:"13:00"},{label:"2pm",val:"14:00"},{label:"3pm",val:"15:00"},
-                      {label:"4pm",val:"16:00"},{label:"5pm",val:"17:00"},{label:"6pm",val:"18:00"},
-                      {label:"7pm",val:"19:00"},{label:"8pm",val:"20:00"},{label:"9pm",val:"21:00"},
-                    ];
-                    const knownVals = TIME_SLOTS.map(s => s.val);
-                    const isCustom = !!entry.dueTime && !knownVals.includes(entry.dueTime);
-                    const fmtCustom = (t: string) => {
-                      const [hh, mm] = t.split(":");
-                      const h = parseInt(hh);
-                      return `${h % 12 || 12}:${mm}${h < 12 ? "am" : "pm"}`;
+                    let selH12: number | null = null;
+                    let selMin: number | null = null;
+                    let selPeriod: "am" | "pm" | null = null;
+                    if (entry.dueTime) {
+                      const [hh, mm] = entry.dueTime.split(":").map(Number);
+                      selH12 = hh % 12 || 12;
+                      selMin = mm;
+                      selPeriod = hh < 12 ? "am" : "pm";
+                    }
+                    const buildTime = (h12: number, min: number, period: "am" | "pm") => {
+                      const h24 = h12 % 12 + (period === "pm" ? 12 : 0);
+                      return `${String(h24).padStart(2,"0")}:${String(min).padStart(2,"0")}`;
                     };
+                    const setH = (h12: number) => onDueTimeSet && onDueTimeSet(buildTime(h12, selMin ?? 0, selPeriod || "am"));
+                    const setM = (min: number) => onDueTimeSet && onDueTimeSet(buildTime(selH12 || 9, min, selPeriod || "am"));
+                    const setP = (p: "am" | "pm") => onDueTimeSet && onDueTimeSet(buildTime(selH12 || 9, selMin ?? 0, p));
+                    const btn = (active: boolean) => ({
+                      fontSize:11, padding:"4px 0", borderRadius:6, textAlign:"center" as const,
+                      background: active ? C.accent : `${C.accent}18`,
+                      border:`1px solid ${active ? C.accent : C.accent + "44"}`,
+                      color: active ? "#fff" : C.accent,
+                      cursor:"pointer", fontFamily:"inherit", fontWeight: active ? 700 : 400,
+                    });
+                    const HOURS = [12,1,2,3,4,5,6,7,8,9,10,11];
+                    const MINS  = [{l:":00",v:0},{l:":15",v:15},{l:":30",v:30},{l:":45",v:45}];
                     return (
                       <div style={{ marginBottom:6 }}>
-                        <div style={{ display:"flex", flexWrap:"wrap", gap:4, marginBottom: entry.dueTime ? 5 : 0 }}>
-                          {TIME_SLOTS.map(({label, val}) => {
-                            const active = entry.dueTime === val;
-                            return (
-                              <button key={val}
-                                onClick={() => onDueTimeSet && onDueTimeSet(active ? null : val)}
-                                style={{ fontSize:11, padding:"3px 8px", borderRadius:6,
-                                         background: active ? C.accent : `${C.accent}18`,
-                                         border:`1px solid ${active ? C.accent : C.accent + "44"}`,
-                                         color: active ? "#fff" : C.accent,
-                                         cursor:"pointer", fontFamily:"inherit", fontWeight: active ? 700 : 400 }}>
-                                {label}
-                              </button>
-                            );
-                          })}
-                          {isCustom && (
-                            <button
-                              onClick={() => onDueTimeSet && onDueTimeSet(null)}
-                              style={{ fontSize:11, padding:"3px 8px", borderRadius:6,
-                                       background: C.accent, border:`1px solid ${C.accent}`,
-                                       color:"#fff", cursor:"pointer", fontFamily:"inherit", fontWeight:700 }}>
-                              {fmtCustom(entry.dueTime!)} ✕
-                            </button>
-                          )}
+                        {/* Hour grid — 6 cols × 2 rows */}
+                        <div style={{ display:"grid", gridTemplateColumns:"repeat(6,1fr)", gap:4, marginBottom:4 }}>
+                          {HOURS.map(h => (
+                            <button key={h} onClick={() => setH(h)} style={btn(selH12 === h)}>{h}</button>
+                          ))}
                         </div>
-                        {entry.dueTime && !isCustom && (
+                        {/* Minutes + AM/PM */}
+                        <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr) 4px repeat(2,1fr)", gap:4, marginBottom: entry.dueTime ? 5 : 0 }}>
+                          {MINS.map(({l,v}) => (
+                            <button key={v} onClick={() => setM(v)} style={btn(selMin === v)}>{l}</button>
+                          ))}
+                          <div style={{ background: C.border }} />
+                          {(["am","pm"] as const).map(p => (
+                            <button key={p} onClick={() => setP(p)} style={btn(selPeriod === p)}>{p.toUpperCase()}</button>
+                          ))}
+                        </div>
+                        {entry.dueTime && (
                           <button onClick={() => onDueTimeSet && onDueTimeSet(null)}
                             style={{ fontSize:10, color:"#ef4444", background:"none", border:"none",
                                      cursor:"pointer", padding:0, fontFamily:"inherit" }}>
