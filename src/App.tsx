@@ -140,25 +140,23 @@ export default function App() {
   const [sheetEntryId,   setSheetEntryId]   = useState<string | null>(null);
 
   const roadmap = [
-    { icon: "🔖", label: "Smart Templates", desc: "Reusable blueprints for recurring tasks, meetings, or daily logs." },
-    { icon: "🔔", label: "Native Notifications", desc: "Desktop and mobile push alerts for time-sensitive events and reminders." },
-    { icon: "☁️", label: "Cloud Sync", desc: "Sync your stream across all devices with end-to-end encryption." },
-    { icon: "👥", label: "Collaboration", desc: "Share lists and streams with others for real-time teamwork." },
-    { icon: "📱", label: "Native Apps", desc: "Dedicated iOS and Android apps for the best mobile experience." },
-    { icon: "🔌", label: "API & Webhooks", desc: "Connect Tikky to your favourite tools and automate your workflow." },
-    { icon: "🔁", label: "Recurring Tasks", desc: "Set any task or event to repeat daily, weekly, or on a custom schedule." },
-    { icon: "🧩", label: "Widgets", desc: "Quick-capture and glanceable stream summary right from your home screen." },
+    { icon: "🔁", label: "Recurring Tasks", desc: "Set any task or event to repeat daily, weekly, monthly, or on a custom schedule." },
+    { icon: "🕐", label: "Times on Entries", desc: "Add a time alongside the date on tasks and events — see them on the calendar at the right hour." },
+    { icon: "🔖", label: "Templates", desc: "Reusable entry blueprints for recurring meetings, project kick-offs, or daily check-ins." },
+    { icon: "🔔", label: "Notifications", desc: "Alerts and reminders when tasks are due or overdue." },
+    { icon: "👥", label: "Collaboration", desc: "Share lists and streams with others." },
+    { icon: "🔌", label: "Integrations", desc: "Connect Tikky to the tools you already use." },
   ];
 
   const shipped = [
+    { label: "Cloud Sync", desc: "Sign in with Google — your stream syncs across every device." },
+    { label: "Mobile Entry Sheet", desc: "Slide-up editor on mobile with large title, chips, body, subtasks, and comments." },
     { label: "Calendar View", desc: "Full month grid with overdue banner and day detail panel." },
-    { label: "Body Editor", desc: "Formatting toolbar for bold, italic, bullets, checkboxes, headings." },
+    { label: "Body Editor", desc: "Formatting toolbar for bold, italic, bullets, checkboxes, and headings." },
     { label: "Board & Sticky Views", desc: "Lists switch between row, sticky-note, and To Do/Done board layouts." },
-    { label: "17 Themes", desc: "Dark, light, accessibility, and specialised themes including Yellow Pad." },
-    { label: "Insights Dashboard", desc: "Streak, completion rate, due metrics, and type breakdown." },
-    { label: "Smart Filters", desc: "Saved filter combos for rapid context switching." },
-    { label: "Bulk Operations", desc: "Multi-select with batch complete, prioritise, and delete." },
-    { label: "Voice Input", desc: "Dictate entries with Web Speech API and live transcript preview." },
+    { label: "17 Themes", desc: "Dark, light, accessibility, and specialised themes." },
+    { label: "Insights", desc: "Streak, completion rate, due metrics, and type breakdown." },
+    { label: "Voice Input", desc: "Dictate entries with live transcript preview." },
     { label: "Image Attachments", desc: "Attach photos via camera, file picker, or drag-and-drop." },
   ];
 

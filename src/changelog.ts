@@ -1,42 +1,37 @@
 import { CLR } from "./constants";
 
 export const CHANGELOG = [
-  { version:"0.118", date:"2026-04-28", label:"UX: 2-col editor, consistent WYSIWYG, chip-to-sheet", items:[
-    "Desktop expanded card redesigned: 2-column layout (body 55% left, subtasks+comments 45% right)",
-    "WYSIWYG toolbar standardised desktop + mobile: ☑ checkbox, H heading labels",
-    "Type/priority chips on mobile now open entry sheet instead of cycling inline",
-    "List item emoji: removed full emoji grid, compact text input instead",
+  { version:"0.119", date:"2026-04-30", label:"Mobile Lists + Tag Editing", items:[
+    "Tap any list item to edit it — no more double-clicking on touch screens.",
+    "Emoji field now stays on-screen on mobile; it no longer overflows off the card edge.",
+    "Tag and context pills in the entry sheet are now removable — tap the × on any pill to delete it.",
+    "New + #tag and + @ctx buttons in the entry sheet let you add tags without digging into the title.",
   ]},
-  { version:"0.117", date:"2026-04-28", label:"Bug Fixes", items:[
-    "Fixed ## and @@ double-prefix on tags and contexts in chip row",
-    "Tapping the body preview on mobile now opens the entry sheet",
-    "Tapping outside the more menu (⋮) now closes it on both desktop and mobile",
-    "Removed duplicate tag display on mobile — chips show them once only",
-    "Formatting toolbar: checkbox button now shows ☑ (was [ ]), heading shows H (was H2)",
+  { version:"0.118", date:"2026-04-29", label:"Editor Redesign", items:[
+    "Expanded entries show notes and tasks side-by-side — less scrolling, more at a glance.",
+    "The NOTES panel always shows so there is never a hunt for where to type.",
+    "Formatting toolbar is now identical everywhere: ☑ for checkboxes, H for headings.",
+    "Tapping the type or priority chip on mobile opens the full entry editor.",
+    "Emoji picker is a small button that opens a tray — no more emoji grid taking over the screen.",
   ]},
-  { version:"0.116", date:"2026-04-28", label:"UX Polish", items:[
-    "Cards now open on any click — whole card is the tap target, not just the chevron",
-    "Three-dots (⋮) opens a more menu with Done / Pin / Duplicate / Delete — no accidental deletion",
-    "Priority labels show full words: Medium instead of Med",
-    "Card corner radius reduced for a more refined, less rounded look",
-    "Tags and saved filters now sit inline with the search bar — one less row of UI chrome",
-    "Title display strips hash and context tags — they appear once in the chip row only",
-    "Double-click a title to edit it directly; single click expands the card",
+  { version:"0.117", date:"2026-04-28", label:"Polish + Fixes", items:[
+    "Tags and contexts now display correctly — no more ##doubleHash or @@doubleAt.",
+    "Tapping a card body on mobile now opens the entry editor as expected.",
+    "The ⋮ more menu closes when you tap anywhere outside it.",
+    "Whole card is now a tap target — no need to hunt for the expand arrow.",
+    "Priority labels show full words — Medium instead of Med.",
   ]},
-  { version:"0.115", date:"2026-04-28", label:"EntrySheet Layout", items:[
-    "Condensed single chip row: Type + Priority + Due + tags + contexts on one scrollable line",
-    "Title row: large title textarea alongside done circle and close button",
-    "Body textarea always visible and focusable — no tap required to start editing",
-    "Formatting toolbar moved above body textarea",
-    "AI Title no longer creates double tags or hashes in the title",
+  { version:"0.116", date:"2026-04-28", label:"Entry Editor Overhaul", items:[
+    "Sliding entry sheet on mobile: swipe-up panel with large title, chip row, and body editor all in one place.",
+    "All chips — type, priority, due date, tags — sit on one scrollable line.",
+    "Title is always large and tappable; done and close sit in the same row.",
+    "AI Title no longer duplicates tags when it rewrites.",
   ]},
-
   { version:"0.113", date:"2026-04-28", label:"Cloud Sync", items:[
-    "Sign in with Google — your data syncs across all your devices",
-    "First login prompts to import any existing local data",
-    "Sync status indicator in header shows when data is saving to the cloud",
-    "Account section in Settings shows your email and sign-out button",
-    "All entries, lists, and preferences stored securely per-user in the cloud",
+    "Sign in with Google — your stream syncs across every device automatically.",
+    "First login prompts to bring in any existing local data.",
+    "A sync indicator in the header shows when data is saving.",
+    "Your email and a sign-out button live in Settings.",
   ]},
   { version:"0.112", date:"2026-04-28", label:"Backlog Clear", items:[
     "Average days to complete tasks now works — completedAt timestamp stored on each task when marked done",
