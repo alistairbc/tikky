@@ -566,6 +566,20 @@ export function StreamCard({
                       {relDueLabel(entry.dueDate, entry.timestamp)}{entry.dueTime && <span style={{opacity:0.75}}> · {formatTime(entry.dueTime)}</span>}
                     </span>
                   )}
+                  {/* Subtask progress — desktop only, collapsed view */}
+                  {!isMobile && !isEditing && !isExpanded && entry.subtasks && entry.subtasks.length > 0 && (() => {
+                    const done = entry.subtasks.filter((s:any) => s.done).length;
+                    const total = entry.subtasks.length;
+                    const pct = Math.round((done/total)*100);
+                    return (
+                      <div style={{ display:"flex", alignItems:"center", gap:4, flexShrink:0 }} title={`${done} of ${total} subtasks done`}>
+                        <div style={{ width:32, height:3, borderRadius:2, background:`${C.border}`, overflow:"hidden" }}>
+                          <div style={{ width:`${pct}%`, height:"100%", background: done===total ? "#10b981" : meta.color, borderRadius:2, transition:"width .3s" }} />
+                        </div>
+                        <span style={{ fontSize:9.5, color: done===total ? "#10b981" : C.dimmer, fontWeight:600 }}>{done}/{total}</span>
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {isEditing ? (

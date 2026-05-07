@@ -1,6 +1,14 @@
 import { CLR } from "./constants";
 
 export const CHANGELOG = [
+  { version:"0.126", date:"2026-05-08", label:"Polish & Commands", items:[
+    "/focus command now activates focus mode directly from the compose bar",
+    "/clear command deletes all completed entries instantly",
+    "Show Done toggle in sort controls — reveal/hide completed tasks",
+    "Entry count shown when filters are active (e.g. '4 of 12 entries')",
+    "Subtask progress bar + count on collapsed desktop task cards",
+    "Logo text colour follows theme (was hardcoded white)",
+  ]},
   { version:"0.125", date:"2026-05-08", label:"Calendar + UX Polish", items:[
     "Calendar grid: desktop cells show up to 2 entry titles with type-coloured left strip",
     "Calendar grid: mobile keeps compact dots, desktop gets richer per-entry rows with time prefix",

@@ -666,6 +666,12 @@ export default function App() {
         return;
       }
       if (cmd === "/import")  { setModal("import"); setInput(""); return; }
+      if (cmd === "/focus")   { setFocusMode(true); setFocusSetup(true); setInput(""); return; }
+      if (cmd === "/clear")   {
+        const doneCount = entries.filter(e => e.done).length;
+        if (doneCount > 0) { setEntries(prev => prev.filter(e => !e.done)); }
+        setInput(""); return;
+      }
     }
 
     // ── Questions / assistant queries → Claude ────────────────────────────────
@@ -1305,7 +1311,7 @@ export default function App() {
       <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"#111", fontFamily:"Inter, sans-serif" }}>
         <div style={{ textAlign:"center", padding:40, borderRadius:24, background:"#1c1c1c", border:"1px solid #2c2c2c", maxWidth:340, width:"100%", margin:20 }}>
           <div style={{ fontSize:42, marginBottom:12 }}>◆</div>
-          <div style={{ fontSize:28, fontWeight:800, color:"#f0f0f0", marginBottom:8, letterSpacing:"-0.5px" }}>Tikky</div>
+          <div style={{ fontSize:28, fontWeight:800, color:C.text, marginBottom:8, letterSpacing:"-0.5px" }}>Tikky</div>
           <div style={{ fontSize:14, color:"#888", marginBottom:32, lineHeight:1.5 }}>Sign in to sync your stream across all your devices</div>
           <button
             onClick={() => supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin } })}
@@ -1880,11 +1886,19 @@ export default function App() {
                         })}
                       </div>
 
-                      {/* Sort + Group + Toggles — merged into single row */}
-                      <div style={{ display:"flex", gap:3, background: C.bg, padding:3, borderRadius:8, border:`1px solid ${C.border}`, marginLeft:"auto", flexShrink:0 }}>
-                        {[["newest","New"],["oldest","Old"],["priority","⚡"],["manual","⠿"]].map(([s, label]) => (
-                          <button key={s} onClick={() => setStreamSort(s)} title={s} style={{ fontSize:11, padding:"4px 9px", borderRadius:6, border: "none", background: streamSort===s ? C.accent : "none", color: streamSort===s ? "#fff" : C.dim, cursor:"pointer", fontFamily:"inherit", fontWeight: streamSort===s ? 700 : 500, transition:"all .2s", whiteSpace:"nowrap" }}>{label}</button>
-                        ))}
+                      {/* Entry count + Sort + Group + Toggles */}
+                      <div style={{ display:"flex", alignItems:"center", gap:6, marginLeft:"auto", flexShrink:0 }}>
+                        <button
+                          onClick={() => setShowCompleted(v => !v)}
+                          title={showCompleted ? "Hide completed" : "Show completed"}
+                          style={{ fontSize:11, padding:"4px 9px", borderRadius:7, border: showCompleted ? `1px solid ${C.accent}44` : `1px solid ${C.border}88`, background: showCompleted ? `${C.accent}18` : "transparent", color: showCompleted ? C.accent : C.dimmer, cursor:"pointer", fontFamily:"inherit", fontWeight:500, whiteSpace:"nowrap", transition:"all .15s" }}>
+                          ✓ Done
+                        </button>
+                        <div style={{ display:"flex", gap:3, background: C.bg, padding:3, borderRadius:8, border:`1px solid ${C.border}` }}>
+                          {[["newest","New"],["oldest","Old"],["priority","⚡"],["manual","⠿"]].map(([s, label]) => (
+                            <button key={s} onClick={() => setStreamSort(s)} title={s} style={{ fontSize:11, padding:"4px 9px", borderRadius:6, border: "none", background: streamSort===s ? C.accent : "none", color: streamSort===s ? "#fff" : C.dim, cursor:"pointer", fontFamily:"inherit", fontWeight: streamSort===s ? 700 : 500, transition:"all .2s", whiteSpace:"nowrap" }}>{label}</button>
+                          ))}
+                        </div>
                       </div>
                       <div style={{ display:"flex", gap:3, flexShrink:0 }}>
                         <select value={groupBy || ""} onChange={e => setGroupBy(e.target.value || null)}
@@ -2108,6 +2122,20 @@ export default function App() {
                       </button>
                     )}
                   </div>
+                );
+              }
+              if (filteredEntries.length > 0) {
+                const totalActive = entries.filter(e => !e.done).length;
+                const isFiltered = search || typeFilter || dueFilter || filterTag;
+                return (
+                  <>
+                    {isFiltered && (
+                      <div style={{ padding:"4px 16px 0", fontSize:11, color: C.dimmer, fontWeight:500 }}>
+                        {filteredEntries.length} of {totalActive} entries
+                      </div>
+                    )}
+                    {filteredEntries.map((entry, i) => renderCard(entry, i, filteredEntries.length))}
+                  </>
                 );
               }
               return filteredEntries.map((entry, i) => renderCard(entry, i, filteredEntries.length));
