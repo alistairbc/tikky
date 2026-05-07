@@ -1,15 +1,15 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
-  TM, TYPES, PM, FONTS, LIST_COLORS, LIST_ICONS, LIST_TEMPLATES, TIKKY_VERSION 
+  TM, PM, FONTS, LIST_COLORS, TIKKY_VERSION 
 } from "./constants";
 import { CHANGELOG, THEMES } from "./changelog";
 import { SEED, SEED_LISTS } from "./seeds";
-import { Entry, List, ListItemType, Prefs, Subtask, Comment, Priority } from "./types";
+import { Entry, List, Prefs, Comment, Priority } from "./types";
 import { 
-  analyze, cleanText, extractDue, extractEventTime, extractDueTime, resolveDueDate, isOverdue, relDueLabel, extractTags, extractContexts, guessEmoji, findUpdateTarget
+  analyze, cleanText, resolveDueDate, isOverdue, extractTags, extractContexts, guessEmoji, findUpdateTarget
 } from "./utils/nlp";
-import { fmt, inPeriod, tagColor, renderMd } from "./utils/format";
+import { fmt, renderMd } from "./utils/format";
 import { classifyEntry, queryAssistant } from "./api";
 import { supabase } from "./lib/supabase";
 
@@ -23,7 +23,6 @@ import { DashboardCard } from "./components/DashboardCard";
 import { ListItem } from "./components/ListItem";
 import { CalendarView } from "./components/CalendarView";
 import { EntrySheet } from "./components/EntrySheet";
-import { SumItem, SumSection } from "./components/Summary";
 
 const loadPrefs = (): Prefs => { try { return JSON.parse(localStorage.getItem("tikky_prefs") || "{}"); } catch(_) { return {}; } };
 

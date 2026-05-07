@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from "motion/react";
 import { TM, PM } from "../constants";
 import { Entry } from "../types";
-import { renderMd } from "../utils/format";
+
 
 function toISO(d: Date) {
   const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');

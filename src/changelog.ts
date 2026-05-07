@@ -1,6 +1,13 @@
 import { CLR } from "./constants";
 
 export const CHANGELOG = [
+  { version:"0.127", date:"2026-05-08", label:"Code Review & Cleanup", items:[
+    "Removed 13 unused imports across App.tsx, StreamCard.tsx, EntrySheet.tsx",
+    "Dead code: SumItem/SumSection components no longer imported (summary view uses inline JSX)",
+    "Removed unused type imports: ListItemType, Subtask from types.ts",
+    "Cleaned NLP imports: extractDue, extractEventTime, extractDueTime, relDueLabel",
+    "StreamCard: removed unused Entry type import and tagColor utility import",
+  ]},
   { version:"0.126", date:"2026-05-08", label:"Polish & Commands", items:[
     "/focus command now activates focus mode directly from the compose bar",
     "/clear command deletes all completed entries instantly",
