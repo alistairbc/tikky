@@ -2,22 +2,41 @@ import { Entry, List } from "./types";
 
 export const SEED: Entry[] = [
   {
-    id:1,
-    rawText: 'Welcome! Type naturally — #tags, @context, action verbs, and "by Tuesday" due dates are all auto-detected. Type /help to see all commands.',
-    text:    'Welcome! Type naturally — tags, @context, action verbs, and due dates are all auto-detected. Type /help to see all commands.',
-    type:"note", priority:"low", done:false, pinned:false, dueDate:null, comments:[], tags:[], contexts:[], subtasks:[], timestamp: new Date()
+    id: 1,
+    rawText: 'Welcome to Tikky! Type anything — tasks, events, notes, or thoughts. Use #tags, @contexts, or "by Friday" to stay organised.',
+    text: 'Welcome to Tikky! Type anything naturally.',
+    type: "note", priority: "low", done: false, pinned: false, dueDate: null,
+    comments: [], tags: [], contexts: [], subtasks: [], timestamp: new Date(),
+    body: '**Getting started:**\n- "Call Alex tomorrow at 3pm #work" — Tikky classifies it automatically\n- Use **#tags** and **@contexts** to organise your stream\n- Type **/** to see commands like /summary and /help\n- Swipe right → to complete, left ← to delete on mobile',
   },
   {
-    id:2,
-    rawText: "ALDI Roadmap - Create a slide by Tuesday that encompasses the AISEO/GEO items and digital evolution coming over 26/27 #aldi #roadmap @aldimobile",
-    text:    "ALDI Roadmap: Create slide covering AISEO/GEO items and digital evolution 26/27",
-    type:"task", priority:"medium", done:false, pinned:false, dueDate:"Tuesday", comments:[], tags:["#aldi","#roadmap"], contexts:["@aldimobile"], subtasks:[{id:21,text:"Pull AISEO/GEO performance data",done:false},{id:22,text:"Draft slide structure",done:false}], timestamp: new Date(Date.now()-120000)
+    id: 2,
+    rawText: 'Try completing this sample task',
+    text: 'Try completing this sample task',
+    type: "task", priority: "medium", done: false, pinned: false, dueDate: null,
+    comments: [], tags: [], contexts: [],
+    subtasks: [
+      { id: 21, text: "Click the checkbox or swipe right to complete", done: false },
+      { id: 22, text: "Double-click any card title to edit it", done: false },
+      { id: 23, text: "Add your first real task above ↑", done: false },
+    ],
+    timestamp: new Date(Date.now() - 60000),
   },
   {
-    id:3,
-    rawText: "Team sync meeting tomorrow at 10am — confirm attendees #internal @medion",
-    text:    "Team sync tomorrow at 10am — confirm attendees",
-    type:"event", priority:"medium", done:false, pinned:false, dueDate:"Tomorrow 10am", comments:[], tags:["#internal"], contexts:["@medion"], subtasks:[], timestamp: new Date(Date.now()-240000)
+    id: 3,
+    rawText: 'Team standup tomorrow at 9am @work',
+    text: 'Team standup',
+    type: "event", priority: "low", done: false, pinned: false,
+    dueDate: (() => { const d = new Date(); d.setDate(d.getDate() + 1); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; })(),
+    dueTime: "09:00",
+    comments: [], tags: [], contexts: ["@work"], subtasks: [], timestamp: new Date(Date.now() - 120000),
+  },
+  {
+    id: 4,
+    rawText: 'The best ideas deserve a home — use thoughts to capture whatever is on your mind, no pressure to action them',
+    text: 'The best ideas deserve a home',
+    type: "thought", priority: "low", done: false, pinned: false, dueDate: null,
+    comments: [], tags: [], contexts: [], subtasks: [], timestamp: new Date(Date.now() - 180000),
   },
 ];
 

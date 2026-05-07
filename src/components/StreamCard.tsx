@@ -493,7 +493,24 @@ export function StreamCard({
                   <span style={{ fontSize:10, color:"#f59e0b", lineHeight:1, flexShrink:0 }}>📌</span>
                 )}
 
-                <div style={{ flex:1, display:"flex", alignItems:"center", gap:12, minWidth:0 }}>
+                <div style={{ flex:1, display:"flex", alignItems:"center", gap:8, minWidth:0 }}>
+                  {/* Task checkbox — desktop */}
+                  {entry.type === "task" && !isMobile && !isEditing && (
+                    <button
+                      onClick={e => { e.stopPropagation(); onToggleDone(); }}
+                      title={entry.done ? "Mark incomplete" : "Mark complete"}
+                      style={{ width:16, height:16, borderRadius:4, flexShrink:0,
+                               border:`1.5px solid ${entry.done ? meta.color : C.border}`,
+                               background: entry.done ? meta.color : "transparent",
+                               cursor:"pointer", display:"flex", alignItems:"center",
+                               justifyContent:"center", transition:"all .15s", padding:0 }}>
+                      {entry.done && (
+                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                      )}
+                    </button>
+                  )}
                   {isEditing ? (
                     <textarea
                       ref={editRef}

@@ -246,7 +246,8 @@ export default function App() {
   const [editListItemText,  setEditListItemText]  = useState("");
   const [listLayout,        setListLayout]        = useState<"list"|"sticky"|"board">("list");
 
-  const [acType,        setAcType]        = useState<"tag" | "context" | null>(null);
+  const [acType,        setAcType]        = useState<"tag" | "context" | "command" | null>(null);
+  const [composeFocused, setComposeFocused] = useState(false);
   const [acQuery,       setAcQuery]       = useState("");
   const [acIndex,       setAcIndex]       = useState(0);
   const [acPos,         setAcPos]         = useState({ top: 0, left: 0 });
@@ -254,8 +255,20 @@ export default function App() {
   const allTags = useMemo(() => [...new Set(entries.flatMap(e => e.tags))].sort(), [entries]);
   const allContexts = useMemo(() => [...new Set(entries.flatMap(e => e.contexts))].sort(), [entries]);
 
+  const SLASH_COMMANDS = [
+    { cmd: "/summary",  desc: "Summarise your stream" },
+    { cmd: "/help",     desc: "Show all commands" },
+    { cmd: "/export",   desc: "Export your data" },
+    { cmd: "/import",   desc: "Import data" },
+    { cmd: "/focus",    desc: "Enter focus mode" },
+    { cmd: "/clear",    desc: "Clear completed tasks" },
+  ];
+
   const acOptions = useMemo(() => {
     if (!acType) return [];
+    if (acType === "command") {
+      return SLASH_COMMANDS.filter(s => s.cmd.slice(1).startsWith(acQuery.toLowerCase())).map(s => s.cmd);
+    }
     const pool = acType === "tag" ? allTags : allContexts;
     return pool.filter(x => x.toLowerCase().includes(acQuery.toLowerCase())).slice(0, 5);
   }, [acType, acQuery, allTags, allContexts]);
@@ -280,6 +293,12 @@ export default function App() {
       setAcIndex(0);
       const { top, left } = getCaretCoordinates(el, pos);
       setAcPos({ top: top + 20, left });
+    } else if (lastWord.startsWith("/") && lastWord.length >= 1) {
+      setAcType("command");
+      setAcQuery(lastWord.slice(1));
+      setAcIndex(0);
+      const { top, left } = getCaretCoordinates(el, pos);
+      setAcPos({ top: top + 20, left });
     } else {
       setAcType(null);
     }
@@ -294,6 +313,12 @@ export default function App() {
     if (!val) { setAcType(null); return; }
     const el = inputRef.current;
     if (!el) return;
+    if (acType === "command") {
+      setInput(val);
+      setAcType(null);
+      setTimeout(() => el.focus(), 0);
+      return;
+    }
     const pos = el.selectionStart || 0;
     const before = input.slice(0, pos);
     const after = input.slice(pos);
@@ -339,6 +364,13 @@ export default function App() {
     if (accentOverride) colors.accent = accentOverride;
     return colors;
   }, [theme, accentOverride]);
+
+  const accentText = useMemo(() => {
+    const hex = (C.accent || '#6366f1').replace('#', '');
+    if (hex.length < 6) return '#fff';
+    const r = parseInt(hex.slice(0,2),16), g = parseInt(hex.slice(2,4),16), b = parseInt(hex.slice(4,6),16);
+    return (r*299 + g*587 + b*114) / 1000 > 160 ? '#111' : '#fff';
+  }, [C.accent]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -1704,32 +1736,66 @@ export default function App() {
                           }
                           if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); addEntry(); } 
                         }}
-                        placeholder="What's on your mind? Try 'Update...', 'What's next?', #tags, @spaces, !priority or /summary..." 
+                        placeholder="What's on your mind? Try 'Update...', 'What's next?', #tags, @spaces, !priority or /commands…" 
                         rows={2}
-                        style={{ flex:1, background:C.input, border:`1.5px solid ${C.accent}33`, borderRadius:10, padding: "12px", fontSize:14, color:C.text, outline:"none", resize:"none", minHeight: 60, maxHeight:120, transition:"border-color .2s", boxShadow:`0 0 0 3px ${C.accent}08` }} 
+                        onFocus={() => setComposeFocused(true)}
+                        onBlur={() => { if (!input.trim()) setComposeFocused(false); }}
+                        style={{ flex:1, background:C.input, border:`1.5px solid ${composeFocused ? C.accent+"66" : C.accent+"33"}`, borderRadius:10, padding: "12px", fontSize:14, color:C.text, outline:"none", resize:"none", minHeight: composeFocused ? 100 : 60, maxHeight: composeFocused ? 280 : 120, transition:"min-height .25s ease, border-color .2s", boxShadow: composeFocused ? `0 0 0 3px ${C.accent}14` : `0 0 0 3px ${C.accent}08` }} 
                       />
+                      {composeFocused && (
+                        <div style={{ display:"flex", gap:3, padding:"4px 2px", borderTop:`1px solid ${C.border}44`, marginTop:4, flexWrap:"wrap" }}>
+                          {[["B","Bold","**"],["I","Italic","*"],["—","Heading","## "],["☑","Checklist","- [ ] "],["•","Bullet","- "]].map(([lbl,title,mk]) => (
+                            <button key={lbl} title={title}
+                              onMouseDown={e => {
+                                e.preventDefault();
+                                const el = inputRef.current;
+                                if (!el) return;
+                                const s = el.selectionStart || 0, en = el.selectionEnd || 0;
+                                const sel = input.slice(s, en);
+                                const wrap = mk!.length <= 3 && !mk!.startsWith("-") && !mk!.startsWith("#");
+                                const newText = input.slice(0,s) + mk + sel + (wrap && sel ? mk : "") + input.slice(en);
+                                setInput(newText);
+                                setTimeout(() => el.focus(), 0);
+                              }}
+                              style={{ fontSize:11, padding:"2px 7px", borderRadius:4, border:`1px solid ${C.border}`, background:"none", color:C.dim, cursor:"pointer", fontFamily:"inherit", fontWeight: lbl==="B" ? 700 : 400, fontStyle: lbl==="I" ? "italic" : "normal", transition:"all .1s", lineHeight:1.4 }}>
+                              {lbl}
+                            </button>
+                          ))}
+                          <span style={{ fontSize:10, color:C.dimmer, alignSelf:"center", marginLeft:"auto" }}>Enter to add · Shift+Enter for newline</span>
+                        </div>
+                      )}
                       {acType && (
                         <div style={{ position:"absolute", top: acPos.top, left: acPos.left, background: C.surface, border:`1px solid ${C.accent}55`, borderRadius:8, zIndex:1000, boxShadow:"0 10px 25px rgba(0,0,0,.3)", minWidth:120, overflow:"hidden" }}>
                           {acOptions.length === 0 ? (
                             <div style={{ padding:"8px 12px", fontSize:12, color: C.dim }}>No matches</div>
                           ) : (
-                            acOptions.map((opt, i) => (
-                              <div 
-                                key={opt} 
-                                onClick={() => handleAcSelect(opt)}
-                                onMouseEnter={() => setAcIndex(i)}
-                                style={{ padding:"8px 12px", fontSize:12, color: acIndex === i ? "#fff" : C.text, background: acIndex === i ? C.accent : "none", cursor:"pointer", fontWeight: acIndex === i ? 600 : 400 }}
-                              >
-                                {acType === "tag" ? "#" : "@"}{opt}
-                              </div>
-                            ))
+                            acOptions.map((opt, i) => {
+                              const cmdInfo = acType === "command" ? SLASH_COMMANDS.find(s => s.cmd === opt) : null;
+                              return (
+                                <div
+                                  key={opt}
+                                  onClick={() => handleAcSelect(opt)}
+                                  onMouseEnter={() => setAcIndex(i)}
+                                  style={{ padding:"8px 12px", fontSize:12, color: acIndex === i ? "#fff" : C.text, background: acIndex === i ? C.accent : "none", cursor:"pointer", fontWeight: acIndex === i ? 600 : 400, display:"flex", alignItems:"center", gap:8 }}
+                                >
+                                  {acType === "command" ? (
+                                    <>
+                                      <span style={{ fontFamily:"monospace", fontSize:11 }}>{opt}</span>
+                                      {cmdInfo && <span style={{ fontSize:10, color: acIndex === i ? "rgba(255,255,255,0.7)" : C.dim, fontWeight:400 }}>{cmdInfo.desc}</span>}
+                                    </>
+                                  ) : (
+                                    <>{acType === "tag" ? "#" : "@"}{opt}</>
+                                  )}
+                                </div>
+                              );
+                            })
                           )}
                         </div>
                       )}
                       <button onClick={() => photoInputRef.current?.click()} title="Attach photo" style={{ height:28, width:28, background: C.surface, border:`1px solid ${C.border}`, color: C.dim, borderRadius:6, padding:0, cursor:"pointer", flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center", transition:"border-color .12s" }}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
                       </button>
-                      <button onClick={addEntry} disabled={isSubmitting} style={{ height:28, padding:"0 14px", background: isSubmitting ? C.dimmer : C.accent, color:"#fff", border:"none", borderRadius:6, cursor: isSubmitting ? "wait" : "pointer", fontWeight:600, fontSize:11, letterSpacing:"0.04em", flexShrink:0, transition:"all .1s", opacity: isSubmitting ? 0.7 : 1 }} onMouseDown={e=>{ if (!isSubmitting) e.currentTarget.style.transform="scale(0.96)"; }} onMouseUp={e=>e.currentTarget.style.transform="scale(1)"}>{isSubmitting ? "…" : "Add"}</button>
+                      <button onClick={addEntry} disabled={isSubmitting} style={{ height:28, padding:"0 14px", background: isSubmitting ? C.dimmer : C.accent, color: isSubmitting ? C.dim : accentText, border:"none", borderRadius:6, cursor: isSubmitting ? "wait" : "pointer", fontWeight:700, fontSize:11, letterSpacing:"0.04em", flexShrink:0, transition:"all .1s", opacity: isSubmitting ? 0.7 : 1 }} onMouseDown={e=>{ if (!isSubmitting) e.currentTarget.style.transform="scale(0.96)"; }} onMouseUp={e=>e.currentTarget.style.transform="scale(1)"}>{isSubmitting ? "…" : "Add"}</button>
                     </div>
                     {composeImages.length > 0 && (
                       <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginTop:4 }}>
@@ -1751,16 +1817,30 @@ export default function App() {
                 const today   = entries.filter(e => !e.done && e.dueDate && resolveDueDate(e.dueDate, e.timestamp)! >= new Date(new Date().setHours(0,0,0,0)) && resolveDueDate(e.dueDate, e.timestamp)! < new Date(new Date().setHours(24,0,0,0)));
                 if ((overdue.length > 0 || today.length > 0) && !dismissedAlert) {
                   return (
-                    <div style={{ background:"#ef444412", borderBottom:"1px solid #ef444430", padding:"7px 15px", display:"flex", alignItems:"center", gap:10, flexShrink:0 }}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}>
-                        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-                        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-                      </svg>
-                      <div style={{ flex:1, fontSize:11, color:"#fca5a5", fontWeight:600 }}>
-                        {overdue.length > 0 && <span>{overdue.length} overdue</span>}
-                        {overdue.length > 0 && today.length > 0 && <span style={{ color:"#ef444466", margin:"0 4px" }}>·</span>}
-                        {today.length > 0 && <span>{today.length} due today</span>}
+                    <div style={{ background:"#ef444418", borderBottom:"2px solid #ef444435", padding:"8px 16px", display:"flex", alignItems:"center", gap:10, flexShrink:0 }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:6, flex:1 }}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}>
+                          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                          <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                        {overdue.length > 0 && (
+                          <span style={{ fontSize:11, fontWeight:800, color:"#ef4444", letterSpacing:"0.03em" }}>
+                            {overdue.length} OVERDUE
+                          </span>
+                        )}
+                        {overdue.length > 0 && today.length > 0 && <span style={{ color:"#ef444444" }}>·</span>}
+                        {today.length > 0 && (
+                          <span style={{ fontSize:11, fontWeight:600, color:"#fca5a5" }}>
+                            {today.length} due today
+                          </span>
+                        )}
+                        <span style={{ fontSize:10, color:"#ef444466", marginLeft:4, fontWeight:400 }}>
+                          {overdue.map(e => e.text).slice(0,2).join(" · ")}{overdue.length > 2 ? ` +${overdue.length-2} more` : ""}
+                        </span>
                       </div>
+                      <button onClick={() => setDueFilter(overdue.length > 0 ? "overdue" : "today")} style={{ background:"#ef444422", border:"1px solid #ef444450", color:"#ef4444", padding:"3px 10px", borderRadius:5, fontSize:10, fontWeight:800, cursor:"pointer", fontFamily:"inherit", letterSpacing:"0.06em", flexShrink:0 }}>VIEW</button>
+                      <button onClick={() => setDismissedAlert(true)} style={{ background:"none", border:"none", color:"#ef444466", cursor:"pointer", fontSize:14, padding:0, lineHeight:1, flexShrink:0 }}>✕</button>
+                    </div>
                       <button onClick={() => setDueFilter(overdue.length > 0 ? "overdue" : "today")} style={{ background:"#ef444420", border:"1px solid #ef444440", color:"#ef4444", padding:"2px 8px", borderRadius:4, fontSize:10, fontWeight:700, cursor:"pointer", fontFamily:"inherit", letterSpacing:"0.04em" }}>VIEW</button>
                       <button onClick={() => setDismissedAlert(true)} style={{ background:"none", border:"none", color:"#ef444488", cursor:"pointer", fontSize:13, padding:0, lineHeight:1 }}>✕</button>
                     </div>
@@ -1799,14 +1879,7 @@ export default function App() {
                           );
                         })}
                       </div>
-                      <div style={{ display:"flex", gap:4 }}>
-                        {[["overdue","⚠ Overdue","#ef4444"],["today","⏱ Today","#f59e0b"],["week","📅 Week",C.accent]].map(([k,label,col]) => (
-                          <button key={k} onClick={() => setDueFilter(dueFilter === k ? null : k)}
-                            style={{ fontSize:11, padding:"4px 10px", borderRadius:8, border: dueFilter===k ? `1px solid ${col}55` : `1px solid ${C.border}88`, background: dueFilter===k ? `${col}22` : "transparent", color: dueFilter===k ? col : C.dim, cursor:"pointer", fontFamily:"inherit", fontWeight: dueFilter===k ? 700 : 500, transition:"all .15s", whiteSpace:"nowrap" }}>
-                            {label}
-                          </button>
-                        ))}
-                      </div>
+
                       {/* Sort + Group + Toggles — merged into single row */}
                       <div style={{ display:"flex", gap:3, background: C.bg, padding:3, borderRadius:8, border:`1px solid ${C.border}`, marginLeft:"auto", flexShrink:0 }}>
                         {[["newest","New"],["oldest","Old"],["priority","⚡"],["manual","⠿"]].map(([s, label]) => (
@@ -1827,18 +1900,28 @@ export default function App() {
                       </div>
                     </div>
 
-                    {/* Tag filter pills — inline under search row */}
-                    {(allTags.length > 0 || savedFilters.length > 0 || filterTag) && (
-                      <div className="no-scrollbar" style={{ display:"flex", gap:5, alignItems:"center", overflowX:"auto", paddingTop:2, paddingBottom:2 }}>
+                    {/* Filter chips row: due filters + tags + saved filters */}
+                    {(allTags.length > 0 || savedFilters.length > 0 || filterTag || dueFilter) && (
+                      <div className="no-scrollbar" style={{ display:"flex", gap:5, alignItems:"center", overflowX:"auto", paddingBottom:1 }}>
                         {(typeFilter || filterTag || dueFilter || search) && (
                           <button
                             onClick={() => { setTypeFilter(null); setFilterTag(null); setDueFilter(null); setSearch(""); }}
-                            style={{ fontSize:10, padding:"2px 8px", borderRadius:5, border:"1px solid #ef444455", background:"#ef444411", color:"#ef4444", cursor:"pointer", fontFamily:"inherit", fontWeight:700, whiteSpace:"nowrap", flexShrink:0 }}>
+                            style={{ fontSize:10, padding:"2px 7px", borderRadius:5, border:"1px solid #ef444455", background:"#ef444411", color:"#ef4444", cursor:"pointer", fontFamily:"inherit", fontWeight:700, whiteSpace:"nowrap", flexShrink:0 }}>
                             ✕ Clear
                           </button>
                         )}
+                        {(["overdue","today","week"] as const).map((k) => {
+                          const meta = { overdue: ["⚠ Overdue","#ef4444"], today: ["Today","#f59e0b"], week: ["This week",C.accent] }[k];
+                          return (
+                            <button key={k} onClick={() => setDueFilter(dueFilter === k ? null : k)}
+                              style={{ fontSize:11, padding:"3px 9px", borderRadius:7, border: dueFilter===k ? `1px solid ${meta[1]}55` : `1px solid ${C.border}66`, background: dueFilter===k ? `${meta[1]}22` : "transparent", color: dueFilter===k ? meta[1] : C.dim, cursor:"pointer", fontFamily:"inherit", fontWeight: dueFilter===k ? 700 : 400, whiteSpace:"nowrap", flexShrink:0, transition:"all .15s" }}>
+                              {meta[0]}
+                            </button>
+                          );
+                        })}
+                        {(allTags.length > 0 || savedFilters.length > 0) && <div style={{ width:1, height:14, background:C.border, flexShrink:0 }} />}
                         {savedFilters.map(f => (
-                          <div key={f.id} style={{ display:"flex", alignItems:"center", background:`${C.accent}12`, border:`1px solid ${C.accent}33`, borderRadius:6, padding:"1px 2px 1px 8px", gap:4, flexShrink:0 }}>
+                          <div key={f.id} style={{ display:"flex", alignItems:"center", background:`${C.accent}12`, border:`1px solid ${C.accent}33`, borderRadius:6, padding:"2px 2px 2px 8px", gap:3, flexShrink:0 }}>
                             <span onClick={() => { setTypeFilter(f.type); setFilterTag(f.tag); setDueFilter(f.due); setSearch(f.search || ""); }} style={{ fontSize:10, color:C.accent, fontWeight:600, cursor:"pointer", whiteSpace:"nowrap" }}>{f.name}</span>
                             <button onClick={() => setSavedFilters(savedFilters.filter(x => x.id !== f.id))} style={{ background:"none", border:"none", color:C.dim, cursor:"pointer", fontSize:10, padding:"2px 4px" }}>✕</button>
                           </div>
