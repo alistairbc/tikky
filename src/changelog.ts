@@ -1,6 +1,20 @@
 import { CLR } from "./constants";
 
 export const CHANGELOG = [
+  { version:"0.125", date:"2026-05-08", label:"Calendar + UX Polish", items:[
+    "Calendar grid: desktop cells show up to 2 entry titles with type-coloured left strip",
+    "Calendar grid: mobile keeps compact dots, desktop gets richer per-entry rows with time prefix",
+    "Fixed .title bug in calendar grid cells (entries use .text not .title)",
+  ]},
+  { version:"0.124", date:"2026-05-08", label:"Compose & Filter Overhaul", items:[
+    "Slash command autocomplete: type / to see commands (/summary, /export, /focus, etc.)",
+    "Compose textarea expands on focus with formatting toolbar (B/I/H/Checklist/Bullet)",
+    "Filter bar consolidated: due date chips (Overdue/Today/This week) merged into tag row",
+    "Task stream cards get interactive checkbox — tick without opening the card",
+    "Add button uses accentText for correct contrast across all themes",
+    "Overdue banner: bolder OVERDUE label with entry preview text",
+    "Generic seed data — one of each type (note/task/event/thought) for new users",
+  ]},
   { version:"0.123", date:"2026-05-01", label:"Date Picker Fixes", items:[
     "Existing due dates now pre-fill correctly in the date picker — you can see and edit the current value.",
     "Opening a card's date picker on the sidebar no longer opens a second picker simultaneously on the stream card.",

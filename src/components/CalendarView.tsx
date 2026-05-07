@@ -174,7 +174,7 @@ export function CalendarView({ entries, C, onEntryClick, isMobile }: Props) {
           {/* Leading empty cells */}
           {Array.from({ length: firstDow }, (_, i) => (
             <div key={`pre-${i}`} style={{
-              minHeight: isMobile ? 52 : 76,
+              minHeight: isMobile ? 52 : 88,
               background: `${C.surface}40`, borderRadius: 6,
               border: `1px solid ${C.border}40`,
             }} />
@@ -225,35 +225,52 @@ export function CalendarView({ entries, C, onEntryClick, isMobile }: Props) {
                   {day}
                 </div>
 
-                {/* Entry dots */}
-                {hasEnts && (
+                {/* Mobile: dots + count */}
+                {hasEnts && isMobile && (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
-                    {dayEnts.slice(0, maxDots).map((entry, idx) => {
+                    {dayEnts.slice(0, 3).map((entry, idx) => {
                       const meta = (TM as any)[entry.type];
                       return (
                         <div key={idx} style={{
-                          width: 7, height: 7, borderRadius: '50%',
+                          width: 6, height: 6, borderRadius: '50%',
                           background: meta.color, flexShrink: 0,
-                          boxShadow: `0 0 3px ${meta.color}88`,
                         }} />
                       );
                     })}
-                    {dayEnts.length > maxDots && (
-                      <span style={{ fontSize: 9, color: C.dim, lineHeight: 1 }}>
-                        +{dayEnts.length - maxDots}
-                      </span>
+                    {dayEnts.length > 3 && (
+                      <span style={{ fontSize: 9, color: C.dim, lineHeight: 1 }}>+{dayEnts.length - 3}</span>
                     )}
                   </div>
                 )}
 
-                {/* First entry title — desktop only */}
-                {!isMobile && hasEnts && dayEnts[0] && (
-                  <div style={{
-                    fontSize: 10, color: C.dim, marginTop: 4,
-                    overflow: 'hidden', textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}>
-                    {dayEnts[0].title}
+                {/* Desktop: entry title rows with type color strip */}
+                {hasEnts && !isMobile && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginTop: 3 }}>
+                    {dayEnts.slice(0, 2).map((entry, idx) => {
+                      const meta = (TM as any)[entry.type];
+                      const displayText = entry.text.replace(/#\S+/g,'').replace(/!high|!med|!low/gi,'').trim();
+                      return (
+                        <div key={idx} style={{
+                          display: 'flex', alignItems: 'center', gap: 4,
+                          borderRadius: 3, overflow: 'hidden',
+                        }}>
+                          <div style={{ width: 2, height: 13, background: meta.color, borderRadius: 1, flexShrink: 0 }} />
+                          <span style={{
+                            fontSize: 9.5, color: entry.done ? C.dimmer : C.text,
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1,
+                            textDecoration: entry.done ? 'line-through' : 'none', lineHeight: 1.3,
+                          }}>
+                            {entry.dueTime ? <span style={{ color: meta.color, fontWeight: 700, marginRight: 2 }}>{entry.dueTime.slice(0,5)}</span> : null}
+                            {displayText}
+                          </span>
+                        </div>
+                      );
+                    })}
+                    {dayEnts.length > 2 && (
+                      <div style={{ fontSize: 9, color: C.dim, paddingLeft: 6, lineHeight: 1 }}>
+                        +{dayEnts.length - 2} more
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
