@@ -1,9 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from "motion/react";
 import { TM, PM } from "../constants";
-import { fmt, renderMd } from "../utils/format";
+import { fmt, renderMd, formatTime } from "../utils/format";
 import { relDueLabel, isOverdue } from "../utils/nlp";
-import { formatTime } from "../utils/format";
 import { Tick } from "./Tick";
 import { TypeBadge } from "./TypeBadge";
 
