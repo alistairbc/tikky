@@ -1,6 +1,11 @@
 import { CLR } from "./constants";
 
 export const CHANGELOG = [
+  { version:"0.130", date:"2026-05-11", title:"Compose & UX polish", items:[
+    "Removed formatting toolbar from compose bar — replaced with keyboard hint",
+    "Click outside expanded card now collapses it",
+    "Sort buttons styled to match type filter tabs (bordered highlight)",
+  ]},
   { version:"0.127", date:"2026-05-08", label:"Code Review & Cleanup", items:[
     "Removed 13 unused imports across App.tsx, StreamCard.tsx, EntrySheet.tsx",
     "Dead code: SumItem/SumSection components no longer imported (summary view uses inline JSX)",
