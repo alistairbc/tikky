@@ -397,6 +397,8 @@ export function StreamCard({
             padding: isMobile ? "10px 11px" : compact ? "6px 10px" : "12px",
             border: entry.isNew
               ? `1.5px solid ${C.accent}`
+              : overdueEntry
+              ? `1px solid #ef444455`
               : `1px solid ${
                   isSelected ? C.accent+"88" :
                   isExpanded ? C.accent+"44" :
@@ -404,14 +406,12 @@ export function StreamCard({
                                C.border
                 }`,
             boxShadow: entry.isNew
-              ? `inset 3px 0 0 ${C.accent}, 0 0 12px ${C.accent}33`
+              ? `inset 3px 0 0 ${meta.color}, 0 0 12px ${C.accent}33`
               : isSelected
-              ? `inset 3px 0 0 ${C.accent}, 0 0 0 2px ${C.accent}22`
-              : overdueEntry
-              ? "inset 3px 0 0 #ef4444"
+              ? `inset 3px 0 0 ${meta.color}, 0 0 0 2px ${C.accent}22`
               : isExpanded
-              ? `0 0 14px ${meta.color}22`
-              : "none",
+              ? `inset 3px 0 0 ${meta.color}, 0 0 14px ${meta.color}22`
+              : `inset 3px 0 0 ${meta.color}`,
             opacity: entry.done ? 0.55 : 1,
             cursor: "pointer",
             transition: "border-color .2s, box-shadow .2s, opacity .2s",

@@ -58,10 +58,10 @@
   --note-ink:  #1a1410; /* dark ink on yellow note                       */
   --note-edge: #a16207; /* amber border for note chip                    */
   --task:      #10b981; /* green  · ✓ checkable                          */
-  --event:     #0ea5e9; /* sky    · ◈ scheduled in time                  */
-  --event-ink: #7dd3fc; /* light-sky text on event badge                 */
-  --thought:   #64748b; /* slate  · ◎ open-ended / thread                */
-  --thought-ink: #cbd5e1; /* light-slate text on thought badge           */
+  --event:     #6366f1; /* indigo · ◈ scheduled in time                  */
+  --event-ink: #a5b4fc; /* light-indigo text on event badge              */
+  --thought:   #8b5cf6; /* violet · ◎ open-ended / thread                */
+  --thought-ink: #ddd6fe; /* light-violet text on thought badge          */
   --ai:        #8b5cf6; /* violet · AI orchestrated (5th type, evolved)  */
   --ai-light:  #a78bfa; /* lighter violet for AI glow/spine              */
 
@@ -120,8 +120,8 @@
   --glow-accent:  0 0 12px var(--accent-22);
   --glow-task:    0 0 6px #10b98166;
   --glow-note:    0 0 6px #fde04766;
-  --glow-event:   0 0 6px #0ea5e966;
-  --glow-thought: 0 0 6px #64748b66;
+  --glow-event:   0 0 6px #6366f166;
+  --glow-thought: 0 0 6px #8b5cf666;
   --glow-ai:      0 0 10px #8b5cf699;
 
   /* Motion — brisk, not bouncy */

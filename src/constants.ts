@@ -4,10 +4,9 @@ export const CLR = {
   warn:    "#f59e0b",
   info:    "#6366f1",
   note:    "#fde047",
-  sky:     "#0ea5e9",   /* event — sky blue */
-  slate:   "#64748b",   /* thought — slate  */
+  event:   "#6366f1",   /* event — indigo   */
   violet:  "#8b5cf6",   /* AI accent        */
-  thought: "#64748b",   /* alias            */
+  thought: "#8b5cf6",   /* thought — violet */
   cyan:    "#06b6d4",
   pink:    "#ec4899",
   orange:  "#f97316",
@@ -15,9 +14,9 @@ export const CLR = {
 
 export const TM = {
   task:    { label: "Task",    color: CLR.success, icon: "✓" },
-  event:   { label: "Event",   color: "#0ea5e9",   icon: "◈" },
+  event:   { label: "Event",   color: "#6366f1",   icon: "◈" },
   note:    { label: "Note",    color: CLR.note,    icon: "◉" },
-  thought: { label: "Thought", color: "#64748b",   icon: "◎" },
+  thought: { label: "Thought", color: "#8b5cf6",   icon: "◎" },
 };
 
 export const TYPES = ["task", "event", "note", "thought"] as const;
@@ -30,7 +29,7 @@ export const PM = {
 };
 export type Priority = keyof typeof PM;
 
-export const TIKKY_VERSION = "0.130";
+export const TIKKY_VERSION = "0.131";
 
 export const FONTS = {
   inter:  "'Inter','Segoe UI',system-ui,sans-serif",

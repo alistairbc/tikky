@@ -1749,7 +1749,7 @@ export default function App() {
                       />
 
                       {acType && (
-                        <div style={{ position:"absolute", top: acPos.top, left: acPos.left, background: C.surface, border:`1px solid ${C.accent}55`, borderRadius:8, zIndex:1000, boxShadow:"0 10px 25px rgba(0,0,0,.3)", minWidth:120, overflow:"hidden" }}>
+                        <div style={{ position:"absolute", bottom:"calc(100% + 6px)", left:0, right:0, background: C.surface, border:`1px solid ${C.accent}55`, borderRadius:8, zIndex:1000, boxShadow:"0 8px 20px rgba(0,0,0,.35)", minWidth:180, maxWidth:"100%", overflow:"hidden" }}>
                           {acOptions.length === 0 ? (
                             <div style={{ padding:"8px 12px", fontSize:12, color: C.dim }}>No matches</div>
                           ) : (
@@ -1791,7 +1791,7 @@ export default function App() {
                         {composeImages.map((img, i) => (
                           <div key={i} style={{ position:"relative" }}>
                             <img src={img} alt="" style={{ width:52, height:52, objectFit:"cover", borderRadius:8, border:`1px solid ${C.border}`, display:"block" }} />
-                            <button onClick={() => setComposeImages(p => p.filter((_,idx) => idx !== i))} style={{ position:"absolute", top:-5, right:-5, width:16, height:16, borderRadius:"50%", background:"#ef4444", border:"none", color:"#fff", fontSize:10, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0 }}>✕</button>
+                            <button onClick={() => setComposeImages(p => p.filter((_,idx) => idx !== i))} style={{ position:"absolute", top:3, right:3, width:16, height:16, borderRadius:"50%", background:"rgba(0,0,0,0.65)", border:"none", color:"rgba(255,255,255,0.9)", fontSize:9, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0, opacity:0.85 }}>✕</button>
                           </div>
                         ))}
                       </div>
@@ -1806,29 +1806,29 @@ export default function App() {
                 const today   = entries.filter(e => !e.done && e.dueDate && resolveDueDate(e.dueDate, e.timestamp)! >= new Date(new Date().setHours(0,0,0,0)) && resolveDueDate(e.dueDate, e.timestamp)! < new Date(new Date().setHours(24,0,0,0)));
                 if ((overdue.length > 0 || today.length > 0) && !dismissedAlert) {
                   return (
-                    <div style={{ background:"#ef444418", borderBottom:"2px solid #ef444435", padding:"8px 16px", display:"flex", alignItems:"center", gap:10, flexShrink:0 }}>
-                      <div style={{ display:"flex", alignItems:"center", gap:6, flex:1 }}>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}>
+                    <div style={{ background:"#f59e0b0e", borderBottom:"1px solid #f59e0b22", padding:"6px 16px", display:"flex", alignItems:"center", gap:10, flexShrink:0 }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:6, flex:1, minWidth:0, overflow:"hidden" }}>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}>
                           <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
                           <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
                         </svg>
                         {overdue.length > 0 && (
-                          <span style={{ fontSize:11, fontWeight:800, color:"#ef4444", letterSpacing:"0.03em" }}>
-                            {overdue.length} OVERDUE
+                          <span style={{ fontSize:11, fontWeight:700, color:"#f59e0b", letterSpacing:"0.02em" }}>
+                            {overdue.length} overdue
                           </span>
                         )}
-                        {overdue.length > 0 && today.length > 0 && <span style={{ color:"#ef444444" }}>·</span>}
+                        {overdue.length > 0 && today.length > 0 && <span style={{ color:"#f59e0b44" }}>·</span>}
                         {today.length > 0 && (
-                          <span style={{ fontSize:11, fontWeight:600, color:"#fca5a5" }}>
+                          <span style={{ fontSize:11, fontWeight:600, color:"#fbbf24" }}>
                             {today.length} due today
                           </span>
                         )}
-                        <span style={{ fontSize:10, color:"#ef444466", marginLeft:4, fontWeight:400 }}>
+                        <span style={{ fontSize:10, color:"#f59e0b55", marginLeft:4, fontWeight:400, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
                           {overdue.map(e => e.text).slice(0,2).join(" · ")}{overdue.length > 2 ? ` +${overdue.length-2} more` : ""}
                         </span>
                       </div>
-                      <button onClick={() => setDueFilter(overdue.length > 0 ? "overdue" : "today")} style={{ background:"#ef444422", border:"1px solid #ef444450", color:"#ef4444", padding:"3px 10px", borderRadius:5, fontSize:10, fontWeight:800, cursor:"pointer", fontFamily:"inherit", letterSpacing:"0.06em", flexShrink:0 }}>VIEW</button>
-                      <button onClick={() => setDismissedAlert(true)} style={{ background:"none", border:"none", color:"#ef444466", cursor:"pointer", fontSize:14, padding:0, lineHeight:1, flexShrink:0 }}>✕</button>
+                      <button onClick={() => setDueFilter(overdue.length > 0 ? "overdue" : "today")} style={{ background:"#f59e0b15", border:"1px solid #f59e0b44", color:"#f59e0b", padding:"3px 10px", borderRadius:5, fontSize:10, fontWeight:700, cursor:"pointer", fontFamily:"inherit", letterSpacing:"0.04em", flexShrink:0 }}>View</button>
+                      <button onClick={() => setDismissedAlert(true)} style={{ background:"none", border:"none", color:"#f59e0b55", cursor:"pointer", fontSize:13, padding:0, lineHeight:1, flexShrink:0 }}>✕</button>
                     </div>
                   );
                 }
