@@ -1846,9 +1846,6 @@ export default function App() {
                       <button onClick={() => setDueFilter(overdue.length > 0 ? "overdue" : "today")} style={{ background:"#ef444422", border:"1px solid #ef444450", color:"#ef4444", padding:"3px 10px", borderRadius:5, fontSize:10, fontWeight:800, cursor:"pointer", fontFamily:"inherit", letterSpacing:"0.06em", flexShrink:0 }}>VIEW</button>
                       <button onClick={() => setDismissedAlert(true)} style={{ background:"none", border:"none", color:"#ef444466", cursor:"pointer", fontSize:14, padding:0, lineHeight:1, flexShrink:0 }}>✕</button>
                     </div>
-                      <button onClick={() => setDueFilter(overdue.length > 0 ? "overdue" : "today")} style={{ background:"#ef444420", border:"1px solid #ef444440", color:"#ef4444", padding:"2px 8px", borderRadius:4, fontSize:10, fontWeight:700, cursor:"pointer", fontFamily:"inherit", letterSpacing:"0.04em" }}>VIEW</button>
-                      <button onClick={() => setDismissedAlert(true)} style={{ background:"none", border:"none", color:"#ef444488", cursor:"pointer", fontSize:13, padding:0, lineHeight:1 }}>✕</button>
-                    </div>
                   );
                 }
                 return null;
