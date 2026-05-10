@@ -1,6 +1,14 @@
 import { CLR } from "./constants";
 
 export const CHANGELOG = [
+  { version:"0.131", date:"2026-05-11", title:"Design system alignment", items:[
+    "Event color: sky → indigo (#6366f1) per design system canonical CSS",
+    "Thought color: slate → violet (#8b5cf6) per design system canonical CSS",
+    "Stream card spine: always type-colored; overdue shows red border instead of red spine",
+    "Overdue banner: red → amber (#f59e0b) — danger reserved for destructive actions",
+    "Slash-command popover: anchored below textarea, no longer floats at viewport corner",
+    "Photo delete button: dark translucent chip replaces red circle",
+  ]},
   { version:"0.130", date:"2026-05-11", title:"Compose & UX polish", items:[
     "Removed formatting toolbar from compose bar — replaced with keyboard hint",
     "Click outside expanded card now collapses it",
