@@ -355,46 +355,43 @@ export function CalendarView({ entries, C, onEntryClick, isMobile }: Props) {
           </div>
         )}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {selectedEntries.map(entry => {
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          {selectedEntries.map((entry, idx) => {
             const meta = (TM as any)[entry.type];
+            const dateStr = !selectedDay && !overdueFilter && entry.dueDate
+              ? (() => { const d = new Date(entry.dueDate + 'T12:00:00'); return isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short' }); })()
+              : entry.dueTime ? formatTime(entry.dueTime) : '';
             return (
               <div
                 key={entry.id}
                 onClick={() => onEntryClick(entry.id)}
                 style={{
-                  padding: '10px 12px', borderRadius: 8, cursor: 'pointer',
-                  background: `${meta.color}0e`, border: `1px solid ${meta.color}28`,
-                  transition: 'border-color 0.1s',
+                  padding: '9px 2px', cursor: 'pointer',
+                  borderTop: idx > 0 ? `1px solid ${C.border}44` : 'none',
+                  display: 'flex', alignItems: 'flex-start', gap: 8,
                 }}
               >
+                {/* Type color indicator */}
                 <div style={{
-                  fontSize: 10, fontWeight: 800, textTransform: 'uppercase',
-                  letterSpacing: '0.05em', color: meta.color,
-                  marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4,
-                }}>
-                  {meta.icon} {meta.label}
-                  {entry.priority === 'high' && (
-                    <span style={{ marginLeft: 'auto', color: '#ef4444', fontSize: 9, letterSpacing: '0.04em' }}>
-                      HIGH
+                  width: 3, height: 36, borderRadius: 2, flexShrink: 0, marginTop: 2,
+                  background: meta.color,
+                }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
+                    <span style={{ fontSize: 9, fontWeight: 800, color: meta.color, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                      {meta.label}
                     </span>
+                    {entry.priority === 'high' && (
+                      <span style={{ fontSize: 9, color: '#ef4444', fontWeight: 800, letterSpacing: '0.04em' }}>HIGH</span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: 12, color: C.text, lineHeight: 1.35, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {entry.text}
+                  </div>
+                  {dateStr && (
+                    <div style={{ fontSize: 10, color: C.dimmer, marginTop: 1 }}>{dateStr}</div>
                   )}
                 </div>
-                <div style={{ fontSize: 12, color: C.text, lineHeight: 1.4, fontWeight: 500 }}>
-                  {entry.text}
-                </div>
-                {entry.dueTime && (
-                  <div style={{ fontSize: 10, color: C.dim, marginTop: 2 }}>
-                    {formatTime(entry.dueTime)}
-                  </div>
-                )}
-                {!selectedDay && !overdueFilter && (
-                  <div style={{ fontSize: 10, color: entry.dueDate ? C.dim : C.dimmer, marginTop: 3 }}>
-                    {entry.dueDate
-                      ? (() => { const d = new Date(entry.dueDate + 'T12:00:00'); return isNaN(d.getTime()) ? 'No date' : d.toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short' }); })()
-                      : 'No date'}
-                  </div>
-                )}
               </div>
             );
           })}

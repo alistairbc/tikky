@@ -308,7 +308,7 @@ export function StreamCard({
         </div>
       )}
 
-      <div style={{ flex:1, borderRadius:11, minWidth:0, position:"relative", overflow:"hidden" }}>
+      <div style={{ flex:1, borderRadius:16, minWidth:0, position:"relative", overflow:"hidden" }}>
         {/* Mobile swipe-action reveals */}
         {/* Swipe-right action: complete / restore */}
         {isMobile && (entry.type === "task" || entry.type === "event") && (
@@ -393,7 +393,7 @@ export function StreamCard({
           }}
           style={{
             background: C.surface,
-            borderRadius: 11,
+            borderRadius: 16,
             padding: isMobile ? "10px 11px" : compact ? "6px 10px" : "12px",
             border: entry.isNew
               ? `1.5px solid ${C.accent}`
@@ -407,11 +407,11 @@ export function StreamCard({
               ? `inset 3px 0 0 ${C.accent}, 0 0 12px ${C.accent}33`
               : isSelected
               ? `inset 3px 0 0 ${C.accent}, 0 0 0 2px ${C.accent}22`
-              : entry.done
-              ? "none"
               : overdueEntry
               ? "inset 3px 0 0 #ef4444"
-              : `inset 3px 0 0 ${meta.color}`,
+              : isExpanded
+              ? `0 0 14px ${meta.color}22`
+              : "none",
             opacity: entry.done ? 0.55 : 1,
             cursor: "pointer",
             transition: "border-color .2s, box-shadow .2s, opacity .2s",

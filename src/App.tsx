@@ -1623,7 +1623,7 @@ export default function App() {
                 {pomodoroActive ? `${Math.floor(pomodoroTime/60)}m` : "Focus"}
               </button>
               {primaryTab === "stream" && (
-                <button onClick={() => { setSumPeriod("all"); setView("summary"); }} style={{ background: C.surface, border:`1px solid ${C.border}`, color: C.muted, cursor:"pointer", padding:"5px 11px", borderRadius:7, fontSize:12, fontFamily:"inherit", fontWeight:500 }}>Summary ↗</button>
+                <button onClick={() => { setSumPeriod("all"); setView("summary"); }} style={{ background: C.surface, border:`1px solid ${C.border}`, color: C.muted, cursor:"pointer", padding:"5px 11px", borderRadius:7, fontSize:12, fontFamily:"inherit", fontWeight:500 }}>Summary ⌥</button>
               )}
               <button onClick={() => setView("help")} style={{ background: C.surface, border:`1px solid ${C.border}`, color: C.muted, cursor:"pointer", padding:"5px 10px", borderRadius:7, fontSize:12, fontFamily:"inherit" }}>?</button>
               <button onClick={() => setPrimaryTab("settings")} style={{ background: C.surface, border:`1px solid ${C.border}`, color: C.muted, cursor:"pointer", padding:"5px 10px", borderRadius:7, fontSize:12, fontFamily:"inherit" }}>⚙</button>
@@ -1741,7 +1741,7 @@ export default function App() {
                           }
                           if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); addEntry(); } 
                         }}
-                        placeholder="What's on your mind? Try 'Update...', 'What's next?', #tags, @spaces, !priority or /commands…" 
+                        placeholder="What's on your mind? Type '/', 'What's next?', #tags, @spaces, /priority or /commands…" 
                         rows={2}
                         onFocus={() => setComposeFocused(true)}
                         onBlur={() => { if (!input.trim()) setComposeFocused(false); }}
@@ -1867,16 +1867,18 @@ export default function App() {
                           <button onClick={() => setSearch("")} style={{ position:"absolute", right:10, background:"none", border:"none", color: C.dimmer, cursor:"pointer", fontSize:14, padding:0, lineHeight:1, display:"flex", alignItems:"center" }}>✕</button>
                         )}
                       </div>
-                      <div style={{ display:"flex", gap:3, background: C.bg, padding:3, borderRadius:8, border:`1px solid ${C.border}` }}>
-                        {[null,"task","event","note","thought"].map(t => {
+                      <div style={{ display:"flex", gap:2, background: C.bg, padding:3, borderRadius:8, border:`1px solid ${C.border}` }}>
+                        {([null,"task","event","note","thought"] as const).map(t => {
                           const active = typeFilter === t;
                           const col    = t ? (TM as any)[t].color : C.accent;
-                          const label  = t ? (TM as any)[t].icon : "All";
+                          const lbl    = t ? (TM as any)[t].label : "All";
+                          const cnt    = t ? entries.filter((e:any) => !e.done && e.type===t).length : entries.filter((e:any) => !e.done).length;
                           return (
                             <button key={String(t)} onClick={() => setTypeFilter(typeFilter === t ? null : t)}
                               title={t ? (TM as any)[t].label : "All types"}
-                              style={{ fontSize:12, width:30, height:30, borderRadius:6, border: active ? `1px solid ${col}55` : "1px solid transparent", background: active ? `${col}22` : "none", color: active ? col : C.dim, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", transition:"all .15s" }}>
-                              {label}
+                              style={{ fontSize:11, padding:"3px 8px", borderRadius:6, border: active ? `1px solid ${col}55` : "1px solid transparent", background: active ? `${col}22` : "none", color: active ? col : C.dim, cursor:"pointer", display:"flex", alignItems:"center", gap:4, transition:"all .15s", fontFamily:"inherit", fontWeight: active ? 700 : 400, whiteSpace:"nowrap" as const }}>
+                              {lbl}
+                              <span style={{ fontSize:9, fontWeight:700, background: active ? col+"33" : C.border, color: active ? col : C.dimmer, borderRadius:3, padding:"1px 4px", lineHeight:"1.4", minWidth:14, textAlign:"center" }}>{cnt}</span>
                             </button>
                           );
                         })}
