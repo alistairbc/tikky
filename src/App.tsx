@@ -1722,7 +1722,7 @@ export default function App() {
               {!isMobile && (
                 <div style={{ borderBottom:`1px solid ${C.border}`, padding: "15px", background:C.bg, flexShrink:0 }}>
                   <div style={{ display:"flex", flexDirection:"column", gap: 8 }}>
-                    <div style={{ display:"flex", gap: 10, position:"relative" }}>
+                    <div style={{ display:"flex", gap: 8, position:"relative", alignItems:"flex-end" }}>
                       <textarea 
                         ref={inputRef}
                         value={input} 
@@ -1747,28 +1747,7 @@ export default function App() {
                         onBlur={() => { if (!input.trim()) setComposeFocused(false); }}
                         style={{ flex:1, background:C.input, border:`1.5px solid ${composeFocused ? C.accent+"66" : C.accent+"33"}`, borderRadius:10, padding: "12px", fontSize:14, color:C.text, outline:"none", resize:"none", minHeight: composeFocused ? 100 : 60, maxHeight: composeFocused ? 280 : 120, transition:"min-height .25s ease, border-color .2s", boxShadow: composeFocused ? `0 0 0 3px ${C.accent}14` : `0 0 0 3px ${C.accent}08` }} 
                       />
-                      {composeFocused && (
-                        <div style={{ display:"flex", gap:3, padding:"4px 2px", borderTop:`1px solid ${C.border}44`, marginTop:4, flexWrap:"wrap" }}>
-                          {[["B","Bold","**"],["I","Italic","*"],["—","Heading","## "],["☑","Checklist","- [ ] "],["•","Bullet","- "]].map(([lbl,title,mk]) => (
-                            <button key={lbl} title={title}
-                              onMouseDown={e => {
-                                e.preventDefault();
-                                const el = inputRef.current;
-                                if (!el) return;
-                                const s = el.selectionStart || 0, en = el.selectionEnd || 0;
-                                const sel = input.slice(s, en);
-                                const wrap = mk!.length <= 3 && !mk!.startsWith("-") && !mk!.startsWith("#");
-                                const newText = input.slice(0,s) + mk + sel + (wrap && sel ? mk : "") + input.slice(en);
-                                setInput(newText);
-                                setTimeout(() => el.focus(), 0);
-                              }}
-                              style={{ fontSize:11, padding:"2px 7px", borderRadius:4, border:`1px solid ${C.border}`, background:"none", color:C.dim, cursor:"pointer", fontFamily:"inherit", fontWeight: lbl==="B" ? 700 : 400, fontStyle: lbl==="I" ? "italic" : "normal", transition:"all .1s", lineHeight:1.4 }}>
-                              {lbl}
-                            </button>
-                          ))}
-                          <span style={{ fontSize:10, color:C.dimmer, alignSelf:"center", marginLeft:"auto" }}>Enter to add · Shift+Enter for newline</span>
-                        </div>
-                      )}
+
                       {acType && (
                         <div style={{ position:"absolute", top: acPos.top, left: acPos.left, background: C.surface, border:`1px solid ${C.accent}55`, borderRadius:8, zIndex:1000, boxShadow:"0 10px 25px rgba(0,0,0,.3)", minWidth:120, overflow:"hidden" }}>
                           {acOptions.length === 0 ? (
@@ -1802,6 +1781,11 @@ export default function App() {
                       </button>
                       <button onClick={addEntry} disabled={isSubmitting} style={{ height:28, padding:"0 14px", background: isSubmitting ? C.dimmer : C.accent, color: isSubmitting ? C.dim : accentText, border:"none", borderRadius:6, cursor: isSubmitting ? "wait" : "pointer", fontWeight:700, fontSize:11, letterSpacing:"0.04em", flexShrink:0, transition:"all .1s", opacity: isSubmitting ? 0.7 : 1 }} onMouseDown={e=>{ if (!isSubmitting) e.currentTarget.style.transform="scale(0.96)"; }} onMouseUp={e=>e.currentTarget.style.transform="scale(1)"}>{isSubmitting ? "…" : "Add"}</button>
                     </div>
+                    {composeFocused && !acType && (
+                      <div style={{ fontSize:10, color:C.dimmer, paddingLeft:1, letterSpacing:"0.01em" }}>
+                        Enter to add · Shift+Enter for newline · Type <span style={{ fontFamily:"monospace", color:C.muted }}>/</span> for commands
+                      </div>
+                    )}
                     {composeImages.length > 0 && (
                       <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginTop:4 }}>
                         {composeImages.map((img, i) => (
@@ -1894,7 +1878,7 @@ export default function App() {
                         </button>
                         <div style={{ display:"flex", gap:3, background: C.bg, padding:3, borderRadius:8, border:`1px solid ${C.border}` }}>
                           {[["newest","New"],["oldest","Old"],["priority","⚡"],["manual","⠿"]].map(([s, label]) => (
-                            <button key={s} onClick={() => setStreamSort(s)} title={s} style={{ fontSize:11, padding:"4px 9px", borderRadius:6, border: "none", background: streamSort===s ? C.accent : "none", color: streamSort===s ? "#fff" : C.dim, cursor:"pointer", fontFamily:"inherit", fontWeight: streamSort===s ? 700 : 500, transition:"all .2s", whiteSpace:"nowrap" }}>{label}</button>
+                            <button key={s} onClick={() => setStreamSort(s)} title={s} style={{ fontSize:11, padding:"3px 8px", borderRadius:6, border: streamSort===s ? `1px solid ${C.accent}55` : "1px solid transparent", background: streamSort===s ? `${C.accent}22` : "none", color: streamSort===s ? C.accent : C.dim, cursor:"pointer", fontFamily:"inherit", fontWeight: streamSort===s ? 700 : 400, transition:"all .15s", whiteSpace:"nowrap" }}>{label}</button>
                           ))}
                         </div>
                       </div>
@@ -1947,7 +1931,7 @@ export default function App() {
           </div>
           
           <div 
-            onClick={() => inputRef.current?.focus()}
+            onClick={() => { setExpanded(null); inputRef.current?.focus(); }}
             className="no-scrollbar"
             style={{ flex:1, overflowY:"auto", padding: isMobile ? "15px 15px 68px" : "15px", position:"relative" }}
           >
